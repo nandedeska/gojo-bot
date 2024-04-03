@@ -10,7 +10,6 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("give")
     .setDescription("Inserts items into a player's inventory.")
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addUserOption((options) =>
       options
         .setName("membername")

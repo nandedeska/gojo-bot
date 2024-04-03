@@ -55,7 +55,7 @@ module.exports = {
         },
         {
           name: "Duel Wins",
-          value: `${userStats.DuelWins}`,
+          value: `${userStats.DuelWins} / ${userStats.DuelPlays}`,
           inline: true,
         },
         {
@@ -71,7 +71,7 @@ module.exports = {
         },
         {
           name: "Adventure Wins",
-          value: `${userStats.AdventureWins}`,
+          value: `${userStats.AdventureWins} / ${userStats.AdventurePlays}`,
           inline: true,
         },
         {

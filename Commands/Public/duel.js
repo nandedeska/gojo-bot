@@ -85,18 +85,18 @@ module.exports = {
       });
 
     // Check if player is already inviting
-    if (isInviting)
+    /*if (isInviting)
       return interaction.reply({
         content: "You are already inviting a player!",
         ephemeral: true,
-      });
+      });*/
 
     // Check if challenged player is inviting
-    if (challengedIsInviting)
+    /*if (challengedIsInviting)
       return interaction.reply({
         content: `${challengedPlayer.username} is already inviting a player!`,
         ephemeral: true,
-      });
+      });*/
 
     // Check if challenged player is already in a duel
     if (challengedIsInDuel)

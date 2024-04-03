@@ -328,8 +328,9 @@ module.exports = {
       case "Attack":
         var attackRoll = Math.floor(Math.random() * attackRollHeight) + 1;
         //console.log(`${attackRollHeight}`);
-        var nextDefenseModifier = 1
-        if (currentDuelInfo.DefenseModifier != null) nextDefenseModifier = currentDuelInfo.DefenseModifier;
+        var nextDefenseModifier = 1;
+        if (currentDuelInfo.DefenseModifier != null)
+          nextDefenseModifier = currentDuelInfo.DefenseModifier;
         if (attackRoll >= otherStand.Defense * nextDefenseModifier) {
           var damage = Math.floor(Math.random() * currentStand.Attack) + 1;
           turnEmbed.setTitle(
@@ -353,10 +354,7 @@ module.exports = {
         if (challengerHp <= 0 && challengedHp <= 0) {
           winEmbed.setTitle("The duel ended in a draw!");
           await endDuelDraw(guildId, challenger, challenged);
-          buttonInteract.update({
-            embeds: [turnEmbed, winEmbed],
-            components: [],
-          });
+          await editEmbed(buttonInteract, [turnEmbed, winEmbed], []);
         } else if (challengerHp <= 0) {
           winEmbed.setTitle(`${challenged.username} won the duel!`);
           await endDuel(
@@ -370,15 +368,12 @@ module.exports = {
           if (Math.random() >= 0.5) {
             rewardEmbed.setTitle(`${challenged.username} found a loot crate!`);
             await giveRewards(challenged, guildId, rewardEmbed);
-            buttonInteract.update({
-              embeds: [turnEmbed, winEmbed, rewardEmbed],
-              components: [],
-            });
-          } else
-            buttonInteract.update({
-              embeds: [turnEmbed, winEmbed],
-              components: [],
-            });
+            await editEmbed(
+              buttonInteract,
+              [turnEmbed, winEmbed, rewardEmbed],
+              []
+            );
+          } else await editEmbed(buttonInteract, [turnEmbed, winEmbed], []);
         } else if (challengedHp <= 0) {
           winEmbed.setTitle(`${challenger.username} won the duel!`);
           await endDuel(
@@ -391,20 +386,18 @@ module.exports = {
           if (Math.random() >= 0.5) {
             rewardEmbed.setTitle(`${challenger.username} found a loot crate!`);
             await giveRewards(challenger, guildId, rewardEmbed);
-            buttonInteract.update({
-              embeds: [turnEmbed, winEmbed, rewardEmbed],
-              components: [],
-            });
-          } else
-            buttonInteract.update({
-              embeds: [turnEmbed, winEmbed],
-              components: [],
-            });
+            await editEmbed(
+              buttonInteract,
+              [turnEmbed, winEmbed, rewardEmbed],
+              []
+            );
+          } else await editEmbed(buttonInteract, [turnEmbed, winEmbed], []);
         } else
-          buttonInteract.update({
-            embeds: [turnEmbed, fightEmbed],
-            components: [duelButtons],
-          });
+          await editEmbed(
+            buttonInteract,
+            [turnEmbed, fightEmbed],
+            [duelButtons]
+          );
 
         if (
           (currentPlayer[0] == challenged.id &&
@@ -481,10 +474,7 @@ module.exports = {
             }
           );
         }
-        buttonInteract.update({
-          embeds: [turnEmbed, fightEmbed],
-          components: [duelButtons],
-        });
+        await editEmbed(buttonInteract, [turnEmbed, fightEmbed], [duelButtons]);
         break;
       case "Ability":
         let ability = currentStand.Ability[0];
@@ -551,10 +541,7 @@ module.exports = {
         if (challengerHp <= 0 && challengedHp <= 0) {
           winEmbed.setTitle("The duel ended in a draw!");
           await endDuelDraw(guildId, challenger, challenged);
-          buttonInteract.update({
-            embeds: [turnEmbed, winEmbed],
-            components: [],
-          });
+          await editEmbed(buttonInteract, [turnEmbed, winEmbed], []);
         } else if (challengerHp <= 0) {
           winEmbed.setTitle(`${challenged.username} won the duel!`);
           await endDuel(
@@ -568,15 +555,12 @@ module.exports = {
           if (Math.random() >= 0.5) {
             rewardEmbed.setTitle(`${challenged.username} found a loot crate!`);
             await giveRewards(challenged, guildId, rewardEmbed);
-            buttonInteract.update({
-              embeds: [turnEmbed, winEmbed, rewardEmbed],
-              components: [],
-            });
-          } else
-            buttonInteract.update({
-              embeds: [turnEmbed, winEmbed],
-              components: [],
-            });
+            await editEmbed(
+              buttonInteract,
+              [turnEmbed, winEmbed, rewardEmbed],
+              []
+            );
+          } else await editEmbed(buttonInteract, [turnEmbed, winEmbed], []);
         } else if (challengedHp <= 0) {
           winEmbed.setTitle(`${challenger.username} won the duel!`);
           await endDuel(
@@ -589,20 +573,18 @@ module.exports = {
           if (Math.random() >= 0.5) {
             rewardEmbed.setTitle(`${challenger.username} found a loot crate!`);
             await giveRewards(challenger, guildId, rewardEmbed);
-            buttonInteract.update({
-              embeds: [turnEmbed, winEmbed, rewardEmbed],
-              components: [],
-            });
-          } else
-            buttonInteract.update({
-              embeds: [turnEmbed, winEmbed],
-              components: [],
-            });
+            await editEmbed(
+              buttonInteract,
+              [turnEmbed, winEmbed, rewardEmbed],
+              []
+            );
+          } else await editEmbed(buttonInteract, [turnEmbed, winEmbed], []);
         } else
-          buttonInteract.update({
-            embeds: [turnEmbed, fightEmbed],
-            components: [duelButtons],
-          });
+          await editEmbed(
+            buttonInteract,
+            [turnEmbed, fightEmbed],
+            [duelButtons]
+          );
 
         if (currentPlayer[0] == challenger.id) {
           await DuelInfo.updateOne(
@@ -653,15 +635,12 @@ module.exports = {
         if (Math.random() >= 0.5) {
           rewardEmbed.setTitle(`${otherPlayer[1]} found a loot crate!`);
           await giveRewards(otherPlayer, guildId, rewardEmbed);
-          buttonInteract.update({
-            embeds: [turnEmbed, winEmbed, rewardEmbed],
-            components: [],
-          });
-        } else
-          buttonInteract.update({
-            embeds: [turnEmbed, winEmbed],
-            components: [],
-          });
+          await editEmbed(
+            buttonInteract,
+            [turnEmbed, winEmbed, rewardEmbed],
+            []
+          );
+        } else await editEmbed(buttonInteract, [turnEmbed, winEmbed], []);
         break;
     }
 
@@ -698,6 +677,19 @@ module.exports = {
     }
   },
 };
+
+async function editEmbed(buttonInteract, embedList) {
+  await buttonInteract.deferUpdate();
+  await buttonInteract.editReply({ embeds: embedList });
+}
+
+async function editEmbed(buttonInteract, embedList, componentList) {
+  await buttonInteract.deferUpdate();
+  await buttonInteract.editReply({
+    embeds: embedList,
+    components: componentList,
+  });
+}
 
 async function giveRewards(rewardUser, guildId, rewardEmbed) {
   let arrowAmount;
