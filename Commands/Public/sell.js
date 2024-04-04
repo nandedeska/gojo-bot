@@ -41,8 +41,10 @@ module.exports = {
 
     const isTrading = booleans.IsTrading;
 
+    await interaction.reply({ content: "Selling item..." });
+
     if (isTrading)
-      return interaction.reply({
+      return await interaction.editReply({
         content: "You can't buy while trading!",
         ephemeral: true,
       });
@@ -77,7 +79,7 @@ module.exports = {
         itemName = "Stand Arrow";
 
         if (inventory.StandArrow < amount)
-          return interaction.reply({
+          return await interaction.editReply({
             content: "You don't have enough Stand Arrows!",
             ephemeral: true,
           });
@@ -88,19 +90,19 @@ module.exports = {
         itemName = "Stand Disc";
 
         if (amount % 5 != 0)
-          return interaction.reply({
+          return await interaction.editReply({
             content: "Disc amount must be a multiple of 5.",
             ephemeral: true,
           });
 
         if (inventory.StandDisc < amount)
-          return interaction.reply({
+          return await interaction.editReply({
             content: "You don't have enough Stand Discs!",
             ephemeral: true,
           });
         break;
       default:
-        return interaction.reply({
+        return await interaction.editReply({
           content: "Item not detected! Contact the developer.",
           ephemeral: true,
         });
@@ -117,7 +119,7 @@ module.exports = {
       }
     );
 
-    await interaction.reply({
+    await await interaction.editReply({
       content: `Successfully salvaged ${amount} ${itemName} for ${fruitAmount} Rocacaca Fruits!`,
     });
   },

@@ -10,6 +10,7 @@ const StandStats = require("../../Schemas/StandStats");
 const Inventory = require("../../Schemas/PlayerInventory");
 const PlayerBooleans = require("../../Schemas/PlayerBooleans");
 const Cooldowns = require("../../Schemas/Cooldowns");
+const CooldownTime = 30000;
 const PlayerStats = require("../../Schemas/PlayerStats");
 const AdventureInfo = require("../../Schemas/AdventureInfo");
 const StandAbilities = require("../../Local Storage/standAbilities");
@@ -509,16 +510,58 @@ module.exports = {
     // Player Turn
     switch (splitArray[1]) {
       case "Accept":
+        const cooldown = await Cooldowns.findOne({
+          Guild: guildId,
+          User: player.id,
+          Command: "adventure",
+        });
+
+        if (cooldown) {
+          if (Date.now() - cooldown.Cooldown >= CooldownTime)
+            await Cooldowns.findOneAndDelete({
+              Guild: guildId,
+              User: player.id,
+              Command: "adventure",
+            });
+          else {
+            const remainingTime = HumanizeDuration(
+              cooldown.Cooldown + CooldownTime - Date.now(),
+              {
+                largest: 2,
+                round: true,
+              }
+            );
+            await buttonInteract.deferUpdate();
+            return await buttonInteract
+              .editReply({
+                content: `You can go on an adventure again in ${remainingTime}.`,
+                ephemeral: true,
+              })
+              .catch(console.error);
+          }
+        }
+        if (
+          PlayerBooleans.findOne({ Guild: guildId, User: player.id })
+            .IsAdventuring
+        ) {
+          await buttonInteract.deferUpdate();
+          return awaitbuttonInteract.editReply({
+            content: "You are already in an adventure!",
+            ephemeral: true,
+          });
+        }
         if (opponentTurnEmbed)
-          buttonInteract.update({
-            embeds: [quoteEmbed, opponentTurnEmbed, fightEmbed],
-            components: [adventureButtons],
-          });
+          editEmbed(
+            buttonInteract,
+            [quoteEmbed, opponentTurnEmbed, fightEmbed],
+            [adventureButtons]
+          );
         else
-          buttonInteract.update({
-            embeds: [quoteEmbed, fightEmbed],
-            components: [adventureButtons],
-          });
+          editEmbed(
+            buttonInteract,
+            [quoteEmbed, fightEmbed],
+            [adventureButtons]
+          );
         break;
       case "Decline":
         await Cooldowns.create({
@@ -528,7 +571,8 @@ module.exports = {
           Cooldown: Date.now(),
         });
 
-        return buttonInteract.update({
+        await buttonInteract.deferUpdate();
+        return buttonInteract.editReply({
           content: `You ran away from ${opponent.displayName}!`,
           embeds: [],
           components: [],

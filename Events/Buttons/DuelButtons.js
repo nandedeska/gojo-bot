@@ -308,19 +308,21 @@ module.exports = {
           { $set: { IsInvitingToDuel: false } }
         );
 
-        await buttonInteract.update({
+        await buttonInteract.deferUpdate();
+        await buttonInteract.editReply({
           content: `<@${challenger.id}> <@${challenged.id}>`,
           embeds: [fightEmbed],
+          components: [duelButtons],
           fetchReply: true,
         });
-        buttonInteract.editReply({ components: [duelButtons] });
         break;
       case "Decline":
         await PlayerBooleans.updateOne(
           { Guild: guildId, User: challenger.id },
           { $set: { IsInvitingToDuel: false } }
         );
-        return buttonInteract.update({
+        await buttonInteract.deferUpdate();
+        return buttonInteract.editReply({
           embeds: [],
           components: [],
           content: `<@${challenger.id}>, ${challenged.username} declined the duel invite.`,
@@ -329,8 +331,11 @@ module.exports = {
         var attackRoll = Math.floor(Math.random() * attackRollHeight) + 1;
         //console.log(`${attackRollHeight}`);
         var nextDefenseModifier = 1;
-        if (currentDuelInfo.DefenseModifier != null)
+        try {
           nextDefenseModifier = currentDuelInfo.DefenseModifier;
+        } catch (err) {
+          console.log(err);
+        }
         if (attackRoll >= otherStand.Defense * nextDefenseModifier) {
           var damage = Math.floor(Math.random() * currentStand.Attack) + 1;
           turnEmbed.setTitle(

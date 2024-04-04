@@ -97,11 +97,14 @@ module.exports = {
         });
     }
 
-    if (inventory.RocacacaFruit < cost)
-      return interaction.reply({
+    await interaction.reply({ content: "Purchasing item..." });
+
+    if (inventory.RocacacaFruit < cost) {
+      return await interaction.editReply({
         content: `You don't have enough Rocacaca Fruits! You need ${cost}.`,
         ephemeral: true,
       });
+    }
 
     await PlayerInventory.updateOne(
       { Guild: guild.id, User: member.id },
@@ -115,7 +118,7 @@ module.exports = {
       }
     );
 
-    interaction.reply({
+    await interaction.editReply({
       content: `Successfully purchased ${amount} ${itemName}!`,
     });
   },

@@ -22,6 +22,9 @@ module.exports = {
       .setColor("#99CCED")
       .setFooter({ text: "You are not yet in the leaderboard." });
 
+    await interaction.reply({ content: "Fetching players... sit tight." });
+
+    console.log(member.guild.id);
     const players = await PlayerStats.find({ Guild: member.guild.id })
       .sort({ DuelWins: -1 })
       .catch((err) => console.log(err));
@@ -44,14 +47,17 @@ module.exports = {
     let topTen = players.slice(0, 10);
 
     for (let i = 0; i < topTen.length; i++) {
-      let { user } = await interaction.guild.members.fetch(topTen[i].User);
-      if (!user) break;
+      let user;
+      try {
+        user = (await interaction.guild.members.fetch(topTen[i].User)).user;
+      } catch (err) {}
+      if (!user) continue;
+      console.log();
       let playerWins = topTen[i].DuelWins;
       description += `**#${i + 1} ${user.username}:** ${playerWins} Wins\n`;
     }
 
     if (description !== "") leaderboardEmbed.setDescription(description);
-
-    await interaction.reply({ embeds: [leaderboardEmbed] });
+    await interaction.editReply({ content: null, embeds: [leaderboardEmbed] });
   },
 };
