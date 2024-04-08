@@ -1,3 +1,6 @@
+const bossImage =
+  "https://www.reddit.com/media?url=https%3A%2F%2Fpreview.redd.it%2Fif-it-werent-for-the-shadows-covering-jotaros-face-we-v0-t2lrftpezega1.jpg%3Fwidth%3D640%26crop%3Dsmart%26auto%3Dwebp%26s%3D3e8b332146de0a3416a3ab9b73add4701a517f14";
+
 const opponentPool = [
   "holhorse",
   "grayfly",
@@ -189,6 +192,51 @@ const opponents = {
           ],
           modifier: 100,
           cooldown: 0,
+        },
+      ],
+    },
+  },
+  dio: {
+    id: "dio",
+    displayName: "DIO",
+    displayImage: bossImage,
+    quotePool: [
+      "Everyone survives in pursuit of peace of mind... Aren't you uneasy, preparing to fight me, knowing you may die? If you join me, I will give you peace of mind that will last forever.",
+      'When one falls in battle and fails to attain their goals... one feels frustrated and hurt... and when met with a fight in the future, fear takes over the body. I believe that to "live" is to overcome "fear". The one who stands at the top of the world must know no fear!',
+      "You fool. Know this... The true power of The World is exactly that: the power to dominate the world!",
+      "Oh? You're approaching me? Instead of running away you're coming right to me?",
+      "Oh? You're approaching me? Instead of running away you're coming right to me?",
+      "Oh? You're approaching me? Instead of running away you're coming right to me?",
+      "Invulnerability! Eternal life! Stand power! Here lies the proof that none shall surpass the mighty DIO!",
+    ],
+    stand: {
+      Name: "The World",
+      Healthpoints: 250,
+      Attack: 100,
+      Defense: 20,
+      Speed: 100,
+      Ability: [
+        {
+          name: "Time Stop",
+          id: "timestop",
+          description: "The stand stops time for a few turns.",
+          actionDescription: "stops time",
+          turns: 3,
+          cooldown: 5,
+        },
+        {
+          name: "Stand Barrage",
+          id: "barrage",
+          description:
+            "The stand throws multiple punches towards the opponent.",
+          cooldown: 3,
+        },
+        {
+          name: "Blood Restoration",
+          id: "heal",
+          description: "The stand recovers lost healthpoints during a fight.",
+          power: 25,
+          cooldown: 6,
         },
       ],
     },

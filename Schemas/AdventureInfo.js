@@ -9,8 +9,8 @@ module.exports = new model(
     PlayerHP: Number,
     OpponentHP: Number,
     AttackRollHeight: Number,
-    PlayerAbilityCount: Number,
-    OpponentAbilityCount: Number,
+    PlayerAbilityCount: Array,
+    OpponentAbilityCount: Array,
     DefenseModifier: Number,
     IsConfused: Boolean,
   })

@@ -19,27 +19,34 @@ module.exports = {
    */
   async execute(interaction) {
     const { guild, member } = interaction;
+
+    await interaction.reply({ content: "Fetching discs... sit tight." });
+
     const collection = await DiscCollection.findOne({
       Guild: guild.id,
       User: member.id,
     });
 
     if (!collection || collection.Discs.length <= 0)
-      return interaction.reply({
+      return interaction.editReply({
         content: "You don't have any stands stored as discs!",
         ephemeral: true,
       });
 
     let selectedDisc = collection.Discs[0];
 
-    const ability = selectedDisc.Ability[0];
+    let abilityText = "";
 
-    let abilityText = `*${ability.name}*\n${ability.description}\n`;
+    for (let i = 0; i < selectedDisc.Ability.length; i++) {
+      let ability = selectedDisc.Ability[i];
+      if (i > 1) abilityText += "\n";
+      abilityText += `*${ability.name}*\n${ability.description}\n`;
 
-    if (ability.damage) abilityText += `\nPower: ${ability.damage}`;
-    if (ability.power) abilityText += `\nPower: ${ability.power}`;
-
-    abilityText += `\nCooldown: ${ability.cooldown}`;
+      if (ability.damage) abilityText += `\nPower: ${ability.damage}`;
+      if (ability.power) abilityText += `\nPower: ${ability.power}`;
+      if (ability.turns) ability += `\nTurns: ${ability.turns}`;
+      abilityText += `\nCooldown: ${ability.cooldown}`;
+    }
 
     const discEmbed = new EmbedBuilder()
       .setTitle(selectedDisc.Name)
@@ -71,7 +78,7 @@ module.exports = {
         { name: "Ability", value: abilityText }
       );
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [discEmbed],
       fetchReply: true,
     });
@@ -94,6 +101,6 @@ module.exports = {
     if (collection.Discs.length == 1)
       arrowButtons.components.forEach((button) => button.setDisabled(true));
 
-    await interaction.editReply({ components: [arrowButtons] });
+    await interaction.editReply({ content: null, components: [arrowButtons] });
   },
 };

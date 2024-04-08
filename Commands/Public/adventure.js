@@ -11,7 +11,7 @@ const PlayerBooleans = require("../../Schemas/PlayerBooleans");
 const Inventory = require("../../Schemas/PlayerInventory");
 const HumanizeDuration = require("humanize-duration");
 const Cooldowns = require("../../Schemas/Cooldowns");
-const CooldownTime = 30000;
+const CooldownTime = 0; //30000;
 const AdventureOpponents = require("../../Local Storage/adventureOpponents");
 const AdventureInfo = require("../../Schemas/AdventureInfo");
 
@@ -222,6 +222,11 @@ module.exports = {
         .setCustomId(
           `Adventure-Decline-${guild.id}-${member.id}-${opponent.id}`
         )
+    );
+
+    await PlayerBooleans.updateOne(
+      { Guild: guild, User: member.id },
+      { $set: { IsAdventuring: true } }
     );
 
     await interaction.editReply({ components: [offerButtons] });

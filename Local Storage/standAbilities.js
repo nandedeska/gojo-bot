@@ -3,7 +3,7 @@ const abilityPool = [
     name: "Stand Barrage",
     id: "barrage",
     description: "The stand throws multiple punches towards the opponent.",
-    cooldown: Math.max(Math.round(Math.random() * 7) + 1, 6),
+    cooldown: Math.max(Math.round(Math.random() * 7), 6),
   },
   {
     name: "Bright Ray of Light",
@@ -12,7 +12,7 @@ const abilityPool = [
       "The stand aims and produces a ray of light that can incinerate objects.",
     actionDescription: "blasts a ray of light",
     damage: Math.max(Math.round(Math.random() * 28), 5),
-    cooldown: Math.max(Math.round(Math.random() * 7) + 1, 4),
+    cooldown: Math.max(Math.round(Math.random() * 7), 4),
   },
   {
     name: "Fifty Shards of Glass",
@@ -21,7 +21,7 @@ const abilityPool = [
       "The stand shoots fifty or so glass shards in quick succession.",
     actionDescription: "shoots fifty glass shards",
     damage: Math.max(Math.round(Math.random() * 15), 7),
-    cooldown: Math.max(Math.round(Math.random() * 4) + 1, 3),
+    cooldown: Math.max(Math.round(Math.random() * 4), 3),
   },
   {
     name: "Splinter in My Head",
@@ -30,7 +30,7 @@ const abilityPool = [
       "The stand causes great physical damage to the opponent's cranium.",
     actionDescription: "causes a great migraine",
     damage: Math.max(Math.round(Math.random() * 25), 10),
-    cooldown: Math.max(Math.round(Math.random() * 4) + 1, 3),
+    cooldown: Math.max(Math.round(Math.random() * 4), 3),
   },
   {
     name: "Yo Da Yo",
@@ -38,14 +38,14 @@ const abilityPool = [
     description: "**Yo. Da. Yo.**",
     actionDescription: "says Yo Da Yo",
     damage: Math.max(Math.round(Math.random() * 35), 15),
-    cooldown: Math.max(Math.round(Math.random() * 3) + 1, 1),
+    cooldown: Math.max(Math.round(Math.random() * 3), 1),
   },
   {
     name: "Self Restoration",
     id: "heal",
     description: "The stand recovers lost healthpoints during a fight.",
     power: Math.max(Math.round(Math.random() * 12), 8),
-    cooldown: Math.max(Math.round(Math.random() * 4) + 1, 2),
+    cooldown: Math.max(Math.round(Math.random() * 4), 2),
   },
   {
     name: "Home Run",
@@ -53,7 +53,7 @@ const abilityPool = [
     description: "The stand punches or kicks at speeds of over 160km/h.",
     actionDescription: "attacks at the speed of a baseball",
     modifier: 1.5,
-    cooldown: Math.max(Math.round(Math.random() * 5) + 1, 3),
+    cooldown: Math.max(Math.round(Math.random() * 5), 3),
   },
   {
     name: "Fruit Punch",
@@ -62,7 +62,7 @@ const abilityPool = [
       "The stand heals injuries by exposure to blood that isn't the user's.",
     actionDescription: "attacks and absorbs the opponent's blood",
     damage: Math.max(Math.round(Math.random() * 15), 5),
-    cooldown: Math.max(Math.round(Math.random() * 6) + 1, 3),
+    cooldown: Math.max(Math.round(Math.random() * 6), 3),
   },
   {
     name: "Death's Kiss",
@@ -70,7 +70,7 @@ const abilityPool = [
     description: "The stand steals the life force of the opponent.",
     actionDescription: "drains the opponent's life force",
     damage: Math.max(Math.round(Math.random() * 17), 4),
-    cooldown: Math.max(Math.round(Math.random() * 7) + 1, 3),
+    cooldown: Math.max(Math.round(Math.random() * 7), 3),
   },
   {
     name: "Dome of Aegis",
@@ -79,7 +79,7 @@ const abilityPool = [
       "The stand constructs an invisible dome that prevents anything from entering it. Any attacks towards the stand will miss.",
     actionDescription: "constructs the Dome of Aegis",
     modifier: 100,
-    cooldown: Math.max(Math.round(Math.random() * 7) + 1, 4),
+    cooldown: Math.max(Math.round(Math.random() * 7), 4),
   },
   {
     name: "Invisible Yet Not So Invincible",
@@ -88,7 +88,7 @@ const abilityPool = [
       "The stand becomes completely transparent, making it hard for opponents to hit it.",
     actionDescription: "turns invisible",
     modifier: 1.25,
-    cooldown: Math.max(Math.round(Math.random() * 6) + 1, 4),
+    cooldown: Math.max(Math.round(Math.random() * 6), 4),
   },
   {
     name: "Iron Fist",
@@ -97,7 +97,7 @@ const abilityPool = [
       "The stand becomes pure metal, dealing more damage when attacking.",
     actionDescription: "turns into metal then attacks",
     modifier: 1.75,
-    cooldown: Math.max(Math.round(Math.random() * 6) + 1, 4),
+    cooldown: Math.max(Math.round(Math.random() * 6), 4),
   },
 ];
 
@@ -314,6 +314,12 @@ function lifeSteal(currentStand, otherStand, abilityInfo) {
     damage: damage,
     healAmount: damage,
   });
+}
+
+function timeStop(currentStand, otherStand, abilityInfo) {
+  let actionText = `${currentStand.Name} ${abilityInfo.actionDescription}`;
+
+  return convertToCombatInfo({});
 }
 
 function convertToCombatInfo(abilityOutput) {

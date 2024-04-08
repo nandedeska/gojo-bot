@@ -26,14 +26,20 @@ module.exports = {
         ephemeral: true,
       });
     } else {
-      const ability = userData.Ability[0];
+      await interaction.reply({ content: "Fetching stand... sit tight." });
 
-      let abilityText = `*${ability.name}*\n${ability.description}\n`;
+      let abilityText = "";
 
-      if (ability.damage) abilityText += `\nPower: ${ability.damage}`;
-      if (ability.power) abilityText += `\nPower: ${ability.power}`;
+      for (let i = 0; i < userData.Ability.length; i++) {
+        let ability = userData.Ability[0];
+        if (i > 1) abilityText += "\n";
+        abilityText += `*${ability.name}*\n${ability.description}\n`;
 
-      abilityText += `\nCooldown: ${ability.cooldown}`;
+        if (ability.damage) abilityText += `\nPower: ${ability.damage}`;
+        if (ability.power) abilityText += `\nPower: ${ability.power}`;
+        if (ability.turns) ability += `\nTurns: ${ability.turns}`;
+        abilityText += `\nCooldown: ${ability.cooldown}`;
+      }
 
       const standEmbed = new EmbedBuilder()
         .setTitle(userData.Name)
@@ -65,7 +71,7 @@ module.exports = {
           },
           { name: "Ability", value: abilityText }
         );
-      await interaction.reply({ embeds: [standEmbed] });
+      await interaction.editReply({ content: null, embeds: [standEmbed] });
     }
   },
 };
