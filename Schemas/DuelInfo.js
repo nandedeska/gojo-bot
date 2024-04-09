@@ -11,8 +11,8 @@ module.exports = new model(
     ChallengerHP: Number,
     ChallengedHP: Number,
     AttackRollHeight: Number,
-    ChallengerAbilityCount: Number,
-    ChallengedAbilityCount: Number,
+    ChallengerAbilityCount: Array,
+    ChallengedAbilityCount: Array,
     DefenseModifier: Number,
   })
 );

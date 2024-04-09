@@ -57,7 +57,6 @@ let standHasDied;
 let abilityInCooldown;
 let playerCooldownText;
 let opponentCooldownText;
-let playerUsedAbility;
 
 module.exports = {
   name: "interactionCreate",
@@ -134,6 +133,7 @@ module.exports = {
       );
 
     turnEmbed = new EmbedBuilder().setColor("#D31A38");
+    opponentTurnEmbed = null;
 
     quoteEmbed = new EmbedBuilder()
       .setColor("#80FEFF")
@@ -478,8 +478,6 @@ module.exports = {
           }
         );
 
-        playerUsedAbility = true;
-
         // check for stand death
         await checkHealth(buttonInteract);
         if (standHasDied) return;
@@ -633,7 +631,7 @@ async function generateGlitchedText(type) {
 function updateAbilityUI(abilityButtons) {
   let buttons = [];
   for (let i = 0; i < playerStand.Ability.length; i++) {
-    if (currentAdventureInfo && playerUsedAbility) {
+    if (currentAdventureInfo) {
       if (
         currentAdventureInfo.PlayerAbilityCount[i] <
         playerStand.Ability[i].cooldown

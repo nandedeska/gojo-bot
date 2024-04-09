@@ -6,13 +6,13 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
-const StandStats = require("../../Schemas/StandStats");
-const Inventory = require("../../Schemas/PlayerInventory");
-const PlayerBooleans = require("../../Schemas/PlayerBooleans");
-const Cooldowns = require("../../Schemas/Cooldowns");
-const PlayerStats = require("../../Schemas/PlayerStats");
-const DuelInfo = require("../../Schemas/DuelInfo");
-const StandAbilities = require("../../Local Storage/standAbilities");
+const StandStats = require("../Schemas/StandStats");
+const Inventory = require("../Schemas/PlayerInventory");
+const PlayerBooleans = require("../Schemas/PlayerBooleans");
+const Cooldowns = require("../Schemas/Cooldowns");
+const PlayerStats = require("../Schemas/PlayerStats");
+const DuelInfo = require("../Schemas/DuelInfo");
+const StandAbilities = require("../Local Storage/standAbilities");
 
 module.exports = {
   name: "interactionCreate",
@@ -129,7 +129,7 @@ module.exports = {
         currentStand = challengedStand;
         otherStand = challengerStand;
       }
-
+      console.log(otherPlayer);
       fightEmbed.setTitle(`${otherPlayer[1]}'s Turn`);
     } else {
       if (challengerStand.Speed >= challengedStand.Speed) {
