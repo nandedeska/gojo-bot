@@ -46,6 +46,18 @@ connect(client.config.DatabaseURL, {}).then(async () => {
   await AdventureInfo.deleteMany({});
   await TradeInfo.deleteMany({});
 
+  // Update missing inventory
+  /*await PlayerInventory.find({ TheWorldShard: { $exists: false } }).then(
+    (inventory) => {
+      inventory.forEach(async function (doc) {
+        await PlayerInventory.updateOne(
+          { Guild: doc.Guild, User: doc.User },
+          { $set: { TheWorldShard: 0 } }
+        );
+      });
+    }
+  );*/
+
   // Update stands that don't have abilities
   // const ability = StandAbilities.abilityPool[Math.round(Math.random() * StandAbilities.abilityPool.length)];
   /*await StandStats.find({ Ability: { $exists: false } }).then((stats) => {

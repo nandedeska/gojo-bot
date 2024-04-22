@@ -14,6 +14,7 @@ const Cooldowns = require("../../Schemas/Cooldowns");
 const CooldownTime = 0; //30000;
 const AdventureOpponents = require("../../Local Storage/adventureOpponents");
 const AdventureInfo = require("../../Schemas/AdventureInfo");
+const { initialize } = require("../../Utility/Utility");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -44,14 +45,7 @@ module.exports = {
     });
 
     if (!booleans) {
-      booleans = await PlayerBooleans.create({
-        Guild: guild.id,
-        User: member.id,
-        IsDueling: false,
-        IsInvitingToDuel: false,
-        IsTrading: false,
-        IsAdventuring: false,
-      });
+      booleans = await initialize("booleans", member.id, guild.id);
     }
 
     let isInDuel = booleans.IsDueling;
@@ -173,10 +167,10 @@ module.exports = {
         Cooldown: Date.now(),
       });
 
-      return interaction.reply({ embeds: [rewardEmbed] });
+      return interaction.reply({ content: null, embeds: [rewardEmbed] });
     }
 
-    const { opponentPool, canonPool, alternatePool, opponents } =
+    const { opponentPool, bossPool, canonPool, alternatePool, opponents } =
       AdventureOpponents;
 
     // random both canon and au
@@ -198,6 +192,10 @@ module.exports = {
           alternatePool[Math.floor(Math.random() * alternatePool.length)]
         ];
 
+    if (Math.random() < 0.1 && gamemode != "au")
+      opponent =
+        opponents[bossPool[Math.floor(Math.random() * bossPool.length)]];
+
     const opponentEmbed = new EmbedBuilder()
       .setAuthor({ name: "OPPONENT FOUND!" })
       .setColor("#D31A38")
@@ -206,7 +204,7 @@ module.exports = {
         `While on your adventure, you encounter ${opponent.displayName}!\n\nWarning: Declining the match still starts your cooldown time.`
       );
     await interaction
-      .reply({ embeds: [opponentEmbed], fetchReply: true })
+      .reply({ content: null, embeds: [opponentEmbed], fetchReply: true })
       .catch(console.log);
 
     const offerButtons = new ActionRowBuilder().addComponents(

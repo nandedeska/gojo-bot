@@ -14,5 +14,6 @@ module.exports = new model(
     ChallengerAbilityCount: Array,
     ChallengedAbilityCount: Array,
     DefenseModifier: Number,
+    TimeStopTurns: Number,
   })
 );

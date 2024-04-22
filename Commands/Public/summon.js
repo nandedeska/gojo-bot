@@ -20,7 +20,7 @@ module.exports = {
     let userData = await Database.findOne({ Guild: guild.id, User: member.id });
 
     if (!userData) {
-      interaction.reply({
+      await interaction.reply({
         content:
           "You don't have a stand! Use /unlockstand to unlock your stand.",
         ephemeral: true,
@@ -31,13 +31,13 @@ module.exports = {
       let abilityText = "";
 
       for (let i = 0; i < userData.Ability.length; i++) {
-        let ability = userData.Ability[0];
-        if (i > 1) abilityText += "\n";
-        abilityText += `*${ability.name}*\n${ability.description}\n`;
+        let ability = userData.Ability[i];
+        if (i > 0) abilityText += "\n\n";
+        abilityText += `***${ability.name}***\n${ability.description}\n`;
 
         if (ability.damage) abilityText += `\nPower: ${ability.damage}`;
         if (ability.power) abilityText += `\nPower: ${ability.power}`;
-        if (ability.turns) ability += `\nTurns: ${ability.turns}`;
+        if (ability.turns) abilityText += `\nTurns: ${ability.turns}`;
         abilityText += `\nCooldown: ${ability.cooldown}`;
       }
 

@@ -6,6 +6,7 @@ const {
 const PlayerInventory = require("../../Schemas/PlayerInventory");
 const HumanizeDuration = require("humanize-duration");
 const Cooldowns = require("../../Schemas/Cooldowns");
+const { initialize } = require("../../Utility/Utility");
 const CooldownTime = 72000000;
 
 module.exports = {
@@ -57,13 +58,7 @@ module.exports = {
     });
 
     if (!inventory) {
-      inventory = await PlayerInventory.create({
-        Guild: guild.id,
-        User: member.id,
-        StandArrow: 2,
-        StandDisc: 0,
-        RocacacaFruit: 0,
-      });
+      inventory = await initialize("inventory", member.id, guild.id);
     }
 
     const lootEmbed = new EmbedBuilder()

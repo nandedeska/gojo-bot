@@ -6,6 +6,7 @@ const {
 const DiscCollection = require("../../Schemas/PlayerDiscCollection");
 const PlayerStand = require("../../Schemas/StandStats");
 const PlayerBooleans = require("../../Schemas/PlayerBooleans");
+const { initialize } = require("../../Utility/Utility");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -27,10 +28,12 @@ module.exports = {
   async execute(interaction) {
     const { guild, member, options } = interaction;
 
-    const booleans = await PlayerBooleans.findOne({
+    let booleans = await PlayerBooleans.findOne({
       Guild: guild.id,
       User: member.id,
     });
+
+    if (!booleans) booleans = await initialize("booleans", member.id, guild.id);
 
     let isInDuel;
     let isInTrade;

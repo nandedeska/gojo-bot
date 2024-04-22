@@ -13,5 +13,6 @@ module.exports = new model(
     OpponentAbilityCount: Array,
     DefenseModifier: Number,
     IsConfused: Boolean,
+    TimeStopTurns: Number,
   })
 );

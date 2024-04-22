@@ -10,6 +10,7 @@ const PlayerInventory = require("../../Schemas/PlayerInventory");
 const DiscCollection = require("../../Schemas/PlayerDiscCollection");
 const TradeInfo = require("../../Schemas/TradeInfo");
 const PlayerBooleans = require("../../Schemas/PlayerBooleans");
+const { initialize } = require("../../Utility/Utility");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -74,10 +75,12 @@ module.exports = {
         ephemeral: true,
       });
 
-    const booleans = await PlayerBooleans.findOne({
+    let booleans = await PlayerBooleans.findOne({
       Guild: guild.id,
       User: member.id,
     });
+
+    if (!booleans) await initialize("booleans", member.id, guild.id);
 
     const isTrading = booleans.IsTrading;
     const isDueling = booleans.IsDueling;
@@ -99,18 +102,11 @@ module.exports = {
       User: member.id,
     });
 
-    if (!traderInventory) {
-      traderInventory = await PlayerInventory.create({
-        Guild: guild.id,
-        User: member.id,
-        StandArrow: 2,
-        StandDisc: 0,
-        RocacacaFruit: 0,
-        PJCooking: 0,
-      });
-    }
+    if (!traderInventory)
+      traderInventory = await initialize("inventory", member.id, guild.id);
 
     let traderOfferText = "";
+    let traderAbilitiesText = "";
     let arrowAmount = options.getInteger("standarrow");
     let discAmount = options.getInteger("standdisc");
     let fruitAmount = options.getInteger("rocacacafruit");
@@ -171,7 +167,11 @@ module.exports = {
           ephemeral: true,
         });
 
-      traderOfferText += `\n**Stand Offer:** \n${traderStand.Name}\nHealthpoints: ${traderStand.Healthpoints}\nAttack: ${traderStand.Attack}\nDefense: ${traderStand.Defense}\nSpeed: ${traderStand.Speed}\nAbility: ${traderStand.Ability.name}`;
+      for (let i = 0; i < traderStand.Ability.length; i++) {
+        traderAbilitiesText += `\n${traderStand.Ability[i].name}`;
+      }
+
+      traderOfferText += `\n**Stand Offer:** \n${traderStand.Name}\nHealthpoints: ${traderStand.Healthpoints}\nAttack: ${traderStand.Attack}\nDefense: ${traderStand.Defense}\nSpeed: ${traderStand.Speed}\nAbility: ${traderAbilitiesText}`;
     }
 
     if (traderOfferText == "") traderOfferText = "Nothing.";
@@ -187,6 +187,7 @@ module.exports = {
     if (requestedTrader) {
       requestedTraderOffer = requestedTrader.TradeOffer;
       let requestedTraderOfferText = "";
+      let requestedTraderAbilitiesText = "";
 
       if (requestedTraderOffer[1] > 0) {
         requestedTraderOfferText += `${requestedTraderOffer[1]}x Stand Arrow\n`;
@@ -211,7 +212,11 @@ module.exports = {
           let requestedTraderStand =
             requestedTraderDiscCollection.Discs[requestedTraderOffer[0] - 1];
 
-          requestedTraderOfferText += `\n**Stand Offer:** \n${requestedTraderStand.Name}\nHealthpoints: ${requestedTraderStand.Healthpoints}\nAttack: ${requestedTraderStand.Attack}\nDefense: ${requestedTraderStand.Defense}\nSpeed: ${requestedTraderStand.Speed}\nAbility: ${requestedTraderStand.Ability.name}`;
+          for (let i = 0; i < requestedTraderStand.Ability.length; i++) {
+            requestedTraderAbilitiesText += `\n${requestedTraderStand.Ability[i].name}`;
+          }
+
+          requestedTraderOfferText += `\n**Stand Offer:** \n${requestedTraderStand.Name}\nHealthpoints: ${requestedTraderStand.Healthpoints}\nAttack: ${requestedTraderStand.Attack}\nDefense: ${requestedTraderStand.Defense}\nSpeed: ${requestedTraderStand.Speed}\nAbilities: ${requestedTraderAbilitiesText}`;
         }
       }
 

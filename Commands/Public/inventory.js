@@ -4,6 +4,7 @@ const {
   EmbedBuilder,
 } = require("discord.js");
 const Inventory = require("../../Schemas/PlayerInventory");
+const { initialize } = require("../../Utility/Utility");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -24,16 +25,8 @@ module.exports = {
     });
 
     // Set inventory if not found
-    if (!playerInventory) {
-      playerInventory = await Inventory.create({
-        Guild: guild.id,
-        User: member.id,
-        StandArrow: 5,
-        StandDisc: 0,
-        RocacacaFruit: 0,
-        PJCooking: 0,
-      });
-    }
+    if (!playerInventory)
+      playerInventory = await initialize("inventory", member.id, guild.id);
 
     let inventoryText = "";
 
@@ -49,6 +42,9 @@ module.exports = {
     if (playerInventory.PJCooking > 0)
       inventoryText += `${playerInventory.PJCooking}x Pearl Jam's Cooking\n`;
 
+    if (playerInventory.TheWorldShard > 0)
+      inventoryText += `**RARE!** ${playerInventory.TheWorldShard}x The World Shard\n`;
+
     if (inventoryText == "") inventoryText = "Inventory is empty.";
 
     // Create inventory embed
@@ -58,7 +54,8 @@ module.exports = {
         iconURL: member.displayAvatarURL(),
       })
       .setColor("#FFFFFF")
-      .setDescription(inventoryText);
+      .setDescription(inventoryText)
+      .setFooter({ text: "Rare items are untradeable" });
 
     interaction.reply({ embeds: [inventoryEmbed] });
   },

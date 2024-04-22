@@ -58,6 +58,8 @@ let abilityInCooldown;
 let challengerCooldownText;
 let challengedCooldownText;
 
+let timeStopTurns;
+
 module.exports = {
   name: "interactionCreate",
   /**
@@ -111,19 +113,23 @@ module.exports = {
     // set default values
     challengerHp = challengerStand.Healthpoints;
     challengedHp = challengedStand.Healthpoints;
+    timeStopTurns = 0;
     attackRollHeight = 75;
+    isConfused = false;
+    standHasDied = false;
 
     // set values if they exist
     if (currentDuelInfo) {
       challengerHp = currentDuelInfo.ChallengerHP;
       challengedHp = currentDuelInfo.ChallengedHP;
       attackRollHeight = currentDuelInfo.AttackRollHeight;
+      timeStopTurns = currentDuelInfo.TimeStopTurns;
     }
 
     //#region EMBEDS & BUTTONS
     fightEmbed = new EmbedBuilder()
       .setAuthor({
-        name: `DUEL: ${challenger.username} vs ${challenged.displayName}`,
+        name: `DUEL: ${challenger.username} vs ${challenged.username}`,
       })
       .setColor("#D31A38")
       .setImage(
@@ -182,7 +188,8 @@ module.exports = {
         otherStand = challengerStand;
       }
 
-      fightEmbed.setTitle(`${otherPlayer[1]}'s Turn`);
+      if (timeStopTurns > 0) fightEmbed.setTitle(`${currentPlayer[1]}'s Turn`);
+      else fightEmbed.setTitle(`${otherPlayer[1]}'s Turn`);
     } else {
       if (challengerStand.Speed >= challengedStand.Speed) {
         currentPlayer = challenger;
@@ -415,9 +422,13 @@ module.exports = {
         var healAmount = abilityInfo[2];
         var nextDefenseModifier = abilityInfo[3];
         var currentDefenseModifier = abilityInfo[4];
+        if (abilityInfo[6] > 0) timeStopTurns = abilityInfo[6];
 
         // execute ability
-        if (damage > 0) {
+        if (timeStopTurns > 0) {
+          fightEmbed.setTitle(`${currentPlayer[1]}'s Turn`);
+          turnEmbed.setTitle(abilityInfo[0]);
+        } else if (damage > 0) {
           // attack based ability
           var attackRoll = Math.floor(Math.random() * attackRollHeight) + 1;
           var defenseMod = 1;
@@ -527,7 +538,7 @@ module.exports = {
           `${currentPlayer[1]} surrenders! ${otherPlayer[1]} wins the duel.`
         );
 
-        await endDuel();
+        await endDuel(otherPlayer, currentPlayer);
 
         if (Math.random() >= 0.5) {
           rewardEmbed.setTitle(`${otherPlayer[1]} found a loot crate!`);
@@ -552,23 +563,43 @@ module.exports = {
         ChallengerAbilityCount: challengerAbilityCount,
         ChallengedAbilityCount: challengedAbilityCount,
         DefenseModifier: 1,
+        TimeStopTurns: 0,
       });
     } else {
-      await DuelInfo.updateOne(
-        {
-          Guild: guildId,
-          Challenger: challenger.id,
-          Challenged: challenged.id,
-        },
-        {
-          $set: {
-            CurrentPlayer: otherPlayer,
-            OtherPlayer: currentPlayer,
-            ChallengerHP: challengerHp,
-            ChallengedHP: challengedHp,
+      if (timeStopTurns > 0)
+        await DuelInfo.updateOne(
+          {
+            Guild: guildId,
+            Challenger: challenger.id,
+            Challenged: challenged.id,
           },
-        }
-      );
+          {
+            $set: {
+              CurrentPlayer: currentPlayer,
+              OtherPlayer: otherPlayer,
+              ChallengerHP: challengerHp,
+              ChallengedHP: challengedHp,
+              TimeStopTurns: timeStopTurns - 1,
+            },
+          }
+        );
+      else
+        await DuelInfo.updateOne(
+          {
+            Guild: guildId,
+            Challenger: challenger.id,
+            Challenged: challenged.id,
+          },
+          {
+            $set: {
+              CurrentPlayer: otherPlayer,
+              OtherPlayer: currentPlayer,
+              ChallengerHP: challengerHp,
+              ChallengedHP: challengedHp,
+              TimeStopTurns: timeStopTurns - 1,
+            },
+          }
+        );
     }
   },
 };
@@ -603,7 +634,7 @@ async function checkHealth(buttonInteract) {
     }
 
     return await reply(buttonInteract, [turnEmbed, winEmbed, rewardEmbed], []);
-  } else if (challenged <= 0) {
+  } else if (challengedHp <= 0) {
     // challenged won
     winEmbed.setTitle(`${challenger.username} won the duel!`);
 
@@ -646,33 +677,62 @@ async function generateGlitchedText(type) {
 function updateAbilityUI(abilityButtons) {
   let buttons = [];
   if (currentDuelInfo) {
-    for (let i = 0; i < currentStand.Ability.length; i++) {
-      if (otherStand == challengerStand) {
-        if (
-          currentDuelInfo.ChallengerAbilityCount[i] <
-          otherStand.Ability[i].cooldown
-        )
-          abilityInCooldown[i] = true;
-        else abilityInCooldown[i] = false;
-        console.log(`${currentStand.Name} ${abilityInCooldown}`);
-      } else if (otherStand == challengedStand) {
-        if (
-          currentDuelInfo.ChallengedAbilityCount[i] <
-          otherStand.Ability[i].cooldown
-        )
-          abilityInCooldown[i] = true;
-        else abilityInCooldown[i] = false;
-        console.log(`${currentStand.Name} ${abilityInCooldown}`);
-      }
+    if (timeStopTurns > 0) {
+      for (let i = 0; i < currentStand.Ability.length; i++) {
+        if (currentStand == challengerStand) {
+          if (
+            currentDuelInfo.ChallengerAbilityCount[i] <
+            currentStand.Ability[i].cooldown
+          )
+            abilityInCooldown[i] = true;
+          else abilityInCooldown[i] = false;
+        } else if (currentStand == challengedStand) {
+          if (
+            currentDuelInfo.ChallengedAbilityCount[i] <
+            currentStand.Ability[i].cooldown
+          )
+            abilityInCooldown[i] = true;
+          else abilityInCooldown[i] = false;
+        }
 
-      abilityButton = new ButtonBuilder()
-        .setLabel(`Ability ${i + 1}`)
-        .setCustomId(
-          `Duel-Ability-${guildId}-${challenger.id}-${challenged.id}-${i}`
-        )
-        .setStyle(ButtonStyle.Secondary)
-        .setDisabled(abilityInCooldown[i]);
-      buttons.push(abilityButton);
+        abilityButton = new ButtonBuilder()
+          .setLabel(`Ability ${i + 1}`)
+          .setCustomId(
+            `Duel-Ability-${guildId}-${challenger.id}-${challenged.id}-${i}`
+          )
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(abilityInCooldown[i]);
+
+        buttons.push(abilityButton);
+      }
+    } else {
+      for (let i = 0; i < otherStand.Ability.length; i++) {
+        if (otherStand == challengerStand) {
+          if (
+            currentDuelInfo.ChallengerAbilityCount[i] <
+            otherStand.Ability[i].cooldown
+          )
+            abilityInCooldown[i] = true;
+          else abilityInCooldown[i] = false;
+        } else if (otherStand == challengedStand) {
+          if (
+            currentDuelInfo.ChallengedAbilityCount[i] <
+            otherStand.Ability[i].cooldown
+          )
+            abilityInCooldown[i] = true;
+          else abilityInCooldown[i] = false;
+        }
+
+        abilityButton = new ButtonBuilder()
+          .setLabel(`Ability ${i + 1}`)
+          .setCustomId(
+            `Duel-Ability-${guildId}-${challenger.id}-${challenged.id}-${i}`
+          )
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(abilityInCooldown[i]);
+
+        buttons.push(abilityButton);
+      }
     }
     abilityButtons.setComponents(buttons);
   }
@@ -716,9 +776,9 @@ function updateDuelDisplay() {
 }
 
 function setCooldownText(stand, abilityIndex, abilityCount) {
-  if (abilityCount < stand.Ability[abilityIndex].cooldown) {
+  if (abilityCount[abilityIndex] < stand.Ability[abilityIndex].cooldown) {
     return `\nAbility Cooldown: ${
-      stand.Ability[abilityIndex].cooldown - abilityCount
+      stand.Ability[abilityIndex].cooldown - abilityCount[abilityIndex]
     } Turns`;
   } else {
     return "\nAbility Ready!";

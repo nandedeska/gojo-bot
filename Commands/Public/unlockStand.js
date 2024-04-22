@@ -8,6 +8,7 @@ const StandCollection = require("../../Schemas/StandCollection");
 const Inventory = require("../../Schemas/PlayerInventory");
 const PlayerBooleans = require("../../Schemas/PlayerBooleans");
 const StandAbilities = require("../../Local Storage/standAbilities");
+const { initialize } = require("../../Utility/Utility");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -28,14 +29,16 @@ module.exports = {
   async execute(interaction) {
     const { options, guild, member } = interaction;
 
-    const booleans = await PlayerBooleans.findOne({
+    booleans = await PlayerBooleans.findOne({
       Guild: guild.id,
       User: member.id,
     });
 
     let isInDuel;
 
-    if (booleans) isInDuel = await booleans.IsDueling;
+    if (!booleans) booleans = await initialize("booleans", member.id, guild.id);
+
+    isInDuel = await booleans.IsDueling;
 
     // Check if player is in a duel
     if (isInDuel)
@@ -52,14 +55,7 @@ module.exports = {
 
     // Set inventory if not found
     if (!playerInventory) {
-      playerInventory = await Inventory.create({
-        Guild: guild.id,
-        User: member.id,
-        StandArrow: 2,
-        StandDisc: 0,
-        RocacacaFruit: 0,
-        PJCooking: 0,
-      });
+      playerInventory = await initialize("inventory", member.id, guild.id);
     }
 
     if (playerInventory.StandArrow <= 0)

@@ -12,6 +12,9 @@ const opponentPool = [
   "lindberg",
   "kaiser",
 ];
+
+const bossPool = ["dio"];
+
 const canonPool = [
   "holhorse",
   "grayfly",
@@ -199,7 +202,8 @@ const opponents = {
   dio: {
     id: "dio",
     displayName: "DIO",
-    displayImage: bossImage,
+    displayImage:
+      "https://cdn.discordapp.com/attachments/675612229676040192/1227902978891976724/how-does-dio-use-hermit-purple-v0-8ku7ymutaqdb1.png?ex=662a18c3&is=6617a3c3&hm=e69753995878e84c9512d055d68683a0c324549c0f2978a3088ea8782526a0d1&",
     quotePool: [
       "Everyone survives in pursuit of peace of mind... Aren't you uneasy, preparing to fight me, knowing you may die? If you join me, I will give you peace of mind that will last forever.",
       'When one falls in battle and fails to attain their goals... one feels frustrated and hurt... and when met with a fight in the future, fear takes over the body. I believe that to "live" is to overcome "fear". The one who stands at the top of the world must know no fear!',
@@ -359,4 +363,10 @@ const opponents = {
   },
 };
 
-module.exports = { opponentPool, canonPool, alternatePool, opponents };
+module.exports = {
+  opponentPool,
+  bossPool,
+  canonPool,
+  alternatePool,
+  opponents,
+};

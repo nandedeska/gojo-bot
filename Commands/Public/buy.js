@@ -5,6 +5,7 @@ const {
 } = require("discord.js");
 const PlayerInventory = require("../../Schemas/PlayerInventory");
 const PlayerBooleans = require("../../Schemas/PlayerBooleans");
+const { initialize } = require("../../Utility/Utility");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -36,6 +37,8 @@ module.exports = {
   async execute(interaction) {
     const { guild, member, options } = interaction;
 
+    await interaction.deferReply();
+
     const booleans = await PlayerBooleans.findOne({
       Guild: guild.id,
       User: member.id,
@@ -44,7 +47,7 @@ module.exports = {
     const isTrading = booleans.IsTrading;
 
     if (isTrading)
-      return interaction.reply({
+      return await interaction.editReply({
         content: "You can't buy while trading!",
         ephemeral: true,
       });
@@ -54,16 +57,8 @@ module.exports = {
       User: member.id,
     });
 
-    if (!inventory) {
-      inventory = await PlayerInventory.create({
-        Guild: guild.id,
-        User: member.id,
-        StandArrow: 2,
-        StandDisc: 0,
-        RocacacaFruit: 0,
-        PJCooking: 0,
-      });
-    }
+    if (!inventory)
+      inventory = await initialize("inventory", member.id, guild.id);
 
     const item = options.getString("item");
     const amount = options.getInteger("amount");
@@ -91,13 +86,13 @@ module.exports = {
         itemName = "Pearl Jam's Cooking";
         break;
       default:
-        return interaction.reply({
+        return await interaction.editReply({
           content: "Item not detected! Contact the developer.",
           ephemeral: true,
         });
     }
 
-    await interaction.reply({ content: "Purchasing item..." });
+    await interaction.editReply({ content: "Purchasing item..." });
 
     if (inventory.RocacacaFruit < cost) {
       return await interaction.editReply({

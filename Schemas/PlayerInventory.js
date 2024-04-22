@@ -9,5 +9,6 @@ module.exports = model(
     StandDisc: Number,
     RocacacaFruit: Number,
     PJCooking: Number,
+    TheWorldShard: Number,
   })
 );

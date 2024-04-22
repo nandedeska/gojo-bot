@@ -1,0 +1,33 @@
+Date : 2024-04-14 22:20:31
+Directory : c:\Users\User Miguel\Documents\the bot\Events
+Total : 6 files,  2164 codes, 174 comments, 328 blanks, all 2666 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| JavaScript |          6 |      2,164 |        174 |        328 |      2,666 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                            | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                               |          6 |      2,164 |        174 |        328 |      2,666 |
+| Buttons                                                                         |          4 |      2,123 |        170 |        321 |      2,614 |
+| Client                                                                          |          1 |         11 |          0 |          2 |         13 |
+| Interactions                                                                    |          1 |         30 |          4 |          5 |         39 |
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                        | language   | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| c:\Users\User Miguel\Documents\the bot\Events\Buttons\BetterAdventureButtons.js | JavaScript |      1,125 |         97 |        164 |      1,386 |
+| c:\Users\User Miguel\Documents\the bot\Events\Buttons\BetterDuelButtons.js      | JavaScript |        781 |         57 |        116 |        954 |
+| c:\Users\User Miguel\Documents\the bot\Events\Buttons\DiscButtons.js            | JavaScript |         69 |          9 |         17 |         95 |
+| c:\Users\User Miguel\Documents\the bot\Events\Buttons\TradeButtons.js           | JavaScript |        148 |          7 |         24 |        179 |
+| c:\Users\User Miguel\Documents\the bot\Events\Client\ready.js                   | JavaScript |         11 |          0 |          2 |         13 |
+| c:\Users\User Miguel\Documents\the bot\Events\Interactions\SlashCommands.js     | JavaScript |         30 |          4 |          5 |         39 |
+| Total                                                                           |            |      2,164 |        174 |        328 |      2,666 |
++---------------------------------------------------------------------------------+------------+------------+------------+------------+------------+

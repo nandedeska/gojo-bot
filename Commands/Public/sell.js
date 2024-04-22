@@ -4,6 +4,7 @@ const {
 } = require("discord.js");
 const PlayerInventory = require("../../Schemas/PlayerInventory");
 const PlayerBooleans = require("../../Schemas/PlayerBooleans");
+const { initialize } = require("../../Utility/Utility");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -54,16 +55,8 @@ module.exports = {
       User: member.id,
     });
 
-    if (!inventory) {
-      inventory = await PlayerInventory.create({
-        Guild: guild.id,
-        User: member.id,
-        StandArrow: 2,
-        StandDisc: 0,
-        RocacacaFruit: 0,
-        PJCooking: 0,
-      });
-    }
+    if (!inventory)
+      inventory = await initialize("inventory", member.id, guild.id);
 
     const item = options.getString("item");
     const amount = options.getInteger("amount");

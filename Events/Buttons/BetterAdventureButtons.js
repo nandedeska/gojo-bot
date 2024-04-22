@@ -44,10 +44,12 @@ let opponentStand;
 let opponentHp;
 let attackRollHeight;
 let isConfused;
+let playerTimeStopTurns;
 
 let fightEmbed;
 let turnEmbed;
 let opponentTurnEmbed;
+let opponentExtraTurnEmbeds;
 let quoteEmbed;
 let winEmbed;
 let rewardEmbed;
@@ -97,6 +99,8 @@ module.exports = {
     opponentHp = opponentStand.Healthpoints;
     attackRollHeight = 75;
     isConfused = false;
+    playerTimeStopTurns = 0;
+    standHasDied = false;
 
     // fetch duel data
     currentAdventureInfo = await AdventureInfo.findOne({
@@ -110,6 +114,7 @@ module.exports = {
       opponentHp = currentAdventureInfo.OpponentHP;
       attackRollHeight = currentAdventureInfo.AttackRollHeight;
       isConfused = currentAdventureInfo.IsConfused;
+      playerTimeStopTurns = currentAdventureInfo.TimeStopTurns;
     }
 
     try {
@@ -134,6 +139,7 @@ module.exports = {
 
     turnEmbed = new EmbedBuilder().setColor("#D31A38");
     opponentTurnEmbed = null;
+    opponentExtraTurnEmbeds = [];
 
     quoteEmbed = new EmbedBuilder()
       .setColor("#80FEFF")
@@ -187,8 +193,10 @@ module.exports = {
     //#endregion EMBEDS & BUTTONS
     //#endregion SETUP
 
-    if (!playerFirst && currentAdventureInfo)
+    if (!playerFirst && currentAdventureInfo && playerTimeStopTurns <= 0)
       await opponentTurn(buttonInteract, adventureButtons, abilityButtons);
+
+    if (playerTimeStopTurns > 0) console.log("TIME STOP");
 
     if (standHasDied) return;
 
@@ -216,6 +224,7 @@ module.exports = {
               Command: "adventure",
             });
           else {
+            await buttonInteract.deferUpdate();
             const remainingTime = HumanizeDuration(
               cooldown.Cooldown + CooldownTime - Date.now(),
               {
@@ -223,23 +232,22 @@ module.exports = {
                 round: true,
               }
             );
-            await buttonInteract.deferUpdate();
             return await buttonInteract
               .editReply({
                 content: `You can go on an adventure again in ${remainingTime}.`,
                 ephemeral: true,
               })
-              .catch(console.error);
+              .catch(console.log);
           }
         }
 
         // check if player is already in an adventure
         if (
-          PlayerBooleans.findOne({ Guild: guildId, User: player.id })
+          await PlayerBooleans.findOne({ Guild: guildId, User: player.id })
             .IsAdventuring
         ) {
           await buttonInteract.deferUpdate();
-          return awaitbuttonInteract.editReply({
+          return await buttonInteract.editReply({
             content: "You are already in an adventure!",
             ephemeral: true,
           });
@@ -249,11 +257,12 @@ module.exports = {
         updateAbilityUI(abilityButtons);
         updateDuelDisplay();
 
-        await reply(
-          buttonInteract,
-          [quoteEmbed, fightEmbed],
-          [adventureButtons, abilityButtons]
-        );
+        await buttonInteract.deferUpdate();
+        await buttonInteract.editReply({
+          content: null,
+          embeds: [quoteEmbed, fightEmbed],
+          components: [adventureButtons, abilityButtons],
+        });
         break;
       case "Decline":
         // start cooldown
@@ -271,7 +280,7 @@ module.exports = {
         );
 
         await buttonInteract.deferUpdate();
-        return buttonInteract.editReply({
+        return await buttonInteract.editReply({
           content: `You ran away from ${opponent.displayName}!`,
           embeds: [],
           components: [],
@@ -292,8 +301,10 @@ module.exports = {
         if (attackRoll >= opponentStand.Defense * currentDefenseModifier) {
           var damage = Math.floor(Math.random() * playerStand.Attack) + 1;
 
-          if (isConfused) turnEmbed.setTitle(generateGlitchedText("long"));
-          else
+          if (isConfused) {
+            turnEmbed.setTitle(generateGlitchedText("long"));
+            console.log("AAAAA");
+          } else
             turnEmbed.setTitle(
               `${playerStand.Name}'s attack hits! It deals ${damage} damage.`
             );
@@ -324,6 +335,7 @@ module.exports = {
               AttackRollHeight: 75,
               PlayerAbilityCount: abilityCounts,
               DefenseModifier: 1,
+              TimeStopTurns: playerTimeStopTurns - 1,
             },
           }
         );
@@ -337,13 +349,21 @@ module.exports = {
           updateDuelDisplay();
 
           // duel continue
-          if (opponentTurnEmbed)
-            await reply(
-              buttonInteract,
-              [turnEmbed, opponentTurnEmbed, fightEmbed],
-              [adventureButtons, abilityButtons]
-            );
-          else
+          if (opponentTurnEmbed) {
+            if (opponentExtraTurnEmbeds.length > 0) {
+              var embeds = [opponentTurnEmbed];
+              embeds.push(...opponentExtraTurnEmbeds, turnEmbed, fightEmbed);
+              await reply(buttonInteract, embeds, [
+                adventureButtons,
+                abilityButtons,
+              ]);
+            } else
+              await reply(
+                buttonInteract,
+                [opponentTurnEmbed, turnEmbed, fightEmbed],
+                [adventureButtons, abilityButtons]
+              );
+          } else
             await reply(
               buttonInteract,
               [turnEmbed, fightEmbed],
@@ -377,6 +397,7 @@ module.exports = {
               AttackRollHeight: 50,
               PlayerAbilityCount: abilityCounts,
               DefenseModifier: 1,
+              TimeStopTurns: playerTimeStopTurns - 1,
             },
           }
         );
@@ -390,13 +411,21 @@ module.exports = {
           updateDuelDisplay();
 
           // duel continue
-          if (opponentTurnEmbed)
-            await reply(
-              buttonInteract,
-              [turnEmbed, opponentTurnEmbed, fightEmbed],
-              [adventureButtons, abilityButtons]
-            );
-          else
+          if (opponentTurnEmbed) {
+            if (opponentExtraTurnEmbeds.length > 0) {
+              var embeds = [opponentTurnEmbed];
+              embeds.push(...opponentExtraTurnEmbeds, turnEmbed, fightEmbed);
+              await reply(buttonInteract, embeds, [
+                adventureButtons,
+                abilityButtons,
+              ]);
+            } else
+              await reply(
+                buttonInteract,
+                [opponentTurnEmbed, turnEmbed, fightEmbed],
+                [adventureButtons, abilityButtons]
+              );
+          } else
             await reply(
               buttonInteract,
               [turnEmbed, fightEmbed],
@@ -419,9 +448,15 @@ module.exports = {
         var damage = abilityInfo[1];
         var healAmount = abilityInfo[2];
         var currentDefenseModifier = abilityInfo[3];
+        var timeStopTurns = abilityInfo[6];
 
         // execute ability
-        if (damage > 0) {
+        if (timeStopTurns > 0) {
+          // time stop ability
+          abilityCounts[splitArray[5]] = 0;
+          playerTimeStopTurns = timeStopTurns;
+          turnEmbed.setTitle(abilityInfo[0]);
+        } else if (damage > 0) {
           // attack based ability
           var attackRoll = Math.floor(Math.random() * attackRollHeight) + 1;
           if (attackRoll >= opponentStand.Defense * currentDefenseModifier) {
@@ -464,19 +499,36 @@ module.exports = {
         }
 
         // update duel data
-        await AdventureInfo.updateOne(
-          {
-            Guild: guildId,
-            User: player.id,
-          },
-          {
-            $set: {
-              AttackRollHeight: 75,
-              PlayerAbilityCount: abilityCounts,
-              DefenseModifier: currentDefenseModifier,
+        // check if player used time stop ability
+        if (timeStopTurns > 0)
+          await AdventureInfo.updateOne(
+            {
+              Guild: guildId,
+              User: player.id,
             },
-          }
-        );
+            {
+              $set: {
+                AttackRollHeight: 75,
+                PlayerAbilityCount: abilityCounts,
+                DefenseModifier: currentDefenseModifier,
+              },
+            }
+          );
+        else
+          await AdventureInfo.updateOne(
+            {
+              Guild: guildId,
+              User: player.id,
+            },
+            {
+              $set: {
+                AttackRollHeight: 75,
+                PlayerAbilityCount: abilityCounts,
+                DefenseModifier: currentDefenseModifier,
+                TimeStopTurns: playerTimeStopTurns - 1,
+              },
+            }
+          );
 
         // check for stand death
         await checkHealth(buttonInteract);
@@ -487,13 +539,21 @@ module.exports = {
           updateDuelDisplay();
 
           // duel continue
-          if (opponentTurnEmbed)
-            await reply(
-              buttonInteract,
-              [turnEmbed, opponentTurnEmbed, fightEmbed],
-              [adventureButtons, abilityButtons]
-            );
-          else
+          if (opponentTurnEmbed) {
+            if (opponentExtraTurnEmbeds.length > 0) {
+              var embeds = [opponentTurnEmbed];
+              embeds.push(...opponentExtraTurnEmbeds, turnEmbed, fightEmbed);
+              await reply(buttonInteract, embeds, [
+                adventureButtons,
+                abilityButtons,
+              ]);
+            } else
+              await reply(
+                buttonInteract,
+                [opponentTurnEmbed, turnEmbed, fightEmbed],
+                [adventureButtons, abilityButtons]
+              );
+          } else
             await reply(
               buttonInteract,
               [turnEmbed, fightEmbed],
@@ -523,7 +583,7 @@ module.exports = {
     }
     //#endregion PLAYER TURN
 
-    if (playerFirst && currentAdventureInfo)
+    if (playerFirst && currentAdventureInfo && playerTimeStopTurns <= 0)
       await opponentTurn(buttonInteract, adventureButtons, abilityButtons);
 
     try {
@@ -546,12 +606,19 @@ module.exports = {
         PlayerAbilityCount: playerAbilityCount,
         OpponentAbilityCount: opponentAbilityCount,
         DefenseModifier: 1,
-        isConfused: isConfused,
+        IsConfused: isConfused,
+        TimeStopTurns: 0,
       });
     } else {
       await AdventureInfo.updateOne(
         { Guild: guildId, User: player.id },
-        { $set: { PlayerHP: playerHp, OpponentHP: opponentHp } }
+        {
+          $set: {
+            PlayerHP: playerHp,
+            OpponentHP: opponentHp,
+            IsConfused: isConfused,
+          },
+        }
       );
     }
   },
@@ -566,9 +633,18 @@ async function checkHealth(buttonInteract) {
 
     standHasDied = true;
 
-    if (opponentTurnEmbed) return await reply(buttonInteract, [fightEmbed], []);
-    else
-      return await reply(buttonInteract, [opponentTurnEmbed, fightEmbed], []);
+    let embeds = [];
+
+    if (playerFirst) {
+      if (turnEmbed.data.title) embeds.push(turnEmbed);
+      if (opponentTurnEmbed.data.title) embeds.push(opponentTurnEmbed);
+    } else {
+      if (opponentTurnEmbed.data.title) embeds.push(opponentTurnEmbed);
+      if (turnEmbed.data.title) embeds.push(turnEmbed);
+    }
+
+    embeds.push(fightEmbed);
+    return await reply(buttonInteract, embeds, []);
   } else if (opponentHp <= 0) {
     // player won
     winEmbed.setTitle(`${player.username} won the duel!`);
@@ -581,18 +657,18 @@ async function checkHealth(buttonInteract) {
 
     standHasDied = true;
 
-    if (opponentTurnEmbed)
-      return await reply(
-        buttonInteract,
-        [opponentTurnEmbed, turnEmbed, winEmbed, rewardEmbed],
-        []
-      );
-    else
-      return await reply(
-        buttonInteract,
-        [turnEmbed, winEmbed, rewardEmbed],
-        []
-      );
+    let embeds = [];
+
+    if (playerFirst) {
+      if (turnEmbed.data.title) embeds.push(turnEmbed);
+      if (opponentTurnEmbed.data.title) embeds.push(opponentTurnEmbed);
+    } else {
+      if (opponentTurnEmbed.data.title) embeds.push(opponentTurnEmbed);
+      if (turnEmbed.data.title) embeds.push(turnEmbed);
+    }
+
+    embeds.push(winEmbed, rewardEmbed);
+    return await reply(buttonInteract, embeds, []);
   } else if (playerHp <= 0) {
     // opponent won
     winEmbed.setTitle(`${opponent.displayName} won the duel!`);
@@ -601,17 +677,25 @@ async function checkHealth(buttonInteract) {
 
     standHasDied = true;
 
-    if (opponentTurnEmbed)
-      return await reply(
-        buttonInteract,
-        [turnEmbed, opponentTurnEmbed, winEmbed],
-        []
-      );
-    else return await reply(buttonInteract, [turnEmbed, winEmbed], []);
+    let embeds = [];
+    if (playerFirst) {
+      if (turnEmbed.data.title) embeds.push(turnEmbed);
+      if (opponentTurnEmbed.data.title) embeds.push(opponentTurnEmbed);
+      if (opponentExtraTurnEmbeds.length > 0)
+        embeds.push(...opponentExtraTurnEmbeds);
+    } else {
+      if (opponentTurnEmbed.data.title) embeds.push(opponentTurnEmbed);
+      if (opponentExtraTurnEmbeds.length > 0)
+        embeds.push(...opponentExtraTurnEmbeds);
+      if (turnEmbed.data.title) embeds.push(turnEmbed);
+    }
+
+    embeds.push(winEmbed);
+    return await reply(buttonInteract, embeds, []);
   } else standHasDied = false;
 }
 
-async function generateGlitchedText(type) {
+function generateGlitchedText(type) {
   switch (type) {
     case "short":
       return GlitchedText.ShortString[
@@ -673,26 +757,43 @@ function updateDuelDisplay() {
 
   console.log(`${playerCooldownText} ${opponentCooldownText}`);
 
-  fightEmbed.addFields(
-    {
-      name: `${playerStand.Name}`,
-      value: `Healthpoints: ${Math.max(playerHp, 0)} / ${
-        playerStand.Healthpoints
-      }${playerCooldownText}`,
-    },
-    {
-      name: `${opponentStand.Name}`,
-      value: `Healthpoints: ${Math.max(opponentHp, 0)} / ${
-        opponentStand.Healthpoints
-      }${opponentCooldownText}`,
-    }
-  );
+  if (isConfused) {
+    fightEmbed.addFields(
+      {
+        name: `${generateGlitchedText("short")}`,
+        value: `${generateGlitchedText("short")}: ${generateGlitchedText(
+          "number"
+        )} / ${generateGlitchedText("number")}${generateGlitchedText("short")}`,
+      },
+      {
+        name: `${generateGlitchedText("short")}`,
+        value: `${generateGlitchedText("short")}: ${generateGlitchedText(
+          "number"
+        )} / ${generateGlitchedText("number")}${generateGlitchedText("short")}`,
+      }
+    );
+  } else {
+    fightEmbed.addFields(
+      {
+        name: `${playerStand.Name}`,
+        value: `Healthpoints: ${Math.max(playerHp, 0)} / ${
+          playerStand.Healthpoints
+        }${playerCooldownText}`,
+      },
+      {
+        name: `${opponentStand.Name}`,
+        value: `Healthpoints: ${Math.max(opponentHp, 0)} / ${
+          opponentStand.Healthpoints
+        }${opponentCooldownText}`,
+      }
+    );
+  }
 }
 
 function setCooldownText(stand, abilityIndex, abilityCount) {
-  if (abilityCount < stand.Ability[abilityIndex].cooldown) {
+  if (abilityCount[abilityIndex] < stand.Ability[abilityIndex].cooldown) {
     return `\nAbility Cooldown: ${
-      stand.Ability[abilityIndex].cooldown - abilityCount
+      stand.Ability[abilityIndex].cooldown - abilityCount[abilityIndex]
     } Turns`;
   } else {
     return "\nAbility Ready!";
@@ -718,6 +819,7 @@ async function giveRewards() {
   let arrowAmount;
   let discAmount;
   let fruitAmount;
+  let theWorldShardAmount = 0;
 
   arrowAmount = 1;
   discAmount = Math.floor(Math.random() * 40);
@@ -729,6 +831,10 @@ async function giveRewards() {
   arrowAmount = Math.round((arrowAmount / sum) * 8);
   discAmount = Math.round((discAmount / sum) * 8);
   fruitAmount = Math.round((fruitAmount / sum) * 8);
+
+  if (opponent.id == "dio") {
+    theWorldShardAmount = Math.floor(Math.random() * 3) + 1;
+  }
 
   let playerInventory = await Inventory.findOne({
     Guild: guildId,
@@ -742,6 +848,7 @@ async function giveRewards() {
         StandArrow: playerInventory.StandArrow + arrowAmount,
         StandDisc: playerInventory.StandDisc + discAmount,
         RocacacaFruit: playerInventory.RocacacaFruit + fruitAmount,
+        TheWorldShard: playerInventory.TheWorldShard + theWorldShardAmount,
       },
     }
   );
@@ -750,7 +857,9 @@ async function giveRewards() {
 
   if (arrowAmount > 0) rewardText += `${arrowAmount}x Stand Arrow\n`;
   if (discAmount > 0) rewardText += `${discAmount}x Stand Disc\n`;
-  if (fruitAmount > 0) rewardText += `${fruitAmount}x Rocacaca Fruit`;
+  if (fruitAmount > 0) rewardText += `${fruitAmount}x Rocacaca Fruit\n`;
+  if (theWorldShardAmount > 0)
+    rewardText += `**RARE DROP!** ${theWorldShardAmount}x The World Shard`;
 
   rewardEmbed.data.description = rewardText;
 }
@@ -891,12 +1000,37 @@ async function opponentTurn(buttonInteract, adventureButtons, abilityButtons) {
         var nextDefenseModifier = abilityInfo[3];
         var currentDefenseModifier = abilityInfo[4];
         isConfused = abilityInfo[5];
+        var timeStopTurns = abilityInfo[6];
 
         // execute ability
-        if (damage > 0) {
+        if (timeStopTurns > 0) {
+          // time stop ability
+          abilityCounts[i] = 0;
+          await AdventureInfo.updateOne(
+            {
+              Guild: guildId,
+              User: player.id,
+            },
+            {
+              $set: {
+                AttackRollHeight: 75,
+                OpponentAbilityCount: abilityCounts,
+                DefenseModifier: nextDefenseModifier,
+              },
+            }
+          );
+          for (let i = 0; i < timeStopTurns; i++) {
+            opponentExtraTurnEmbeds.push(
+              await opponentExtraTurn(
+                buttonInteract,
+                adventureButtons,
+                abilityButtons
+              )
+            );
+          }
+          opponentTurnEmbed.setTitle(abilityInfo[0]);
+        } else if (damage > 0) {
           // attack based ability
-          var attackRoll = Math.floor(Math.random() * attackRollHeight) + 1;
-          var defenseMod = 1;
           if (currentAdventureInfo)
             defenseMod = currentAdventureInfo.DefenseModifier;
           if (
@@ -915,11 +1049,7 @@ async function opponentTurn(buttonInteract, adventureButtons, abilityButtons) {
             }
 
             if (isConfused)
-              opponentTurnEmbed.setTitle(
-                GlitchedText.LongString[
-                  Math.floor(Math.random() * GlitchedText.LongString.length)
-                ]
-              );
+              opponentTurnEmbed.setTitle(generateGlitchedText("long"));
             else opponentTurnEmbed.setTitle(abilityInfo[0]);
           } else {
             if (isConfused)
@@ -939,7 +1069,7 @@ async function opponentTurn(buttonInteract, adventureButtons, abilityButtons) {
         for (let j = 0; j < opponentStand.Ability.length; j++) {
           if (j == i) abilityCounts[j] = 0;
           else
-            abilityCounts[i] = currentAdventureInfo.OpponentAbilityCount[j] + 1;
+            abilityCounts[j] = currentAdventureInfo.OpponentAbilityCount[j] + 1;
         }
 
         // update duel data
@@ -968,16 +1098,17 @@ async function opponentTurn(buttonInteract, adventureButtons, abilityButtons) {
           updateDuelDisplay();
 
           // duel continue
-          if (opponentTurnEmbed)
+          if (opponentExtraTurnEmbeds.length > 0) {
+            var embeds = [turnEmbed, opponentTurnEmbed];
+            embeds.push(...opponentExtraTurnEmbeds, fightEmbed);
+            await reply(buttonInteract, embeds, [
+              adventureButtons,
+              abilityButtons,
+            ]);
+          } else
             await reply(
               buttonInteract,
               [turnEmbed, opponentTurnEmbed, fightEmbed],
-              [adventureButtons, abilityButtons]
-            );
-          else
-            await reply(
-              buttonInteract,
-              [turnEmbed, fightEmbed],
               [adventureButtons, abilityButtons]
             );
         }
@@ -1045,18 +1176,11 @@ async function opponentTurn(buttonInteract, adventureButtons, abilityButtons) {
         updateDuelDisplay();
 
         // duel continue
-        if (opponentTurnEmbed)
-          await reply(
-            buttonInteract,
-            [turnEmbed, opponentTurnEmbed, fightEmbed],
-            [adventureButtons, abilityButtons]
-          );
-        else
-          await reply(
-            buttonInteract,
-            [turnEmbed, fightEmbed],
-            [adventureButtons, abilityButtons]
-          );
+        await reply(
+          buttonInteract,
+          [turnEmbed, opponentTurnEmbed, fightEmbed],
+          [adventureButtons, abilityButtons]
+        );
       }
     }
   } else {
@@ -1095,19 +1219,167 @@ async function opponentTurn(buttonInteract, adventureButtons, abilityButtons) {
       updateDuelDisplay();
 
       // duel continue
-      if (opponentTurnEmbed)
-        await reply(
-          buttonInteract,
-          [turnEmbed, opponentTurnEmbed, fightEmbed],
-          [adventureButtons, abilityButtons]
-        );
-      else
-        await reply(
-          buttonInteract,
-          [turnEmbed, fightEmbed],
-          [adventureButtons, abilityButtons]
-        );
+      await reply(
+        buttonInteract,
+        [turnEmbed, opponentTurnEmbed, fightEmbed],
+        [adventureButtons, abilityButtons]
+      );
     }
   }
+}
+
+async function opponentExtraTurn(
+  buttonInteract,
+  adventureButtons,
+  abilityButtons
+) {
+  const rand = Math.random();
+  opponentTurnEmbed = new EmbedBuilder().setColor("#D31A38");
+  let abilityCounts;
+
+  if (currentAdventureInfo)
+    abilityCounts = currentAdventureInfo.OpponentAbilityCount;
+
+  var extraTurnEmbed = new EmbedBuilder().setColor("#D31A38");
+  if (rand < 0.95) {
+    // attack or ability
+    let opponentUsedAbility = false;
+    for (let i = 0; i < opponentStand.Ability.length; i++) {
+      // check if bot can use ability
+      if (abilityCounts[i] >= opponentStand.Ability[i].cooldown) {
+        console.log(`BOT: ABILITY ${i + 1}`);
+        // fetch ability
+        let ability = opponentStand.Ability[i];
+        let abilityId = ability.id;
+        let abilityInfo = StandAbilities.abilities[abilityId](
+          opponentStand,
+          playerStand,
+          ability
+        );
+
+        var damage = abilityInfo[1];
+        var healAmount = abilityInfo[2];
+        var nextDefenseModifier = abilityInfo[3];
+        var currentDefenseModifier = abilityInfo[4];
+        isConfused = abilityInfo[5];
+        var timeStopTurns = abilityInfo[6];
+
+        // execute ability
+        if (timeStopTurns > 0) {
+          // time stop ability
+          extraTurnEmbed.setTitle(abilityInfo[0]);
+        } else if (damage > 0) {
+          // attack based ability
+          var defenseMod = 1;
+          if (currentAdventureInfo)
+            defenseMod = currentAdventureInfo.DefenseModifier;
+          if (defenseMod < 100) {
+            var damage = abilityInfo[1];
+
+            playerHp -= damage;
+            if (healAmount > 0) {
+              // life steal ability
+              opponentHp += healAmount;
+
+              playerHp = Math.min(playerHp, playerStand.Healthpoints);
+              opponentHp = Math.min(opponentHp, opponentStand.Healthpoints);
+            }
+
+            if (isConfused)
+              extraTurnEmbed.setTitle(generateGlitchedText("long"));
+            else extraTurnEmbed.setTitle(abilityInfo[0]);
+          } else {
+            if (isConfused)
+              extraTurnEmbed.setTitle(generateGlitchedText("long"));
+            else extraTurnEmbed.setTitle(`${opponentStand.Name} missed!`);
+          }
+        } else if (healAmount > 0) {
+          // heal ability
+          opponentHp += healAmount;
+
+          playerHp = Math.min(playerHp, playerStand.Healthpoints);
+          opponentHp = Math.min(opponentHp, opponentStand.Healthpoints);
+          extraTurnEmbed.setTitle(abilityInfo[0]);
+        } else extraTurnEmbed.setTitle(abilityInfo[0]);
+
+        // reset ability count
+        abilityCounts[i] = 0;
+
+        // update duel data
+        await AdventureInfo.updateOne(
+          {
+            Guild: guildId,
+            User: player.id,
+          },
+          {
+            $set: {
+              AttackRollHeight: 75,
+              OpponentAbilityCount: abilityCounts,
+              DefenseModifier: nextDefenseModifier,
+            },
+          }
+        );
+
+        opponentUsedAbility = true;
+      }
+    }
+
+    if (!opponentUsedAbility) {
+      // bot attacks
+      console.log("BOT: ATTACK");
+
+      // roll for attack
+      var currentDefenseModifier = 1;
+      try {
+        currentDefenseModifier = currentAdventureInfo.DefenseModifier;
+      } catch (err) {
+        currentDefenseModifier = 1;
+      }
+
+      // check if attack hits
+      if (currentDefenseModifier < 100) {
+        var damage = Math.floor(Math.random() * opponentStand.Attack) + 1;
+        if (isConfused) extraTurnEmbed.setTitle(generateGlitchedText("long"));
+        else
+          extraTurnEmbed.setTitle(
+            `${opponentStand.Name}'s attack hits! It deals ${damage} damage.`
+          );
+
+        playerHp -= damage;
+      } else {
+        if (isConfused) extraTurnEmbed.setTitle(generateGlitchedText("long"));
+        else extraTurnEmbed.setTitle(`${opponentStand.Name} missed!`);
+      }
+
+      // update duel data
+      await AdventureInfo.updateOne(
+        { Guild: guildId, User: player.id },
+        {
+          $set: {
+            AttackRollHeight: 75,
+            DefenseModifier: 1,
+          },
+        }
+      );
+    }
+  } else {
+    // dodge
+    console.log("BOT: DODGE");
+    if (isConfused) extraTurnEmbed.setTitle(generateGlitchedText("long"));
+    else extraTurnEmbed.setTitle(`${opponentStand.Name} prepares to dodge!`);
+
+    // update duel data
+    await AdventureInfo.updateOne(
+      { Guild: guildId, User: player.id },
+      {
+        $set: {
+          AttackRollHeight: 100,
+          DefenseModifier: 1,
+        },
+      }
+    );
+  }
+
+  return extraTurnEmbed.data;
 }
 //#endregion

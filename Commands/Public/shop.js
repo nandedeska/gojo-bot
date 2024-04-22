@@ -38,7 +38,7 @@ module.exports = {
 
     if (!inventory) {
       shopEmbed.setFooter({
-        text: "Use /buy to purchase items.\nYou have no Rocacaca Fruits.",
+        text: "Use /buy to purchase items.\nYou have 0 Rocacaca Fruits.",
       });
     } else {
       shopEmbed.setFooter({

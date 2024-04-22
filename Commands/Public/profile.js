@@ -5,6 +5,7 @@ const {
 } = require("discord.js");
 const PlayerStats = require("../../Schemas/PlayerStats");
 const PlayerStand = require("../../Schemas/StandStats");
+const { initialize } = require("../../Utility/Utility");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -23,14 +24,8 @@ module.exports = {
       User: member.id,
     });
 
-    if (!userStats) {
-      userStats = await PlayerStats.create({
-        Guild: guild.id,
-        User: member.id,
-        DuelWins: 0,
-        DuelPlays: 0,
-      });
-    }
+    if (!userStats)
+      userStats = await initialize("playerStats", member.id, guild.id);
 
     let userStand = await PlayerStand.findOne({
       Guild: guild.id,

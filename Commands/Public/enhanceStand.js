@@ -6,6 +6,7 @@ const {
 const StandStats = require("../../Schemas/StandStats");
 const PlayerInventory = require("../../Schemas/PlayerInventory");
 const PlayerBooleans = require("../../Schemas/PlayerBooleans");
+const { initialize } = require("../../Utility/Utility");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -61,10 +62,13 @@ module.exports = {
         ephemeral: true,
       });
 
-    const inventory = await PlayerInventory.findOne({
+    let inventory = await PlayerInventory.findOne({
       Guild: guild.id,
       User: member.id,
     });
+
+    if (!inventory)
+      inventory = await initialize("inventory", member.id, guild.id);
 
     if (inventory.PJCooking <= 0) {
       return interaction.reply({

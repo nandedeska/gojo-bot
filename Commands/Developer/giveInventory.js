@@ -4,6 +4,7 @@ const {
   ChatInputCommandInteraction,
 } = require("discord.js");
 const PlayerInventory = require("../../Schemas/PlayerInventory");
+const { initialize } = require("../../Utility/Utility");
 
 module.exports = {
   developer: true,
@@ -25,7 +26,8 @@ module.exports = {
           { name: "Stand Arrow", value: "arrow" },
           { name: "Stand Disc", value: "disc" },
           { name: "Rocacaca Fruit", value: "fruit" },
-          { name: "Pearl Jam's Cooking", value: "pjcooking" }
+          { name: "Pearl Jam's Cooking", value: "pjcooking" },
+          { name: "The World Shard", value: "theworldshard" }
         )
     )
     .addIntegerOption((options) =>
@@ -47,20 +49,16 @@ module.exports = {
 
     let inventory = await PlayerInventory.findOne({
       Guild: guild.id,
-      User: member.id,
+      User: targetMember.id,
     });
 
-    if (!inventory) {
-      return interaction.reply({
-        content: `${targetMember.username} doesn't have an inventory!`,
-        ephemeral: true,
-      });
-    }
+    if (!inventory) await initialize("inventory", targetMember.id, guild.id);
 
     let arrowAmount = 0;
     let discAmount = 0;
     let fruitAmount = 0;
     let pjcookingAmount = 0;
+    let theWorldShardAmount = 0;
 
     switch (item) {
       case "arrow":
@@ -79,6 +77,10 @@ module.exports = {
         pjcookingAmount = amount;
         itemName = "Pearl Jam's Cooking";
         break;
+      case "theworldshard":
+        theWorldShardAmount = amount;
+        itemName = "The World Shard";
+        break;
       default:
         return interaction.reply({
           content: "This item doesn't exist!",
@@ -94,6 +96,7 @@ module.exports = {
           StandDisc: inventory.StandDisc + discAmount,
           RocacacaFruit: inventory.RocacacaFruit + fruitAmount,
           PJCooking: inventory.PJCooking + pjcookingAmount,
+          TheWorldShard: inventory.TheWorldShard + theWorldShardAmount,
         },
       }
     );
