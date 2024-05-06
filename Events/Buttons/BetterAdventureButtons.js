@@ -661,9 +661,11 @@ async function checkHealth(buttonInteract) {
 
     if (playerFirst) {
       if (turnEmbed.data.title) embeds.push(turnEmbed);
-      if (opponentTurnEmbed.data.title) embeds.push(opponentTurnEmbed);
+      if (opponentTurnEmbed && opponentTurnEmbed.data.title)
+        embeds.push(opponentTurnEmbed);
     } else {
-      if (opponentTurnEmbed.data.title) embeds.push(opponentTurnEmbed);
+      if (opponentTurnEmbed && opponentTurnEmbed.data.title)
+        embeds.push(opponentTurnEmbed);
       if (turnEmbed.data.title) embeds.push(turnEmbed);
     }
 
