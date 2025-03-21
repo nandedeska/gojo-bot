@@ -216,9 +216,9 @@ const opponents = {
     stand: {
       Name: "The World",
       Healthpoints: 250,
-      Attack: 100,
+      Attack: 50,
       Defense: 20,
-      Speed: 100,
+      Speed: 50,
       Ability: [
         {
           name: "Time Stop",
