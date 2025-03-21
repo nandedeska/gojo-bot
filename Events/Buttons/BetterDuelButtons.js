@@ -10,7 +10,6 @@ const StandStats = require("../../Schemas/StandStats");
 const Inventory = require("../../Schemas/PlayerInventory");
 const PlayerBooleans = require("../../Schemas/PlayerBooleans");
 const Cooldowns = require("../../Schemas/Cooldowns");
-const CooldownTime = 30000;
 const PlayerStats = require("../../Schemas/PlayerStats");
 const StandAbilities = require("../../Local Storage/standAbilities");
 const DuelInfo = require("../../Schemas/DuelInfo");

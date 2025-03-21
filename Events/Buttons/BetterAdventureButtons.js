@@ -32,20 +32,27 @@ const GlitchedText = {
   NumberString: ["୧̶͚̘͕̲͐͐̌͝͝ͅ୧̷̢̧̲͓̱͐͆͒̔̿", "მ̵̧̬̜͕̰̔̈͑͛̚μ̴̧̛̩̦̬̅̿̀͜͠", "Ɛ̶̧̩̙̙̰̆̑̔̓̌ς̶͙̪̩̥̮͛̀́͝͠", "Ɩ̵̛̼̤̯̱̲͂̌̀̊მ̷̝̘͓̤̞̀̾̅̽̚", "ɘ̵̨̡̺̬̞̀̀̂̉̎Ɉ̶̢͍͉͍̝̍͋͑̿͝ǭ̷͎̠̗̘̓̉̽͘", "m̶̹̦̓̑̏̏̕i̶͊̈́̚ƨ̴͕͂̊̂́̿ƨ̸͝"],
 };
 
+// important data
 let guildId;
 let player;
 let opponent;
-let playerFirst;
-
-let currentAdventureInfo;
 let playerStand;
 let playerHp;
 let opponentStand;
 let opponentHp;
+let playerFirst;
+let standHasDied;
+let abilityInCooldown;
+let playerCooldownText;
+let opponentCooldownText;
+
+// adventureinfo
+let currentAdventureInfo;
 let attackRollHeight;
 let isConfused;
 let playerTimeStopTurns;
 
+// embeds
 let fightEmbed;
 let turnEmbed;
 let opponentTurnEmbed;
@@ -53,12 +60,6 @@ let opponentExtraTurnEmbeds;
 let quoteEmbed;
 let winEmbed;
 let rewardEmbed;
-
-let standHasDied;
-
-let abilityInCooldown;
-let playerCooldownText;
-let opponentCooldownText;
 
 module.exports = {
   name: "interactionCreate",
@@ -191,6 +192,8 @@ module.exports = {
         .setDisabled(true)
     );
     //#endregion EMBEDS & BUTTONS
+
+    DuelData = {};
     //#endregion SETUP
 
     if (!playerFirst && currentAdventureInfo && playerTimeStopTurns <= 0)
