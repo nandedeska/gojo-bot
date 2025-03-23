@@ -9,7 +9,7 @@ const {
 const AdventureInfo = require("../Schemas/AdventureInfo");
 const StandStats = require("../Schemas/StandStats");
 
-class AdventureData {
+export class AdventureData {
   guildId;
   player;
   playerStand;
@@ -80,7 +80,7 @@ class AdventureData {
   }
 }
 
-class EmbedData {
+export class EmbedData {
   fightEmbed;
   turnEmbed;
   opponentTurnEmbed;
@@ -170,4 +170,3 @@ class EmbedData {
   }
 }
 
-export { AdventureData, EmbedData };
