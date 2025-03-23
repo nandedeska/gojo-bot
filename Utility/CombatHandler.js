@@ -18,6 +18,8 @@ export class AdventureData {
   opponentStand;
   opponentHp;
 
+  savedData;
+
   attackRollHeight;
   timeStopTurns;
 
@@ -65,17 +67,17 @@ export class AdventureData {
     this.playerCooldownText = "";
     this.opponentCooldownText = "";
 
-    adventureInfo = await AdventureInfo.findOne({
+    this.savedData = await AdventureInfo.findOne({
       Guild: this.guildId,
       User: this.player.id,
     });
 
-    if (adventureInfo) {
-      this.playerHp = adventureInfo.PlayerHP;
-      this.opponentHp = adventureInfo.OpponentHP;
-      this.attackRollHeight = adventureInfo.AttackRollHeight;
-      this.isConfused = adventureInfo.IsConfused;
-      this.timeStopTurns = adventureInfo.TimeStopTurns;
+    if (this.savedData) {
+      this.playerHp = this.savedData.PlayerHP;
+      this.opponentHp = this.savedData.OpponentHP;
+      this.attackRollHeight = this.savedData.AttackRollHeight;
+      this.isConfused = this.savedData.IsConfused;
+      this.timeStopTurns = this.savedData.TimeStopTurns;
     }
   }
 }
