@@ -16,6 +16,7 @@ const CooldownTime = 30000;
 const AdventureInfo = require("../../Schemas/AdventureInfo");
 const StandAbilities = require("../../Local Storage/standAbilities");
 const AdventureOpponents = require("../../Local Storage/adventureOpponents");
+const HumanizeDuration = require("humanize-duration");
 
 module.exports = {
   name: "interactionCreate",
