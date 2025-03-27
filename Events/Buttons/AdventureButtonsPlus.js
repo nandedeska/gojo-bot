@@ -341,6 +341,13 @@ module.exports = {
       await CombatHandler.botTurn(buttonInteract, adventureData, embedData);
     }
 
+    if (adventureData.isMatchOver)
+      return CombatHandler.endAdventure(
+        buttonInteract,
+        adventureData,
+        embedData
+      );
+
     CombatHandler.updateAbilityUI(adventureData, embedData);
     CombatHandler.updateAdventureDisplay(adventureData, embedData);
 
