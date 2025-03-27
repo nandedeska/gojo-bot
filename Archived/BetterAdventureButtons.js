@@ -6,15 +6,15 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
-const StandStats = require("../../Schemas/StandStats");
-const Inventory = require("../../Schemas/PlayerInventory");
-const PlayerBooleans = require("../../Schemas/PlayerBooleans");
-const Cooldowns = require("../../Schemas/Cooldowns");
+const StandStats = require("../Schemas/StandStats");
+const Inventory = require("../Schemas/PlayerInventory");
+const PlayerBooleans = require("../Schemas/PlayerBooleans");
+const Cooldowns = require("../Schemas/Cooldowns");
 const CooldownTime = 30000;
-const PlayerStats = require("../../Schemas/PlayerStats");
-const AdventureInfo = require("../../Schemas/AdventureInfo");
-const StandAbilities = require("../../Local Storage/standAbilities");
-const AdventureOpponents = require("../../Local Storage/adventureOpponents");
+const PlayerStats = require("../Schemas/PlayerStats");
+const AdventureInfo = require("../Schemas/AdventureInfo");
+const StandAbilities = require("../Local Storage/standAbilities");
+const AdventureOpponents = require("../Local Storage/adventureOpponents");
 const GlitchedText = {
   LongString: [
     "I̶̤̕Ɉ̵͚͂'̷̩̇ƨ̵̜͘ ̶̫͝į̶͔́υ̴͙̑ƨ̴̘̋Ɉ̷̡͑ ̸͕͝ɒ̶̠̎ ̶̦̃d̴͍̉υ̸̙͊ɿ̴̻͝n̷̜͌i̴͕̊ñ̵̝ϱ̴̙͗ ̶̫̐m̶̛̙ɘ̸̬̾m̵͉͠o̶͜͝ɿ̶̑͜γ̴̸̧̜̘̰̈́̅̓̾̓ͅ",
