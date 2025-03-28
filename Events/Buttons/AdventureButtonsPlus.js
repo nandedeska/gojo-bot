@@ -265,7 +265,7 @@ module.exports = {
 
             if (adventureData.isConfused)
               embedData.turnEmbed.setTitle(generateGlitchedText("long"));
-            else turnEmbed.setTitle(abilityInfo[0]);
+            else embedData.turnEmbed.setTitle(abilityInfo[0]);
           } else {
             if (adventureData.isConfused)
               embedData.turnEmbed.setTitle(generateGlitchedText("long"));

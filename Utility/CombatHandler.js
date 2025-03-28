@@ -361,7 +361,7 @@ async function botTurn(buttonInteract, adventureData, embedData) {
     // increment ability count
     for (let i = 0; i < opponentStand.Ability.length; i++) {
       try {
-        abilityCounts[i] = embedData.savedData.OpponentAbilityCount[i] + 1;
+        abilityCounts[i] = adventureData.savedData.OpponentAbilityCount[i] + 1;
       } catch (err) {
         console.log(err);
       }
