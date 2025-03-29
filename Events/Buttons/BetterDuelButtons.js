@@ -623,8 +623,8 @@ async function checkHealth(buttonInteract) {
 
     // handle rewards
     if (Math.random() >= 0.5) {
-      rewardEmbed.setTitle(`${challenged.username} found a loot crate!`);
-      await giveRewards(challenged, guildId, rewardEmbed);
+      rewardEmbed.setTitle(`${challenger.username} found a loot crate!`);
+      await giveRewards(challenger, guildId, rewardEmbed);
       return await reply(
         buttonInteract,
         [turnEmbed, winEmbed, rewardEmbed],
