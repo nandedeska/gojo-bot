@@ -34,7 +34,8 @@ module.exports = {
 
     var plr = await client.users.cache.get(splitText[3]);
 
-    let adventureData = await AdventureData.new(
+    let adventureData = new AdventureData();
+    await adventureData.init(
       guildId,
       plr,
       AdventureOpponents.opponents[splitText[4]]
@@ -42,7 +43,8 @@ module.exports = {
 
     adventureData.playerWinState = "ONGOING";
 
-    let embedData = await EmbedData.new(adventureData);
+    let embedData = new EmbedData();
+    await embedData.init(adventureData);
 
     if (
       !adventureData.isPlayerFirst &&

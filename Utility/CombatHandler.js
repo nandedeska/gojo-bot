@@ -39,12 +39,6 @@ class AdventureData {
 
   constructor() {}
 
-  static async new(guildId, player, opponent) {
-    const data = new AdventureData();
-    await data.init(guildId, player, opponent);
-    return data;
-  }
-
   async init(guildId, player, opponent) {
     this.guildId = guildId;
 
@@ -101,12 +95,6 @@ class EmbedData {
   abilityButtons;
 
   constructor() {}
-
-  static async new(adventureData) {
-    const data = new EmbedData();
-    await data.init(adventureData);
-    return data;
-  }
 
   async init(adventureData) {
     let guildId = adventureData.guildId;
