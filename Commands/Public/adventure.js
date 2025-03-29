@@ -178,7 +178,7 @@ module.exports = {
     //    opponents[opponentPool[Math.floor(Math.random() * opponentPool.length)]];
 
     // default canon
-    opponent =
+    let opponent =
       opponents[canonPool[Math.floor(Math.random() * canonPool.length)]];
 
     const gamemode = options.getString("gamemode");
