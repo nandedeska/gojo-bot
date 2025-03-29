@@ -32,6 +32,9 @@ module.exports = {
     if (splitText[0] !== "Adventure") return;
     let guildId = splitText[2];
 
+    if (buttonInteract.user.id !== splitText[3])
+      return await buttonInteract.deferUpdate().catch(console.error);
+
     var plr = await client.users.cache.get(splitText[3]);
 
     let adventureData = new AdventureData();
