@@ -157,11 +157,14 @@ module.exports = {
         var attackRoll =
           Math.floor(Math.random() * adventureData.attackRollHeight) + 1;
 
-        var currentDefenseModifier;
-        try {
+        var currentDefenseModifier = 1;
+
+        if (adventureData.savedData) {
+          adventureData.savedData = await AdventureInfo.findOne({
+            Guild: adventureData.guildId,
+            User: adventureData.player.id,
+          });
           currentDefenseModifier = adventureData.savedData.DefenseModifier;
-        } catch (err) {
-          currentDefenseModifier = 1;
         }
 
         if (attackRoll >= opponentStand.Defense * currentDefenseModifier) {
@@ -249,9 +252,22 @@ module.exports = {
           embedData.turnEmbed.setTitle(abilityInfo[0]);
         } else if (damage > 0) {
           // attack based ability
+          var defenseMod = 1;
+
+          if (adventureData.savedData) {
+            adventureData.savedData = await AdventureInfo.findOne({
+              Guild: adventureData.guildId,
+              User: adventureData.player.id,
+            });
+            defenseMod = adventureData.savedData.DefenseModifier;
+          }
+
           var attackRoll =
             Math.floor(Math.random() * adventureData.attackRollHeight) + 1;
-          if (attackRoll >= opponentStand.Defense * currentDefenseModifier) {
+          if (
+            attackRoll >=
+            opponentStand.Defense * defenseMod * currentDefenseModifier
+          ) {
             var damage = abilityInfo[1];
 
             adventureData.opponentHp -= damage;

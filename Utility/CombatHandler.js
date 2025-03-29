@@ -218,8 +218,13 @@ async function botTurn(buttonInteract, adventureData, embedData) {
         }
         // ATTACK-BASED ABILITY
         else if (damage > 0) {
-          if (adventureData.savedData)
+          if (adventureData.savedData) {
+            adventureData.savedData = await AdventureInfo.findOne({
+              Guild: adventureData.guildId,
+              User: adventureData.player.id,
+            });
             defenseMod = adventureData.savedData.DefenseModifier;
+          }
 
           var attackRoll =
             Math.floor(Math.random() * adventureData.attackRollHeight) + 1;
@@ -296,10 +301,12 @@ async function botTurn(buttonInteract, adventureData, embedData) {
         Math.floor(Math.random() * adventureData.attackRollHeight) + 1;
       var currentDefenseModifier = 1;
 
-      try {
+      if (adventureData.savedData) {
+        adventureData.savedData = await AdventureInfo.findOne({
+          Guild: adventureData.guildId,
+          User: adventureData.player.id,
+        });
         currentDefenseModifier = adventureData.savedData.DefenseModifier;
-      } catch (err) {
-        currentDefenseModifier = 1;
       }
 
       if (attackRoll >= playerStand.Defense * currentDefenseModifier) {
@@ -408,8 +415,14 @@ async function botTimeStopTurn(adventureData) {
         } else if (damage > 0) {
           // ATTACK BASED ABILITY
           var defenseMod = 1;
-          if (adventureData.savedData)
+          if (adventureData.savedData) {
+            adventureData.savedData = await AdventureInfo.findOne({
+              Guild: adventureData.guildId,
+              User: adventureData.player.id,
+            });
             defenseMod = adventureData.savedData.DefenseModifier;
+          }
+
           if (defenseMod < 100) {
             var damage = abilityInfo[1];
 
@@ -458,10 +471,13 @@ async function botTimeStopTurn(adventureData) {
 
     if (!hasUsedAbility) {
       var currentDefenseModifier = 1;
-      try {
+
+      if (adventureData.savedData) {
+        adventureData.savedData = await AdventureInfo.findOne({
+          Guild: adventureData.guildId,
+          User: adventureData.player.id,
+        });
         currentDefenseModifier = adventureData.savedData.DefenseModifier;
-      } catch (err) {
-        currentDefenseModifier = 1;
       }
 
       if (currentDefenseModifier < 100) {
