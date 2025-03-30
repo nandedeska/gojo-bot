@@ -614,7 +614,7 @@ async function checkHealth(buttonInteract) {
 
     return await reply(buttonInteract, [fightEmbed], []);
   } else if (challengerHp <= 0) {
-    // challenger won
+    // challenged won
     winEmbed.setTitle(`${challenged.username} won the duel!`);
 
     await endDuel(challenged, challenger);
@@ -623,8 +623,8 @@ async function checkHealth(buttonInteract) {
 
     // handle rewards
     if (Math.random() >= 0.5) {
-      rewardEmbed.setTitle(`${challenger.username} found a loot crate!`);
-      await giveRewards(challenger, guildId, rewardEmbed);
+      rewardEmbed.setTitle(`${challenged.username} found a loot crate!`);
+      await giveRewards(challenged, guildId, rewardEmbed);
       return await reply(
         buttonInteract,
         [turnEmbed, winEmbed, rewardEmbed],
@@ -634,7 +634,7 @@ async function checkHealth(buttonInteract) {
 
     return await reply(buttonInteract, [turnEmbed, winEmbed, rewardEmbed], []);
   } else if (challengedHp <= 0) {
-    // challenged won
+    // challenger won
     winEmbed.setTitle(`${challenger.username} won the duel!`);
 
     await endDuel(challenger, challenged);
@@ -643,8 +643,8 @@ async function checkHealth(buttonInteract) {
 
     // handle rewards
     if (Math.random() >= 0.5) {
-      rewardEmbed.setTitle(`${challenged.username} found a loot crate!`);
-      await giveRewards(challenged, guildId, rewardEmbed);
+      rewardEmbed.setTitle(`${challenger.username} found a loot crate!`);
+      await giveRewards(challenger, guildId, rewardEmbed);
       return await reply(
         buttonInteract,
         [turnEmbed, winEmbed, rewardEmbed],
