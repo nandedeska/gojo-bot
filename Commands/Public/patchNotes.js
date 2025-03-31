@@ -2,6 +2,9 @@ const {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
   EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
 } = require("discord.js");
 let version = "1.0.0";
 const patchNotes = {
@@ -25,6 +28,7 @@ const patchNotes = {
 };
 
 module.exports = {
+  patchNotes,
   data: new SlashCommandBuilder()
     .setName("patchnotes")
     .setDescription("Shows the latest patch notes.")
@@ -51,11 +55,24 @@ module.exports = {
     update = patchNotes[version];
 
     const patchNotesEmbed = new EmbedBuilder()
-      .setAuthor({ name: `v${version} PATCH NOTES` })
-      .setTitle(update.name)
+      .setAuthor({ name: `PATCH NOTES` })
+      .setTitle(`v${version}`)
       .setDescription(update.notes)
       .setColor("#FFFFFF");
 
-    interaction.reply({ embeds: [patchNotesEmbed] });
+    await interaction.reply({ embeds: [patchNotesEmbed], fetchReply: true });
+
+    const arrowButtons = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("⬅️")
+        .setCustomId(`Patch-Left`)
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setLabel("➡️")
+        .setCustomId(`Patch-Right`)
+        .setStyle(ButtonStyle.Secondary)
+    );
+
+    await interaction.editReply({ components: [arrowButtons] });
   },
 };
