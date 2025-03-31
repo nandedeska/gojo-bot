@@ -20,13 +20,24 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("patchnotes")
     .setDescription("Shows the latest patch notes.")
-    .setDMPermission(false),
+    .setDMPermission(false)
+    .addStringOption((options) =>
+      options.setName("version").setDescription("Select version to view.")
+    ),
   /**
    *
    * @param {ChatInputCommandInteraction} interaction
    */
   async execute(interaction) {
-    const { guild, member } = interaction;
+    const { guild, member, options } = interaction;
+
+    console.log(options.getString("version"));
+
+    if (!(options.getString("version") in patchNotes))
+      return interaction.reply({
+        content: "Version not found.",
+        ephemeral: true,
+      });
 
     update = patchNotes[version];
 
