@@ -3,14 +3,22 @@ const {
   ChatInputCommandInteraction,
   EmbedBuilder,
 } = require("discord.js");
-const version = "1.0";
+let version = "1.0.0";
 const patchNotes = {
-  "1.0": {
-    name: "The DIO Update",
+  "1.0.1": {
     notes:
+      "Nerfed DIO (ATK 100 >> 50 SPD 100 >> 50)\n" +
+      "Updated /patchnotes: version selection and cycling\n" +
+      "Fixed /adventure syncing bug\n" +
+      "Fixed dodge code in /adventure\n" +
+      "Bug fixes",
+  },
+  "1.0.0": {
+    notes:
+      "**THE DIO UPDATE**\n" +
       "Added DIO to adventure mode\n" +
       'Added "The World Shards"\n' +
-      "Added infuse ability\n" +
+      "Added /infuseability\n" +
       "Players can now have more than one ability\n" +
       "Bug fixes",
   },
@@ -31,9 +39,10 @@ module.exports = {
   async execute(interaction) {
     const { guild, member, options } = interaction;
 
-    console.log(options.getString("version"));
+    if (options.getString("version") != null)
+      version = options.getString("version");
 
-    if (!(options.getString("version") in patchNotes))
+    if (!(version in patchNotes))
       return interaction.reply({
         content: "Version not found.",
         ephemeral: true,
