@@ -162,6 +162,9 @@ class DuelData {
       this.attackRollHeight = this.savedData.AttackRollHeight;
       this.timeStopTurns = this.savedData.TimeStopTurns;
     }
+
+    this.challengerCooldownText = "";
+    this.challengedCooldownText = "";
   }
 }
 
