@@ -316,11 +316,11 @@ async function botTurn(buttonInteract, adventureData, embedData) {
   const rand = Math.random();
   embedData.opponentTurnEmbed = new EmbedBuilder().setColor("#D31A38");
 
-  guildId = adventureData.guildId;
-  player = adventureData.player;
-  playerStand = adventureData.playerStand;
-  opponent = adventureData.opponent;
-  opponentStand = adventureData.opponentStand;
+  let guildId = adventureData.guildId;
+  let player = adventureData.player;
+  let playerStand = adventureData.playerStand;
+  let opponent = adventureData.opponent;
+  let opponentStand = adventureData.opponentStand;
 
   let abilityCounts;
   if (adventureData.savedData)
@@ -338,12 +338,12 @@ async function botTurn(buttonInteract, adventureData, embedData) {
           ability
         );
 
-        var damage = abilityInfo[1];
-        var healAmount = abilityInfo[2];
-        var nextDefenseModifier = abilityInfo[3];
-        var currentDefenseModifier = abilityInfo[4];
+        let damage = abilityInfo[1];
+        let healAmount = abilityInfo[2];
+        let nextDefenseModifier = abilityInfo[3];
+        let currentDefenseModifier = abilityInfo[4];
         adventureData.isConfused = abilityInfo[5];
-        var timeStopTurns = abilityInfo[6];
+        let timeStopTurns = abilityInfo[6];
 
         // TIME STOP ABILITY
         if (timeStopTurns > 0) {
@@ -364,15 +364,16 @@ async function botTurn(buttonInteract, adventureData, embedData) {
         }
         // ATTACK-BASED ABILITY
         else if (damage > 0) {
+          let defenseMod = 1;
           if (adventureData.savedData) {
             adventureData.savedData = await AdventureInfo.findOne({
-              Guild: adventureData.guildId,
-              User: adventureData.player.id,
+              Guild: guildId,
+              User: player.id,
             });
             defenseMod = adventureData.savedData.DefenseModifier;
           }
 
-          var attackRoll =
+          let attackRoll =
             Math.floor(Math.random() * adventureData.attackRollHeight) + 1;
 
           if (
@@ -443,20 +444,20 @@ async function botTurn(buttonInteract, adventureData, embedData) {
     }
 
     if (!hasUsedAbility) {
-      var attackRoll =
+      let attackRoll =
         Math.floor(Math.random() * adventureData.attackRollHeight) + 1;
-      var currentDefenseModifier = 1;
+      let currentDefenseModifier = 1;
 
       if (adventureData.savedData) {
         adventureData.savedData = await AdventureInfo.findOne({
-          Guild: adventureData.guildId,
-          User: adventureData.player.id,
+          Guild: guildId,
+          User: player.id,
         });
         currentDefenseModifier = adventureData.savedData.DefenseModifier;
       }
 
       if (attackRoll >= playerStand.Defense * currentDefenseModifier) {
-        var damage = Math.floor(Math.random() * opponentStand.Attack) + 1;
+        let damage = Math.floor(Math.random() * opponentStand.Attack) + 1;
         if (adventureData.isConfused)
           embedData.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
         else
@@ -522,16 +523,16 @@ async function botTimeStopTurn(adventureData) {
   const rand = Math.random();
   let abilityCounts;
 
-  guildId = adventureData.guildId;
-  player = adventureData.player;
-  playerStand = adventureData.playerStand;
-  opponent = adventureData.opponent;
-  opponentStand = adventureData.opponentStand;
+  let guildId = adventureData.guildId;
+  let player = adventureData.player;
+  let playerStand = adventureData.playerStand;
+  let opponent = adventureData.opponent;
+  let opponentStand = adventureData.opponentStand;
 
   if (adventureData.savedData)
     abilityCounts = adventureData.savedData.OpponentAbilityCount;
 
-  var extraTurnEmbed = new EmbedBuilder().setColor("#D31A38");
+  let extraTurnEmbed = new EmbedBuilder().setColor("#D31A38");
   if (rand < 0.95) {
     // Attack or ability
     let hasUsedAbility = false;
@@ -548,19 +549,19 @@ async function botTimeStopTurn(adventureData) {
           ability
         );
 
-        var damage = abilityInfo[1];
-        var healAmount = abilityInfo[2];
-        var nextDefenseModifier = abilityInfo[3];
-        var currentDefenseModifier = abilityInfo[4];
+        let damage = abilityInfo[1];
+        let healAmount = abilityInfo[2];
+        let nextDefenseModifier = abilityInfo[3];
+        let currentDefenseModifier = abilityInfo[4];
         adventureData.isConfused = abilityInfo[5];
-        var timeStopTurns = abilityInfo[6];
+        let timeStopTurns = abilityInfo[6];
 
         if (timeStopTurns > 0) {
           // TIME STOP
           extraTurnEmbed.setTitle(abilityInfo[0]);
         } else if (damage > 0) {
           // ATTACK BASED ABILITY
-          var defenseMod = 1;
+          let defenseMod = 1;
           if (adventureData.savedData) {
             adventureData.savedData = await AdventureInfo.findOne({
               Guild: adventureData.guildId,
@@ -570,7 +571,7 @@ async function botTimeStopTurn(adventureData) {
           }
 
           if (defenseMod < 100) {
-            var damage = abilityInfo[1];
+            let damage = abilityInfo[1];
 
             adventureData.playerHp -= damage;
             if (healAmount > 0) {
@@ -616,7 +617,7 @@ async function botTimeStopTurn(adventureData) {
     }
 
     if (!hasUsedAbility) {
-      var currentDefenseModifier = 1;
+      let currentDefenseModifier = 1;
 
       if (adventureData.savedData) {
         adventureData.savedData = await AdventureInfo.findOne({
@@ -627,7 +628,7 @@ async function botTimeStopTurn(adventureData) {
       }
 
       if (currentDefenseModifier < 100) {
-        var damage = Math.floor(Math.random() * opponentStand.Attack) + 1;
+        let damage = Math.floor(Math.random() * opponentStand.Attack) + 1;
         if (adventureData.isConfused)
           extraTurnEmbed.setTitle(generateGlitchedText("long"));
         else
