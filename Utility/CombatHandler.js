@@ -349,7 +349,7 @@ async function botTurn(buttonInteract, adventureData, embedData) {
         if (timeStopTurns > 0) {
           // time stop ability
           abilityCounts[i] = 0;
-          await updateSchema(AdventureInfo, adventureData, {
+          await updateAdventureSchema(AdventureInfo, adventureData, {
             AttackRollHeight: 100,
             OpponentAbilityCount: abilityCounts,
             DefenseModifier: nextDefenseModifier,
@@ -428,7 +428,7 @@ async function botTurn(buttonInteract, adventureData, embedData) {
         }
 
         // Update saved data
-        await updateSchema(AdventureInfo, adventureData, {
+        await updateAdventureSchema(AdventureInfo, adventureData, {
           AttackRollHeight: 100,
           OpponentAbilityCount: abilityCounts,
           DefenseModifier: nextDefenseModifier,
@@ -483,7 +483,7 @@ async function botTurn(buttonInteract, adventureData, embedData) {
         }
       }
 
-      await updateSchema(AdventureInfo, adventureData, {
+      await updateAdventureSchema(AdventureInfo, adventureData, {
         AttackRollHeight: 100,
         OpponentAbilityCount: abilityCounts,
         DefenseModifier: 1,
@@ -509,7 +509,7 @@ async function botTurn(buttonInteract, adventureData, embedData) {
       }
     }
 
-    await updateSchema(AdventureInfo, adventureData, {
+    await updateAdventureSchema(AdventureInfo, adventureData, {
       AttackRollHeight: 75,
       OpponentAbilityCount: abilityCounts,
       DefenseModifier: 1,
@@ -606,7 +606,7 @@ async function botTimeStopTurn(adventureData) {
         // Reset ability count
         abilityCounts[i] = 0;
 
-        await updateSchema(AdventureInfo, adventureData, {
+        await updateAdventureSchema(AdventureInfo, adventureData, {
           AttackRollHeight: 100,
           OpponentAbilityCount: abilityCounts,
           DefenseModifier: nextDefenseModifier,
@@ -643,7 +643,7 @@ async function botTimeStopTurn(adventureData) {
         else extraTurnEmbed.setTitle(`${opponentStand.Name} missed!`);
       }
 
-      await updateSchema(AdventureInfo, adventureData, {
+      await updateAdventureSchema(AdventureInfo, adventureData, {
         AttackRollHeight: 100,
         DefenseModifier: 1,
       });
@@ -654,7 +654,7 @@ async function botTimeStopTurn(adventureData) {
       extraTurnEmbed.setTitle(generateGlitchedText("long"));
     else extraTurnEmbed.setTitle(`${opponentStand.Name} prepares to dodge!`);
 
-    await updateSchema(AdventureInfo, adventureData, {
+    await updateAdventureSchema(AdventureInfo, adventureData, {
       AttackRollHeight: 75,
       DefenseModifier: 1,
     });
@@ -663,7 +663,7 @@ async function botTimeStopTurn(adventureData) {
   return extraTurnEmbed.data;
 }
 
-async function updateSchema(schema, adventureData, data) {
+async function updateAdventureSchema(schema, adventureData, data) {
   await schema.updateOne(
     {
       Guild: adventureData.guildId,
@@ -850,7 +850,9 @@ async function endAdventure(buttonInteract, adventureData, embedData) {
   await clearAdventureInfo(buttonInteract, adventureData);
 
   // Set IsAdventuring to false
-  await updateSchema(PlayerBooleans, adventureData, { IsAdventuring: false });
+  await updateAdventureSchema(PlayerBooleans, adventureData, {
+    IsAdventuring: false,
+  });
 
   // Set adventure cooldown
   await Cooldowns.create({
@@ -877,12 +879,12 @@ async function endAdventure(buttonInteract, adventureData, embedData) {
   }
 
   if (adventureData.playerWinState == "WIN")
-    await updateSchema(PlayerStats, adventureData, {
+    await updateAdventureSchema(PlayerStats, adventureData, {
       AdventureWins: playerStats.AdventureWins + 1,
       AdventurePlays: playerStats.AdventurePlays + 1,
     });
   else
-    await updateSchema(PlayerStats, adventureData, {
+    await updateAdventureSchema(PlayerStats, adventureData, {
       AdventurePlays: playerStats.AdventurePlays + 1,
     });
 
@@ -976,7 +978,7 @@ async function giveRewards(adventureData, embedData) {
     User: adventureData.player.id,
   });
 
-  await updateSchema(Inventory, adventureData, {
+  await updateAdventureSchema(Inventory, adventureData, {
     StandArrow: playerInventory.StandArrow + arrowAmount,
     StandDisc: playerInventory.StandDisc + discAmount,
     RocacacaFruit: playerInventory.RocacacaFruit + fruitAmount,
@@ -1000,7 +1002,7 @@ module.exports = {
   EmbedData,
   reply,
   botTurn,
-  updateSchema,
+  updateAdventureSchema,
   checkStandDeath,
   updateAdventureDisplay,
   updateAbilityUI,

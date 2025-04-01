@@ -146,9 +146,13 @@ module.exports = {
         });
 
         // update booleans
-        await CombatHandler.updateSchema(PlayerBooleans, adventureData, {
-          IsAdventuring: false,
-        });
+        await CombatHandler.updateAdventureSchema(
+          PlayerBooleans,
+          adventureData,
+          {
+            IsAdventuring: false,
+          }
+        );
 
         await buttonInteract.deferUpdate();
         return await buttonInteract.editReply({
@@ -196,12 +200,16 @@ module.exports = {
           }
         }
 
-        await CombatHandler.updateSchema(AdventureInfo, adventureData, {
-          AttackRollHeight: 100,
-          PlayerAbilityCount: abilityCounts,
-          DefenseModifier: 1,
-          TimeStopTurns: adventureData.timeStopTurns - 1,
-        });
+        await CombatHandler.updateAdventureSchema(
+          AdventureInfo,
+          adventureData,
+          {
+            AttackRollHeight: 100,
+            PlayerAbilityCount: abilityCounts,
+            DefenseModifier: 1,
+            TimeStopTurns: adventureData.timeStopTurns - 1,
+          }
+        );
 
         await CombatHandler.checkStandDeath(adventureData);
         break;
@@ -223,12 +231,16 @@ module.exports = {
           }
         }
 
-        await CombatHandler.updateSchema(AdventureInfo, adventureData, {
-          AttackRollHeight: 75,
-          PlayerAbilityCount: abilityCounts,
-          DefenseModifier: 1,
-          TimeStopTurns: adventureData.timeStopTurns - 1,
-        });
+        await CombatHandler.updateAdventureSchema(
+          AdventureInfo,
+          adventureData,
+          {
+            AttackRollHeight: 75,
+            PlayerAbilityCount: abilityCounts,
+            DefenseModifier: 1,
+            TimeStopTurns: adventureData.timeStopTurns - 1,
+          }
+        );
 
         await CombatHandler.checkStandDeath(adventureData);
         break;
@@ -320,18 +332,26 @@ module.exports = {
         // update duel data
         // check if player used time stop ability
         if (timeStopTurns > 0)
-          await CombatHandler.updateSchema(AdventureInfo, adventureData, {
-            AttackRollHeight: 100,
-            PlayerAbilityCount: abilityCounts,
-            DefenseModifier: currentDefenseModifier,
-          });
+          await CombatHandler.updateAdventureSchema(
+            AdventureInfo,
+            adventureData,
+            {
+              AttackRollHeight: 100,
+              PlayerAbilityCount: abilityCounts,
+              DefenseModifier: currentDefenseModifier,
+            }
+          );
         else
-          await CombatHandler.updateSchema(AdventureInfo, adventureData, {
-            AttackRollHeight: 100,
-            PlayerAbilityCount: abilityCounts,
-            DefenseModifier: currentDefenseModifier,
-            TimeStopTurns: adventureData.timeStopTurns - 1,
-          });
+          await CombatHandler.updateAdventureSchema(
+            AdventureInfo,
+            adventureData,
+            {
+              AttackRollHeight: 100,
+              PlayerAbilityCount: abilityCounts,
+              DefenseModifier: currentDefenseModifier,
+              TimeStopTurns: adventureData.timeStopTurns - 1,
+            }
+          );
 
         await CombatHandler.checkStandDeath(adventureData);
         break;
@@ -402,7 +422,7 @@ module.exports = {
         TimeStopTurns: 0,
       });
     } else {
-      await CombatHandler.updateSchema(AdventureInfo, adventureData, {
+      await CombatHandler.updateAdventureSchema(AdventureInfo, adventureData, {
         PlayerHP: adventureData.playerHp,
         OpponentHP: adventureData.opponentHp,
         IsConfused: adventureData.isConfused,
