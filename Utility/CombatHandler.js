@@ -98,6 +98,33 @@ class AdventureData {
   }
 }
 
+class DuelData {
+  guildId;
+  challenger;
+  challengerStand;
+  challengerHp;
+  challenged;
+  challengedStand;
+  challengedHp;
+
+  currentPlayer;
+  currentStand;
+  otherPlayer;
+  otherStand;
+
+  savedData;
+
+  attackRollHeight;
+  timeStopTurns;
+
+  isMatchOver;
+  areAbilitiesInCooldown;
+  isConfused;
+
+  challengerCooldownText;
+  challengedCooldownText;
+}
+
 class EmbedData {
   fightEmbed;
   turnEmbed;
