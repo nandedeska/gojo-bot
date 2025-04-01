@@ -892,6 +892,7 @@ async function giveRewards(adventureData, embedData) {
 
 module.exports = {
   AdventureData,
+  DuelData,
   EmbedData,
   reply,
   botTurn,

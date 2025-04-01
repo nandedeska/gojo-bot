@@ -6,6 +6,7 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
+const { DuelData, EmbedData } = require("../../Utility/CombatHandler");
 const StandStats = require("../../Schemas/StandStats");
 const Inventory = require("../../Schemas/PlayerInventory");
 const PlayerBooleans = require("../../Schemas/PlayerBooleans");
