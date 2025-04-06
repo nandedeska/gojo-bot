@@ -99,7 +99,7 @@ class AdventureData {
   }
 }
 
-class DuelData {
+class DuelManager {
   guildId;
   challenger;
   challengerStand;
@@ -122,12 +122,23 @@ class DuelData {
   areAbilitiesInCooldown;
   isConfused;
 
+  playerWinState;
+
   challengerCooldownText;
   challengedCooldownText;
 
+  fightEmbed;
+  turnEmbed;
+  winEmbed;
+  rewardEmbed;
+
+  duelButtons;
+  abilityButtons;
+
   constructor() {}
 
-  async init(guildId, challenger, challenged) {
+  async init(guildId, challenger, challenged, client) {
+    this.client = client;
     this.guildId = guildId;
     this.challenger = challenger;
     this.challenged = challenged;
@@ -147,24 +158,388 @@ class DuelData {
       User: this.challenged.id,
     });
 
-    this.challengerHp = challengerStand.Healthpoints;
-    this.challengedHp = challengedStand.Healthpoints;
+    this.challengerHp = this.challengerStand.Healthpoints;
+    this.challengedHp = this.challengedStand.Healthpoints;
     this.timeStopTurns = 0;
     this.attackRollHeight = 100;
     this.isMatchOver = false;
     this.isConfused = false;
 
     if (this.savedData) {
-      this.currentPlayer = this.savedData.CurrentPlayer;
-      this.otherPlayer = this.savedData.OtherPlayer;
+      this.currentPlayer = await client.users.cache.get(
+        this.savedData.CurrentPlayer
+      );
+      this.otherPlayer = await client.users.cache.get(
+        this.savedData.OtherPlayer
+      );
       this.challengerHp = this.savedData.ChallengerHP;
       this.challengedHp = this.savedData.ChallengedHP;
       this.attackRollHeight = this.savedData.AttackRollHeight;
       this.timeStopTurns = this.savedData.TimeStopTurns;
     }
 
+    this.playerWinState = "ONGOING";
+
     this.challengerCooldownText = "";
     this.challengedCooldownText = "";
+
+    this.fightEmbed = new EmbedBuilder()
+      .setAuthor({
+        name: `DUEL: ${this.challenger.username} vs ${this.challenged.username}`,
+      })
+      .setColor("#D31A38")
+      .setImage(
+        "https://cdn.discordapp.com/attachments/562958339034841098/1088740524342640700/image.png"
+      );
+
+    this.turnEmbed = new EmbedBuilder().setColor("#D31A38");
+
+    this.winEmbed = new EmbedBuilder()
+      .setColor("#D31A38")
+      .setImage(
+        "https://cdn.discordapp.com/attachments/675612229676040192/1089139526624084040/image.png"
+      );
+
+    this.rewardEmbed = new EmbedBuilder()
+      .setColor("#FFDF00")
+      .setAuthor({ name: "LOOT CRATE" })
+      .setImage(
+        "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5851f423-3ac3-4eef-88d5-2be0fc69382b/de3ayma-b38313b3-a404-4604-91e9-c7b9908f8ad1.png/v1/fill/w_1600,h_900,q_80,strp/jojo_stand_arrow_heads_by_mdwyer5_de3ayma-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9OTAwIiwicGF0aCI6IlwvZlwvNTg1MWY0MjMtM2FjMy00ZWVmLTg4ZDUtMmJlMGZjNjkzODJiXC9kZTNheW1hLWIzODMxM2IzLWE0MDQtNDYwNC05MWU5LWM3Yjk5MDhmOGFkMS5wbmciLCJ3aWR0aCI6Ijw9MTYwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.y66dqY4BgvgJUSz2mCTRTKXmvoI5yxtf9yGNV349Ls0"
+      )
+      .setDescription("CONTACT DEVELOPER: REWARD EMBED ERROR");
+
+    this.duelButtons = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("Attack")
+        .setCustomId(
+          `Duel-Attack-${this.guildId}-${this.challenger.id}-${this.challenged.id}`
+        )
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setLabel("Dodge")
+        .setCustomId(
+          `Duel-Dodge-${this.guildId}-${this.challenger.id}-${this.challenged.id}`
+        )
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setLabel("Surrender")
+        .setCustomId(
+          `Duel-Surrender-${this.guildId}-${this.challenger.id}-${this.challenged.id}`
+        )
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    this.abilityButtons = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("Ability")
+        .setCustomId("Dummy")
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(true)
+    );
+  }
+
+  async updateSchema(schema, data, updateSave = false, player = null) {
+    if (updateSave)
+      await schema.updateOne(
+        {
+          Guild: this.guildId,
+          Challenger: this.challenger.id,
+          Challenged: this.challenged.id,
+        },
+        { $set: data }
+      );
+    else
+      await schema.updateOne(
+        {
+          Guild: this.guildId,
+          User: player.id,
+        },
+        { $set: data }
+      );
+  }
+
+  checkStandDeath() {
+    if (this.challengerHp <= 0 && this.challengedHp <= 0) {
+      this.playerWinState = "DRAW";
+      this.isMatchOver = true;
+    }
+    // PLAYER WON
+    else if (this.challengerHp <= 0) {
+      this.playerWinState = "CHALLENGED";
+      this.isMatchOver = true;
+    }
+    // OPPONENT WON
+    else if (this.challengedHp <= 0) {
+      this.playerWinState = "CHALLENGER";
+      this.isMatchOver = true;
+    }
+  }
+
+  updateDisplay() {
+    if (this.savedData) {
+      for (let i = 0; i < this.challengerStand.Ability.length; i++) {
+        this.challengerCooldownText += setCooldownText(
+          this.challengerStand,
+          i,
+          this.savedData.ChallengerAbilityCount
+        );
+      }
+
+      for (let i = 0; i < this.challengedStand.Ability.length; i++) {
+        this.challengedCooldownText += setCooldownText(
+          this.challengedStand,
+          i,
+          this.savedData.ChallengedAbilityCount
+        );
+      }
+    }
+
+    this.fightEmbed.addFields(
+      {
+        name: `${this.challengerStand.Name}`,
+        value: `Healthpoints: ${Math.max(this.challengerHp, 0)} / ${
+          this.challengerStand.Healthpoints
+        }${this.challengerCooldownText}`,
+      },
+      {
+        name: `${this.challengedStand.Name}`,
+        value: `Healthpoints: ${Math.max(this.challengedHp, 0)} / ${
+          this.challengedStand.Healthpoints
+        }${this.challengedCooldownText}`,
+      }
+    );
+  }
+
+  updateAbilityUI() {
+    let buttons = [];
+
+    let stand = this.currentStand;
+    let abilityCount = [];
+
+    if (this.savedData)
+      abilityCount =
+        this.currentStand == this.challengerStand
+          ? this.savedData.ChallengerAbilityCount
+          : this.savedData.ChallengedAbilityCount;
+
+    for (let i = 0; i < stand.Ability.length; i++) {
+      if (this.savedData) {
+        if (abilityCount[i] < stand.Ability[i].cooldown)
+          this.areAbilitiesInCooldown[i] = true;
+        else this.areAbilitiesInCooldown[i] = false;
+      }
+
+      let abilityButton = new ButtonBuilder()
+        .setLabel(`Ability ${i + 1}`)
+        .setCustomId(
+          `Duel-Ability-${this.guildId}-${this.challenger.id}-${this.challenged.id}-${i}`
+        )
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(this.areAbilitiesInCooldown[i]);
+
+      buttons.push(abilityButton);
+    }
+
+    this.abilityButtons.setComponents(buttons);
+  }
+
+  async giveRewards() {
+    let arrowAmount;
+    let discAmount;
+    let fruitAmount;
+
+    arrowAmount = 1;
+    discAmount = Math.floor(Math.random() * 40);
+    fruitAmount = Math.floor(Math.random() * 100);
+    let sum = arrowAmount + discAmount + fruitAmount;
+
+    console.log(`${arrowAmount}-${discAmount}-${fruitAmount}`);
+
+    arrowAmount = Math.round((arrowAmount / sum) * 8);
+    discAmount = Math.round((discAmount / sum) * 8);
+    fruitAmount = Math.round((fruitAmount / sum) * 8);
+
+    let plr =
+      this.playerWinState == "CHALLENGER" ? this.challenger : this.challenged;
+
+    let playerInventory = await Inventory.findOne({
+      Guild: this.guildId,
+      User: plr.id,
+    });
+
+    await this.updateSchema(
+      Inventory,
+      {
+        StandArrow: playerInventory.StandArrow + arrowAmount,
+        StandDisc: playerInventory.StandDisc + discAmount,
+        RocacacaFruit: playerInventory.RocacacaFruit + fruitAmount,
+      },
+      plr
+    );
+
+    let rewardText = "";
+
+    if (arrowAmount > 0) rewardText += `${arrowAmount}x Stand Arrow\n`;
+    if (discAmount > 0) rewardText += `${discAmount}x Stand Disc\n`;
+    if (fruitAmount > 0) rewardText += `${fruitAmount}x Rocacaca Fruit\n`;
+
+    this.rewardEmbed.data.description = rewardText;
+  }
+
+  async clearDuelInfo() {
+    await DuelInfo.findOneAndDelete({
+      Guild: this.guildId,
+      Challenger: this.challenger.id,
+      Challenged: this.challenged.id,
+    });
+  }
+
+  async endDuel(buttonInteract) {
+    await this.clearDuelInfo();
+
+    await this.updateSchema(
+      PlayerBooleans,
+      { IsDueling: false },
+      false,
+      this.challenger
+    );
+    await this.updateSchema(
+      PlayerBooleans,
+      { IsDueling: false },
+      false,
+      this.challenged
+    );
+
+    await Cooldowns.create({
+      Guild: this.guildId,
+      User: this.challenger.id,
+      Command: "duel",
+      Cooldown: Date.now(),
+    });
+    await Cooldowns.create({
+      Guild: this.guildId,
+      User: this.challenged.id,
+      Command: "duel",
+      Cooldown: Date.now(),
+    });
+
+    if (this.playerWinState == "DRAW") {
+      let challengerStats = await PlayerStats.findOne({
+        Guild: this.guildId,
+        User: this.challenger.id,
+      });
+
+      if (!challengerStats) {
+        challengerStats = await PlayerStats.create({
+          Guild: this.guildId,
+          User: this.challenger.id,
+          DuelWins: 0,
+          DuelPlays: 0,
+          AdventureWins: 0,
+          AdventurePlays: 0,
+        });
+      }
+
+      let challengedStats = await PlayerStats.findOne({
+        Guild: this.guildId,
+        User: this.challenged.id,
+      });
+
+      if (!challengedStats) {
+        challengedStats = await PlayerStats.create({
+          Guild: this.guildId,
+          User: this.challenged.id,
+          DuelWins: 0,
+          DuelPlays: 0,
+          AdventureWins: 0,
+          AdventurePlays: 0,
+        });
+      }
+
+      await this.updateSchema(
+        PlayerStats,
+        { DuelPlays: challengerStats.DuelPlays + 1 },
+        false,
+        this.challenger
+      );
+      await this.updateSchema(
+        PlayerStats,
+        { DuelPlays: challengedStats.DuelPlays + 1 },
+        false,
+        this.challenged
+      );
+
+      this.winEmbed.setTitle(
+        `${this.challenger.username} and ${this.challenged.username} drew!`
+      );
+    } else {
+      let winner =
+        this.playerWinState == "CHALLENGER" ? this.challenger : this.challenged;
+      let loser =
+        this.playerWinState == "CHALLENGER" ? this.challenged : this.challenger;
+
+      let winnerStats = await PlayerStats.findOne({
+        Guild: this.guildId,
+        User: winner.id,
+      });
+
+      if (!winnerStats) {
+        winnerStats = await PlayerStats.create({
+          Guild: this.guildId,
+          User: winner.id,
+          DuelWins: 0,
+          DuelPlays: 0,
+          AdventureWins: 0,
+          AdventurePlays: 0,
+        });
+      }
+
+      let loserStats = await PlayerStats.findOne({
+        Guild: this.guildId,
+        User: loser.id,
+      });
+
+      if (!loserStats) {
+        loserStats = await PlayerStats.create({
+          Guild: this.guildId,
+          User: loser.id,
+          DuelWins: 0,
+          DuelPlays: 0,
+          AdventureWins: 0,
+          AdventurePlays: 0,
+        });
+      }
+
+      await this.updateSchema(
+        PlayerStats,
+        {
+          DuelWins: winnerStats.DuelWins + 1,
+          DuelPlays: winnerStats.DuelPlays + 1,
+        },
+        false,
+        winner
+      );
+
+      await this.updateSchema(
+        PlayerStats,
+        {
+          DuelPlays: loserStats.DuelPlays + 1,
+        },
+        false,
+        loser
+      );
+
+      this.winEmbed.setTitle(`${winner.username} won the duel!`);
+    }
+
+    let embeds = [this.turnEmbed, this.winEmbed];
+
+    if (Math.random() < 0.5) {
+      this.giveRewards();
+      embeds.push(this.rewardEmbed);
+    }
+
+    reply(buttonInteract, embeds, []);
   }
 }
 
@@ -1001,14 +1376,15 @@ async function giveRewards(adventureData, embedData) {
 
 module.exports = {
   AdventureData,
-  DuelData,
+  DuelManager,
   EmbedData,
-  reply,
   botTurn,
-  updateAdventureSchema,
   checkStandDeath,
-  updateAdventureDisplay,
-  updateAbilityUI,
-  orderEmbedDisplay,
   endAdventure,
+  generateGlitchedText,
+  orderEmbedDisplay,
+  reply,
+  updateAbilityUI,
+  updateAdventureDisplay,
+  updateAdventureSchema,
 };
