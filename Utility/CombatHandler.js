@@ -381,6 +381,34 @@ class DuelManager {
     this.abilityButtons.setComponents(buttons);
   }
 
+  updateAbilityCounts(exceptionIndex = -1) {
+    for (let i = 0; i < this.currentStand.Ability.length; i++) {
+      if (this.currentPlayer.id == this.challenger.id) {
+        if (i == exceptionIndex) {
+          this.challengerAbilityCount[i] = 0;
+        } else {
+          try {
+            this.challengerAbilityCount[i] =
+              this.savedData.ChallengerAbilityCount[i] + 1;
+          } catch (err) {
+            console.log(err);
+          }
+        }
+      } else {
+        if (i == exceptionIndex) {
+          this.challengedAbilityCount[i] = 0;
+        } else {
+          try {
+            this.challengedAbilityCount[i] =
+              this.savedData.ChallengedAbilityCount[i] + 1;
+          } catch (err) {
+            console.log(err);
+          }
+        }
+      }
+    }
+  }
+
   async giveRewards() {
     let arrowAmount;
     let discAmount;

@@ -240,16 +240,7 @@ async function attack(duelManager) {
   }
 
   // increment ability count
-  for (let i = 0; i < duelManager.currentStand.Ability.length; i++) {
-    try {
-      if (duelManager.currentStand == duelManager.challengerStand)
-        duelManager.challengerAbilityCount[i] =
-          duelManager.savedData.ChallengerAbilityCount[i] + 1;
-      else
-        duelManager.challengedAbilityCount[i] =
-          duelManager.savedData.ChallengedAbilityCount[i] + 1;
-    } catch (err) {}
-  }
+  duelManager.updateAbilityCounts();
 
   // update duel data
   await duelManager.updateSchema(
@@ -275,16 +266,7 @@ async function dodge(duelManager) {
     );
 
   // increment ability count
-  for (let i = 0; i < duelManager.currentStand.Ability.length; i++) {
-    try {
-      if (duelManager.currentStand == duelManager.challengerStand)
-        duelManager.challengerAbilityCount[i] =
-          duelManager.savedData.ChallengerAbilityCount[i] + 1;
-      else
-        duelManager.challengedAbilityCount[i] =
-          duelManager.savedData.ChallengedAbilityCount[i] + 1;
-    } catch (err) {}
-  }
+  duelManager.updateAbilityCounts();
 
   // update duel data
   duelManager.updateSchema(
@@ -387,31 +369,7 @@ async function useAbility(duelManager) {
   }
 
   // increment other ability counts except for used ability
-  for (let i = 0; i < duelManager.currentStand.Ability.length; i++) {
-    if (duelManager.currentPlayer.id == duelManager.challenger.id) {
-      if (i == splitArray[5]) {
-        challengerAbilityCount[i] = 0;
-      } else {
-        try {
-          challengerAbilityCount[i] =
-            duelManager.savedData.ChallengerAbilityCount[i] + 1;
-        } catch (err) {
-          console.log(err);
-        }
-      }
-    } else {
-      if (i == splitArray[5]) {
-        challengedAbilityCount[i] = 0;
-      } else {
-        try {
-          challengedAbilityCount[i] =
-            duelManager.savedData.ChallengedAbilityCount[i] + 1;
-        } catch (err) {
-          console.log(err);
-        }
-      }
-    }
-  }
+  duelManager.updateAbilityCounts(splitArray[5]);
 
   // update duel data
   await duelManager.updateSchema(
