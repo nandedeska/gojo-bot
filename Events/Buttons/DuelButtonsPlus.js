@@ -46,62 +46,6 @@ module.exports = {
     )
       return await buttonInteract.deferUpdate().catch(console.error);
 
-    if (duelManager.savedData) {
-      if (duelManager.currentPlayer.id == duelManager.challenger.id) {
-        duelManager.currentStand = duelManager.challengerStand;
-        duelManager.otherStand = duelManager.challengedStand;
-      } else {
-        duelManager.currentStand = duelManager.challengedStand;
-        duelManager.otherStand = duelManager.challengerStand;
-      }
-
-      if (duelManager.timeStopTurns > 0)
-        duelManager.fightEmbed.setTitle(
-          `${duelManager.currentPlayer.username}'s Turn`
-        );
-      else
-        duelManager.fightEmbed.setTitle(
-          `${duelManager.otherPlayer.username}'s Turn`
-        );
-    } else {
-      if (
-        duelManager.challengerStand.Speed >= duelManager.challengedStand.Speed
-      ) {
-        duelManager.currentPlayer = duelManager.challenger;
-        duelManager.otherPlayer = duelManager.challenged;
-        duelManager.currentStand = duelManager.challengerStand;
-        duelManager.otherStand = duelManager.challengedStand;
-      } else {
-        duelManager.currentPlayer = duelManager.challenged;
-        duelManager.otherPlayer = duelManager.challenger;
-        duelManager.currentStand = duelManager.challengedStand;
-        duelManager.otherStand = duelManager.challengerStand;
-      }
-
-      duelManager.fightEmbed.setTitle(
-        `${duelManager.currentPlayer.username}'s Turn`
-      );
-    }
-
-    duelManager.areAbilitiesInCooldown = Array(
-      duelManager.currentStand.Ability.length
-    ).fill(true);
-
-    let challengerAbilityCount;
-    let challengedAbilityCount;
-
-    if (duelManager.savedData) {
-      challengerAbilityCount = duelManager.savedData.ChallengerAbilityCount;
-      challengedAbilityCount = duelManager.savedData.ChallengedAbilityCount;
-    } else {
-      challengerAbilityCount = Array(
-        duelManager.challengerStand.Ability.length
-      ).fill(0);
-      challengedAbilityCount = Array(
-        duelManager.challengedStand.Ability.length
-      ).fill(0);
-    }
-
     let isNewDuel = false;
 
     switch (splitArray[1]) {
@@ -148,8 +92,8 @@ module.exports = {
         ChallengerHP: duelManager.challengerHp,
         ChallengedHP: duelManager.challengedHp,
         AttackRollHeight: 100,
-        ChallengerAbilityCount: challengerAbilityCount,
-        ChallengedAbilityCount: challengedAbilityCount,
+        ChallengerAbilityCount: duelManager.challengerAbilityCount,
+        ChallengedAbilityCount: duelManager.challengedAbilityCount,
         DefenseModifier: 1,
         TimeStopTurns: 0,
       });

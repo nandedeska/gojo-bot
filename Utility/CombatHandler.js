@@ -115,6 +115,9 @@ class DuelManager {
 
   savedData;
 
+  challengerAbilityCount;
+  challengedAbilityCount;
+
   attackRollHeight;
   timeStopTurns;
 
@@ -165,17 +168,23 @@ class DuelManager {
     this.isMatchOver = false;
     this.isConfused = false;
 
-    if (this.savedData) {
-      this.currentPlayer = await client.users.cache.get(
-        this.savedData.CurrentPlayer
-      );
-      this.otherPlayer = await client.users.cache.get(
-        this.savedData.OtherPlayer
-      );
-      this.challengerHp = this.savedData.ChallengerHP;
-      this.challengedHp = this.savedData.ChallengedHP;
-      this.attackRollHeight = this.savedData.AttackRollHeight;
-      this.timeStopTurns = this.savedData.TimeStopTurns;
+    this.challengerAbilityCount = Array(
+      this.challengerStand.Ability.length
+    ).fill(0);
+    this.challengedAbilityCount = Array(
+      this.challengedStand.Ability.length
+    ).fill(0);
+
+    if (this.challengerStand.Speed >= this.challengedStand.Speed) {
+      this.currentPlayer = this.challenger;
+      this.otherPlayer = this.challenged;
+      this.currentStand = this.challengerStand;
+      this.otherStand = this.challengedStand;
+    } else {
+      this.currentPlayer = this.challenged;
+      this.otherPlayer = this.challenger;
+      this.currentStand = this.challengedStand;
+      this.otherStand = this.challengerStand;
     }
 
     this.playerWinState = "ONGOING";
@@ -207,6 +216,37 @@ class DuelManager {
         "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5851f423-3ac3-4eef-88d5-2be0fc69382b/de3ayma-b38313b3-a404-4604-91e9-c7b9908f8ad1.png/v1/fill/w_1600,h_900,q_80,strp/jojo_stand_arrow_heads_by_mdwyer5_de3ayma-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9OTAwIiwicGF0aCI6IlwvZlwvNTg1MWY0MjMtM2FjMy00ZWVmLTg4ZDUtMmJlMGZjNjkzODJiXC9kZTNheW1hLWIzODMxM2IzLWE0MDQtNDYwNC05MWU5LWM3Yjk5MDhmOGFkMS5wbmciLCJ3aWR0aCI6Ijw9MTYwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.y66dqY4BgvgJUSz2mCTRTKXmvoI5yxtf9yGNV349Ls0"
       )
       .setDescription("CONTACT DEVELOPER: REWARD EMBED ERROR");
+
+    if (this.savedData) {
+      this.currentPlayer = await client.users.cache.get(
+        this.savedData.CurrentPlayer
+      );
+      this.otherPlayer = await client.users.cache.get(
+        this.savedData.OtherPlayer
+      );
+      this.challengerHp = this.savedData.ChallengerHP;
+      this.challengedHp = this.savedData.ChallengedHP;
+      this.attackRollHeight = this.savedData.AttackRollHeight;
+      this.timeStopTurns = this.savedData.TimeStopTurns;
+      this.challengerAbilityCount = this.savedData.ChallengerAbilityCount;
+      this.challengedAbilityCount = this.savedData.ChallengedAbilityCount;
+
+      if (this.currentPlayer.id == this.challenger.id) {
+        this.currentStand = this.challengerStand;
+        this.otherStand = this.challengedStand;
+      } else {
+        this.currentStand = this.challengedStand;
+        this.otherStand = this.challengerStand;
+      }
+
+      if (this.timeStopTurns > 0)
+        this.fightEmbed.setTitle(`${this.currentPlayer.username}'s Turn`);
+      else this.fightEmbed.setTitle(`${this.otherPlayer.username}'s Turn`);
+    }
+
+    this.areAbilitiesInCooldown = Array(this.currentStand.Ability.length).fill(
+      true
+    );
 
     this.duelButtons = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
