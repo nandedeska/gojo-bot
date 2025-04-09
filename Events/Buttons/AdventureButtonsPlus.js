@@ -178,7 +178,9 @@ module.exports = {
           var damage = Math.floor(Math.random() * playerStand.Attack) + 1;
 
           if (adventureData.isConfused) {
-            embedData.turnEmbed.setTitle(generateGlitchedText("long"));
+            embedData.turnEmbed.setTitle(
+              CombatHandler.generateGlitchedText("long")
+            );
           } else
             embedData.turnEmbed.setTitle(
               `${playerStand.Name}'s attack hits! It deals ${damage} damage.`
@@ -187,7 +189,9 @@ module.exports = {
           adventureData.opponentHp -= damage;
         } else {
           if (adventureData.isConfused)
-            embedData.turnEmbed.setTitle(generateGlitchedText("long"));
+            embedData.turnEmbed.setTitle(
+              CombatHandler.generateGlitchedText("long")
+            );
           else embedData.turnEmbed.setTitle(`${playerStand.Name} missed!`);
         }
 
@@ -215,7 +219,9 @@ module.exports = {
         break;
       case "Dodge":
         if (adventureData.isConfused)
-          embedData.turnEmbed.setTitle(generateGlitchedText("long"));
+          embedData.turnEmbed.setTitle(
+            CombatHandler.generateGlitchedText("long")
+          );
         else
           embedData.turnEmbed.setTitle(
             `${playerStand.Name} prepares to dodge!`
@@ -297,11 +303,15 @@ module.exports = {
             }
 
             if (adventureData.isConfused)
-              embedData.turnEmbed.setTitle(generateGlitchedText("long"));
+              embedData.turnEmbed.setTitle(
+                CombatHandler.generateGlitchedText("long")
+              );
             else embedData.turnEmbed.setTitle(abilityInfo[0]);
           } else {
             if (adventureData.isConfused)
-              embedData.turnEmbed.setTitle(generateGlitchedText("long"));
+              embedData.turnEmbed.setTitle(
+                CombatHandler.generateGlitchedText("long")
+              );
             else embedData.turnEmbed.setTitle(`${playerStand.Name} missed!`);
           }
         } else if (healAmount > 0) {
