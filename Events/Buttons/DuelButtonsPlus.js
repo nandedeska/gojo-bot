@@ -476,7 +476,7 @@ async function useAbility(duelManager) {
       AttackRollHeight: 100,
       ChallengerAbilityCount: duelManager.challengerAbilityCount,
       ChallengedAbilityCount: duelManager.challengedAbilityCount,
-      DefenseModifier: 1,
+      DefenseModifier: nextDefenseModifier,
     },
     true
   );
