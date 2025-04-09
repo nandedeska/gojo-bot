@@ -279,17 +279,15 @@ class DuelManager {
     if (this.savedData) {
       for (let i = 0; i < this.challengerStand.Ability.length; i++) {
         this.challengerCooldownText += setCooldownText(
-          this.challengerStand,
-          i,
-          this.savedData.ChallengerAbilityCount
+          this.savedData.ChallengerAbilityCount[i],
+          this.challengerStand.Ability[i].cooldown
         );
       }
 
       for (let i = 0; i < this.challengedStand.Ability.length; i++) {
         this.challengedCooldownText += setCooldownText(
-          this.challengedStand,
-          i,
-          this.savedData.ChallengedAbilityCount
+          this.savedData.ChallengedAbilityCount[i],
+          this.challengedStand.Ability[i].cooldown
         );
       }
     }
@@ -1069,11 +1067,9 @@ async function checkStandDeath(adventureData) {
   }
 }
 
-function setCooldownText(stand, abilityIndex, abilityCount) {
-  if (abilityCount[abilityIndex] < stand.Ability[abilityIndex].cooldown) {
-    return `\nAbility Cooldown: ${
-      stand.Ability[abilityIndex].cooldown - abilityCount[abilityIndex]
-    } Turns`;
+function setCooldownText(currentAbilityCount, abilityCooldown) {
+  if (currentAbilityCount < abilityCooldown) {
+    return `\nAbility Cooldown: ${abilityCooldown - currentAbilityCount} Turns`;
   } else {
     return "\nAbility Ready!";
   }
@@ -1384,6 +1380,7 @@ module.exports = {
   generateGlitchedText,
   orderEmbedDisplay,
   reply,
+  setCooldownText,
   updateAbilityUI,
   updateAdventureDisplay,
   updateAdventureSchema,
