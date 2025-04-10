@@ -371,11 +371,9 @@ class DuelManager {
     }
 
     for (let i = 0; i < stand.Ability.length; i++) {
-      if (this.savedData) {
-        if (abilityCount[i] < stand.Ability[i].cooldown)
-          this.areAbilitiesInCooldown[i] = true;
-        else this.areAbilitiesInCooldown[i] = false;
-      }
+      if (abilityCount[i] < stand.Ability[i].cooldown)
+        this.areAbilitiesInCooldown[i] = true;
+      else this.areAbilitiesInCooldown[i] = false;
 
       let abilityButton = new ButtonBuilder()
         .setLabel(`Ability ${i + 1}`)
