@@ -246,9 +246,10 @@ class DuelManager {
       else this.fightEmbed.setTitle(`${this.otherPlayer.username}'s Turn`);
     }
 
-    this.areAbilitiesInCooldown = Array(this.currentStand.Ability.length).fill(
-      true
-    );
+    this.areAbilitiesInCooldown =
+      this.savedData && this.timeStopTurns <= 0
+        ? Array(this.otherStand.Ability.length).fill(true)
+        : Array(this.currentStand.Ability.length).fill(true);
 
     this.duelButtons = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
