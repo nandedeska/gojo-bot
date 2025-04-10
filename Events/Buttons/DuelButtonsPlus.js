@@ -62,7 +62,7 @@ module.exports = {
         await dodge(duelManager);
         break;
       case "Ability":
-        await useAbility(duelManager);
+        await useAbility(splitArray[5], duelManager);
         break;
       case "Surrender":
         await surrender(buttonInteract, duelManager);
@@ -283,9 +283,9 @@ async function dodge(duelManager) {
   await duelManager.checkStandDeath();
 }
 
-async function useAbility(duelManager) {
+async function useAbility(abilityIndex, duelManager) {
   // fetch ability
-  let ability = duelManager.currentStand.Ability[splitArray[5]];
+  let ability = duelManager.currentStand.Ability[abilityIndex];
   let abilityId = ability.id;
   let abilityInfo = StandAbilities.abilities[abilityId](
     duelManager.currentStand,
@@ -369,7 +369,7 @@ async function useAbility(duelManager) {
   }
 
   // increment other ability counts except for used ability
-  duelManager.updateAbilityCounts(splitArray[5]);
+  duelManager.updateAbilityCounts(abilityIndex);
 
   // update duel data
   await duelManager.updateSchema(
