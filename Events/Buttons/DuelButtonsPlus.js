@@ -71,15 +71,16 @@ module.exports = {
 
     if (duelManager.isMatchOver) return duelManager.endDuel(buttonInteract);
 
-    duelManager.updateAbilityUI();
-    duelManager.updateDisplay();
+    if (!isNewDuel) {
+      duelManager.updateAbilityUI();
+      duelManager.updateDisplay();
 
-    if (!isNewDuel)
       await CombatHandler.reply(
         buttonInteract,
         [duelManager.turnEmbed, duelManager.fightEmbed],
         [duelManager.duelButtons, duelManager.abilityButtons]
       );
+    }
 
     // initialize/update duel info
     if (!duelManager.savedData) {
