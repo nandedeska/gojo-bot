@@ -201,6 +201,8 @@ class DuelManager {
         "https://cdn.discordapp.com/attachments/562958339034841098/1088740524342640700/image.png"
       );
 
+    this.fightEmbed.setTitle(`${this.currentPlayer.username}'s Turn`);
+
     this.turnEmbed = new EmbedBuilder().setColor("#D31A38");
 
     this.winEmbed = new EmbedBuilder()
