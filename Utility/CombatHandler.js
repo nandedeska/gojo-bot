@@ -391,16 +391,25 @@ class DuelManager {
 
   updateAbilityCounts(exceptionIndex = -1) {
     for (let i = 0; i < this.currentStand.Ability.length; i++) {
+      let abilityInfo = StandAbilities.abilities[
+        this.currentStand.Ability[i].id
+      ](this.currentStand, this.otherStand, this.currentStand.Ability[i]);
+      let isTimeStopAbility = abilityInfo[6] > 0;
+
       if (this.currentPlayer.id == this.challenger.id) {
         if (i == exceptionIndex) {
-          this.challengerAbilityCount[i] = 0;
+          if (isTimeStopAbility)
+            this.challengerAbilityCount[i] = -abilityInfo[6];
+          else this.challengerAbilityCount[i] = 0;
         } else {
           this.challengerAbilityCount[i] =
             this.savedData.ChallengerAbilityCount[i] + 1;
         }
       } else {
         if (i == exceptionIndex) {
-          this.challengedAbilityCount[i] = 0;
+          if (isTimeStopAbility)
+            this.challengedAbilityCount[i] = -abilityInfo[6];
+          else this.challengedAbilityCount[i] = 0;
         } else {
           this.challengedAbilityCount[i] =
             this.savedData.ChallengedAbilityCount[i] + 1;
