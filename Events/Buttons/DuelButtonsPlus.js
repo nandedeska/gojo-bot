@@ -302,7 +302,9 @@ async function useAbility(abilityIndex, duelManager) {
 
   // execute ability
   if (duelManager.timeStopTurns > 0) {
-    duelManager.fightEmbed.setTitle(`${currentPlayer.username}'s Turn`);
+    duelManager.fightEmbed.setTitle(
+      `${duelManager.currentPlayer.username}'s Turn`
+    );
     duelManager.turnEmbed.setTitle(abilityInfo[0]);
   } else if (damage > 0) {
     // attack based ability
