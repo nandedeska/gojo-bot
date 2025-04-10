@@ -352,14 +352,23 @@ class DuelManager {
   updateAbilityUI() {
     let buttons = [];
 
-    let stand = this.currentStand;
+    let stand =
+      this.savedData && this.timeStopTurns <= 0
+        ? this.otherStand
+        : this.currentStand;
     let abilityCount = [];
 
-    if (this.savedData)
+    if (this.savedData) {
       abilityCount =
-        this.currentStand == this.challengerStand
+        stand == this.challengerStand
           ? this.savedData.ChallengerAbilityCount
           : this.savedData.ChallengedAbilityCount;
+    } else {
+      abilityCount =
+        stand == this.challengerStand
+          ? Array(this.challengerStand.Ability.length).fill(0)
+          : Array(this.challengedStand.Ability.length).fill(0);
+    }
 
     for (let i = 0; i < stand.Ability.length; i++) {
       if (this.savedData) {
