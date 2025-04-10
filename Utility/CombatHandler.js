@@ -395,23 +395,15 @@ class DuelManager {
         if (i == exceptionIndex) {
           this.challengerAbilityCount[i] = 0;
         } else {
-          try {
-            this.challengerAbilityCount[i] =
-              this.savedData.ChallengerAbilityCount[i] + 1;
-          } catch (err) {
-            console.log(err);
-          }
+          this.challengerAbilityCount[i] =
+            this.savedData.ChallengerAbilityCount[i] + 1;
         }
       } else {
         if (i == exceptionIndex) {
           this.challengedAbilityCount[i] = 0;
         } else {
-          try {
-            this.challengedAbilityCount[i] =
-              this.savedData.ChallengedAbilityCount[i] + 1;
-          } catch (err) {
-            console.log(err);
-          }
+          this.challengedAbilityCount[i] =
+            this.savedData.ChallengedAbilityCount[i] + 1;
         }
       }
     }
