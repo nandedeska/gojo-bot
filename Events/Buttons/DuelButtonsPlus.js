@@ -35,13 +35,13 @@ module.exports = {
     await duelManager.init(guildId, challenger, challenged, client);
 
     if (
-      !duelManager.currentPlayer &&
+      !duelManager.savedData &&
       buttonInteract.user.id !== duelManager.challenged.id
     )
       return await buttonInteract.deferUpdate().catch(console.error);
 
     if (
-      duelManager.currentPlayer &&
+      duelManager.savedData &&
       buttonInteract.user.id !== duelManager.currentPlayer.id
     )
       return await buttonInteract.deferUpdate().catch(console.error);
