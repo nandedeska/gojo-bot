@@ -319,20 +319,18 @@ class DuelManager {
   }
 
   updateDisplay() {
-    if (this.savedData) {
-      for (let i = 0; i < this.challengerStand.Ability.length; i++) {
-        this.challengerCooldownText += setCooldownText(
-          this.savedData.ChallengerAbilityCount[i],
-          this.challengerStand.Ability[i].cooldown
-        );
-      }
+    for (let i = 0; i < this.challengerStand.Ability.length; i++) {
+      this.challengerCooldownText += setCooldownText(
+        this.challengerAbilityCount[i],
+        this.challengerStand.Ability[i].cooldown
+      );
+    }
 
-      for (let i = 0; i < this.challengedStand.Ability.length; i++) {
-        this.challengedCooldownText += setCooldownText(
-          this.savedData.ChallengedAbilityCount[i],
-          this.challengedStand.Ability[i].cooldown
-        );
-      }
+    for (let i = 0; i < this.challengedStand.Ability.length; i++) {
+      this.challengedCooldownText += setCooldownText(
+        this.challengedAbilityCount[i],
+        this.challengedStand.Ability[i].cooldown
+      );
     }
 
     this.fightEmbed.addFields(
