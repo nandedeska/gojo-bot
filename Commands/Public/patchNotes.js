@@ -6,12 +6,14 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
-let version = "1.0.0";
+let version = "1.1.0";
 const patchNotes = {
+  "1.1.0": {
+    notes: "Updated /patchnotes: version selection and cycling\n",
+  },
   "1.0.1": {
     notes:
       "Nerfed DIO (ATK 100 >> 50 SPD 100 >> 50)\n" +
-      "Updated /patchnotes: version selection and cycling\n" +
       "Fixed /adventure syncing bug\n" +
       "Fixed dodge code in /adventure\n" +
       "Bug fixes",
