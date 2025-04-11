@@ -449,6 +449,7 @@ class DuelManager {
         StandDisc: playerInventory.StandDisc + discAmount,
         RocacacaFruit: playerInventory.RocacacaFruit + fruitAmount,
       },
+      false,
       plr
     );
 
