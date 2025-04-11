@@ -165,10 +165,9 @@ function burningmemory(currentStand, otherStand, abilityInfo) {
 }
 
 function flavoredAttack(currentStand, otherStand, abilityInfo) {
-  let damage = Math.floor(Math.random() * currentStand.Attack) + 1;
+  let damage = Math.floor(Math.random() * abilityInfo.damage) + 1;
 
-  let actionText = `${currentStand.Name} ${abilityInfo.actionDescription[0]}!`;
-
+  let actionText = `${currentStand.Name} ${abilityInfo.actionDescription} dealing ${damage} damage!`;
   return convertToCombatInfo({
     actionText: actionText,
     damage: damage,
@@ -260,16 +259,6 @@ function modifiedAttack(currentStand, otherStand, abilityInfo) {
   let actionText = `${currentStand.Name} ${abilityInfo.actionDescription} dealing ${damage} damage!`;
 
   // Turn Embed Text, Damage, HP Healed, Self Defense Modifier, Opponent Defense Modifier
-  return convertToCombatInfo({
-    actionText: actionText,
-    damage: damage,
-  });
-}
-
-function flavoredAttack(currentStand, otherStand, abilityInfo) {
-  let damage = Math.floor(Math.random() * abilityInfo.damage) + 1;
-
-  let actionText = `${currentStand.Name} ${abilityInfo.actionDescription} dealing ${damage} damage!`;
   return convertToCombatInfo({
     actionText: actionText,
     damage: damage,
