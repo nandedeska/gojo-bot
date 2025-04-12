@@ -373,35 +373,28 @@ class AdventureManager {
     const rand = Math.random();
     let abilityCounts;
 
-    let guildId = this.guildId;
-    let player = this.player;
-    let playerStand = this.playerStand;
-    let opponent = this.opponent;
-    let opponentStand = this.opponentStand;
-
     if (this.savedData) abilityCounts = this.savedData.OpponentAbilityCount;
 
     let extraTurnEmbed = new EmbedBuilder().setColor("#D31A38");
     if (rand < 0.95) {
       // Attack or ability
       let hasUsedAbility = false;
-      for (let i = 0; i < opponentStand.Ability.length; i++) {
+      for (let i = 0; i < this.opponentStand.Ability.length; i++) {
         // Check if bot can use ability
-        if (abilityCounts[i] >= opponentStand.Ability[i].cooldown) {
+        if (abilityCounts[i] >= this.opponentStand.Ability[i].cooldown) {
           console.log(`BOT: ABILITY ${i + 1}`);
           // fetch ability
-          let ability = opponentStand.Ability[i];
+          let ability = this.opponentStand.Ability[i];
           let abilityId = ability.id;
           let abilityInfo = StandAbilities.abilities[abilityId](
-            opponentStand,
-            playerStand,
+            this.opponentStand,
+            this.playerStand,
             ability
           );
 
           let damage = abilityInfo[1];
           let healAmount = abilityInfo[2];
           let nextDefenseModifier = abilityInfo[3];
-          let currentDefenseModifier = abilityInfo[4];
           this.isConfused = abilityInfo[5];
           let timeStopTurns = abilityInfo[6];
 
@@ -429,7 +422,7 @@ class AdventureManager {
 
                 this.opponentHp = Math.min(
                   this.opponentHp,
-                  opponentStand.Healthpoints
+                  this.opponentStand.Healthpoints
                 );
               }
 
@@ -439,7 +432,8 @@ class AdventureManager {
             } else {
               if (this.isConfused)
                 extraTurnEmbed.setTitle(generateGlitchedText("long"));
-              else extraTurnEmbed.setTitle(`${opponentStand.Name} missed!`);
+              else
+                extraTurnEmbed.setTitle(`${this.opponentStand.Name} missed!`);
             }
           } else if (healAmount > 0) {
             // heal ability
@@ -447,7 +441,7 @@ class AdventureManager {
 
             this.opponentHp = Math.min(
               this.opponentHp,
-              opponentStand.Healthpoints
+              this.opponentStand.Healthpoints
             );
             extraTurnEmbed.setTitle(abilityInfo[0]);
           } else extraTurnEmbed.setTitle(abilityInfo[0]);
@@ -477,19 +471,20 @@ class AdventureManager {
         }
 
         if (currentDefenseModifier < 100) {
-          let damage = Math.floor(Math.random() * opponentStand.Attack) + 1;
+          let damage =
+            Math.floor(Math.random() * this.opponentStand.Attack) + 1;
           if (this.isConfused)
             extraTurnEmbed.setTitle(generateGlitchedText("long"));
           else
             extraTurnEmbed.setTitle(
-              `${opponentStand.Name}'s attack hits! It deals ${damage} damage.`
+              `${this.opponentStand.Name}'s attack hits! It deals ${damage} damage.`
             );
 
           this.playerHp -= damage;
         } else {
           if (this.isConfused)
             extraTurnEmbed.setTitle(generateGlitchedText("long"));
-          else extraTurnEmbed.setTitle(`${opponentStand.Name} missed!`);
+          else extraTurnEmbed.setTitle(`${this.opponentStand.Name} missed!`);
         }
 
         await this.updateAdventureSchema(AdventureInfo, {
@@ -501,7 +496,10 @@ class AdventureManager {
       // DODGE
       if (this.isConfused)
         extraTurnEmbed.setTitle(generateGlitchedText("long"));
-      else extraTurnEmbed.setTitle(`${opponentStand.Name} prepares to dodge!`);
+      else
+        extraTurnEmbed.setTitle(
+          `${this.opponentStand.Name} prepares to dodge!`
+        );
 
       await this.updateAdventureSchema(AdventureInfo, {
         AttackRollHeight: 75,
