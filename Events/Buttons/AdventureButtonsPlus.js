@@ -105,7 +105,7 @@ module.exports = {
       return adventureManager.endAdventure(buttonInteract);
 
     adventureManager.updateAbilityUI();
-    adventureManager.updateAdventureDisplay();
+    adventureManager.updateDisplay();
 
     let embeds = adventureManager.orderEmbedDisplay(
       adventureManager.isPlayerFirst,
@@ -191,7 +191,7 @@ async function acceptAdventure(buttonInteract, adventureManager) {
   }
 
   adventureManager.updateAbilityUI();
-  adventureManager.updateAdventureDisplay();
+  adventureManager.updateDisplay();
 
   await buttonInteract.deferUpdate();
   await buttonInteract.editReply({
