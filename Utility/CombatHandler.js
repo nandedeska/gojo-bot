@@ -31,7 +31,7 @@ const GlitchedText = {
   NumberString: ["୧̶͚̘͕̲͐͐̌͝͝ͅ୧̷̢̧̲͓̱͐͆͒̔̿", "მ̵̧̬̜͕̰̔̈͑͛̚μ̴̧̛̩̦̬̅̿̀͜͠", "Ɛ̶̧̩̙̙̰̆̑̔̓̌ς̶͙̪̩̥̮͛̀́͝͠", "Ɩ̵̛̼̤̯̱̲͂̌̀̊მ̷̝̘͓̤̞̀̾̅̽̚", "ɘ̵̨̡̺̬̞̀̀̂̉̎Ɉ̶̢͍͉͍̝̍͋͑̿͝ǭ̷͎̠̗̘̓̉̽͘", "m̶̹̦̓̑̏̏̕i̶͊̈́̚ƨ̴͕͂̊̂́̿ƨ̸͝"],
 };
 
-class AdventureData {
+class AdventureManager {
   guildId;
   player;
   playerStand;
@@ -635,7 +635,7 @@ class EmbedData {
   constructor() {}
 
   async init(data) {
-    if (data instanceof AdventureData) {
+    if (data instanceof AdventureManager) {
       let guildId = data.guildId;
       let player = data.player;
       let opponent = data.opponent;
@@ -766,19 +766,19 @@ class EmbedData {
   }
 }
 
-async function botTurn(buttonInteract, adventureData, embedData) {
+async function botTurn(buttonInteract, adventureManager, embedData) {
   const rand = Math.random();
   embedData.opponentTurnEmbed = new EmbedBuilder().setColor("#D31A38");
 
-  let guildId = adventureData.guildId;
-  let player = adventureData.player;
-  let playerStand = adventureData.playerStand;
-  let opponent = adventureData.opponent;
-  let opponentStand = adventureData.opponentStand;
+  let guildId = adventureManager.guildId;
+  let player = adventureManager.player;
+  let playerStand = adventureManager.playerStand;
+  let opponent = adventureManager.opponent;
+  let opponentStand = adventureManager.opponentStand;
 
   let abilityCounts;
-  if (adventureData.savedData)
-    abilityCounts = adventureData.savedData.OpponentAbilityCount;
+  if (adventureManager.savedData)
+    abilityCounts = adventureManager.savedData.OpponentAbilityCount;
 
   if (rand < 0.8) {
     let hasUsedAbility = false;
@@ -796,14 +796,14 @@ async function botTurn(buttonInteract, adventureData, embedData) {
         let healAmount = abilityInfo[2];
         let nextDefenseModifier = abilityInfo[3];
         let currentDefenseModifier = abilityInfo[4];
-        adventureData.isConfused = abilityInfo[5];
+        adventureManager.isConfused = abilityInfo[5];
         let timeStopTurns = abilityInfo[6];
 
         // TIME STOP ABILITY
         if (timeStopTurns > 0) {
           // time stop ability
           abilityCounts[i] = 0;
-          await updateAdventureSchema(AdventureInfo, adventureData, {
+          await updateAdventureSchema(AdventureInfo, adventureManager, {
             AttackRollHeight: 100,
             OpponentAbilityCount: abilityCounts,
             DefenseModifier: nextDefenseModifier,
@@ -811,7 +811,7 @@ async function botTurn(buttonInteract, adventureData, embedData) {
 
           for (let i = 0; i < timeStopTurns; i++) {
             embedData.opponentExtraTurnEmbeds.push(
-              await botTimeStopTurn(adventureData)
+              await botTimeStopTurn(adventureManager)
             );
           }
           embedData.opponentTurnEmbed.setTitle(abilityInfo[0]);
@@ -819,41 +819,41 @@ async function botTurn(buttonInteract, adventureData, embedData) {
         // ATTACK-BASED ABILITY
         else if (damage > 0) {
           let defenseMod = 1;
-          if (adventureData.savedData) {
-            adventureData.savedData = await AdventureInfo.findOne({
+          if (adventureManager.savedData) {
+            adventureManager.savedData = await AdventureInfo.findOne({
               Guild: guildId,
               User: player.id,
             });
-            defenseMod = adventureData.savedData.DefenseModifier;
+            defenseMod = adventureManager.savedData.DefenseModifier;
           }
 
           let attackRoll =
-            Math.floor(Math.random() * adventureData.attackRollHeight) + 1;
+            Math.floor(Math.random() * adventureManager.attackRollHeight) + 1;
 
           if (
             attackRoll >=
             playerStand.Defense * defenseMod * currentDefenseModifier
           ) {
-            adventureData.playerHp -= damage;
+            adventureManager.playerHp -= damage;
 
             // LIFE STEAL
             if (healAmount > 0) {
-              adventureData.opponentHp += healAmount;
-              adventureData.opponentHp = Math.min(
-                adventureData.opponentHp,
+              adventureManager.opponentHp += healAmount;
+              adventureManager.opponentHp = Math.min(
+                adventureManager.opponentHp,
                 opponentStand.Healthpoints
               );
             }
 
             // HEARTACHES ABILITY
-            if (adventureData.isConfused)
+            if (adventureManager.isConfused)
               embedData.opponentTurnEmbed.setTitle(
                 generateGlitchedText("long")
               );
             else embedData.opponentTurnEmbed.setTitle(abilityInfo[0]);
           } else {
             // HEARTACHES ABILITY
-            if (adventureData.isConfused)
+            if (adventureManager.isConfused)
               embedData.opponentTurnEmbed.setTitle(
                 generateGlitchedText("long")
               );
@@ -865,9 +865,9 @@ async function botTurn(buttonInteract, adventureData, embedData) {
         }
         // HEAL ABILITY
         else if (healAmount > 0) {
-          adventureData.opponentHp += healAmount;
-          adventureData.opponentHp = Math.min(
-            adventureData.opponentHp,
+          adventureManager.opponentHp += healAmount;
+          adventureManager.opponentHp = Math.min(
+            adventureManager.opponentHp,
             opponentStand.Healthpoints
           );
           embedData.opponentTurnEmbed.setTitle(abilityInfo[0]);
@@ -878,11 +878,11 @@ async function botTurn(buttonInteract, adventureData, embedData) {
           if (j == i) abilityCounts[j] = 0;
           else
             abilityCounts[j] =
-              adventureData.savedData.OpponentAbilityCount[j] + 1;
+              adventureManager.savedData.OpponentAbilityCount[j] + 1;
         }
 
         // Update saved data
-        await updateAdventureSchema(AdventureInfo, adventureData, {
+        await updateAdventureSchema(AdventureInfo, adventureManager, {
           AttackRollHeight: 100,
           OpponentAbilityCount: abilityCounts,
           DefenseModifier: nextDefenseModifier,
@@ -891,37 +891,37 @@ async function botTurn(buttonInteract, adventureData, embedData) {
         hasUsedAbility = true;
 
         // Check if stand died
-        await checkStandDeath(adventureData);
+        await checkStandDeath(adventureManager);
 
-        if (adventureData.isMatchOver) return;
+        if (adventureManager.isMatchOver) return;
       }
     }
 
     if (!hasUsedAbility) {
       let attackRoll =
-        Math.floor(Math.random() * adventureData.attackRollHeight) + 1;
+        Math.floor(Math.random() * adventureManager.attackRollHeight) + 1;
       let currentDefenseModifier = 1;
 
-      if (adventureData.savedData) {
-        adventureData.savedData = await AdventureInfo.findOne({
+      if (adventureManager.savedData) {
+        adventureManager.savedData = await AdventureInfo.findOne({
           Guild: guildId,
           User: player.id,
         });
-        currentDefenseModifier = adventureData.savedData.DefenseModifier;
+        currentDefenseModifier = adventureManager.savedData.DefenseModifier;
       }
 
       if (attackRoll >= playerStand.Defense * currentDefenseModifier) {
         let damage = Math.floor(Math.random() * opponentStand.Attack) + 1;
-        if (adventureData.isConfused)
+        if (adventureManager.isConfused)
           embedData.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
         else
           embedData.opponentTurnEmbed.setTitle(
             `${opponentStand.Name}'s attack hits! It deals ${damage} damage.`
           );
 
-        adventureData.playerHp -= damage;
+        adventureManager.playerHp -= damage;
       } else {
-        if (adventureData.isConfused)
+        if (adventureManager.isConfused)
           embedData.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
         else
           embedData.opponentTurnEmbed.setTitle(`${opponentStand.Name} missed!`);
@@ -931,23 +931,23 @@ async function botTurn(buttonInteract, adventureData, embedData) {
       for (let i = 0; i < opponentStand.Ability.length; i++) {
         try {
           abilityCounts[i] =
-            adventureData.savedData.OpponentAbilityCount[i] + 1;
+            adventureManager.savedData.OpponentAbilityCount[i] + 1;
         } catch (err) {
           console.log(err);
         }
       }
 
-      await updateAdventureSchema(AdventureInfo, adventureData, {
+      await updateAdventureSchema(AdventureInfo, adventureManager, {
         AttackRollHeight: 100,
         OpponentAbilityCount: abilityCounts,
         DefenseModifier: 1,
       });
 
-      await checkStandDeath(adventureData);
+      await checkStandDeath(adventureManager);
     }
   } else {
     // DODGE
-    if (adventureData.isConfused)
+    if (adventureManager.isConfused)
       embedData.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
     else
       embedData.opponentTurnEmbed.setTitle(
@@ -957,34 +957,35 @@ async function botTurn(buttonInteract, adventureData, embedData) {
     // increment ability count
     for (let i = 0; i < opponentStand.Ability.length; i++) {
       try {
-        abilityCounts[i] = adventureData.savedData.OpponentAbilityCount[i] + 1;
+        abilityCounts[i] =
+          adventureManager.savedData.OpponentAbilityCount[i] + 1;
       } catch (err) {
         console.log(err);
       }
     }
 
-    await updateAdventureSchema(AdventureInfo, adventureData, {
+    await updateAdventureSchema(AdventureInfo, adventureManager, {
       AttackRollHeight: 75,
       OpponentAbilityCount: abilityCounts,
       DefenseModifier: 1,
     });
 
-    await checkStandDeath(adventureData);
+    await checkStandDeath(adventureManager);
   }
 }
 
-async function botTimeStopTurn(adventureData) {
+async function botTimeStopTurn(adventureManager) {
   const rand = Math.random();
   let abilityCounts;
 
-  let guildId = adventureData.guildId;
-  let player = adventureData.player;
-  let playerStand = adventureData.playerStand;
-  let opponent = adventureData.opponent;
-  let opponentStand = adventureData.opponentStand;
+  let guildId = adventureManager.guildId;
+  let player = adventureManager.player;
+  let playerStand = adventureManager.playerStand;
+  let opponent = adventureManager.opponent;
+  let opponentStand = adventureManager.opponentStand;
 
-  if (adventureData.savedData)
-    abilityCounts = adventureData.savedData.OpponentAbilityCount;
+  if (adventureManager.savedData)
+    abilityCounts = adventureManager.savedData.OpponentAbilityCount;
 
   let extraTurnEmbed = new EmbedBuilder().setColor("#D31A38");
   if (rand < 0.95) {
@@ -1007,7 +1008,7 @@ async function botTimeStopTurn(adventureData) {
         let healAmount = abilityInfo[2];
         let nextDefenseModifier = abilityInfo[3];
         let currentDefenseModifier = abilityInfo[4];
-        adventureData.isConfused = abilityInfo[5];
+        adventureManager.isConfused = abilityInfo[5];
         let timeStopTurns = abilityInfo[6];
 
         if (timeStopTurns > 0) {
@@ -1016,42 +1017,42 @@ async function botTimeStopTurn(adventureData) {
         } else if (damage > 0) {
           // ATTACK BASED ABILITY
           let defenseMod = 1;
-          if (adventureData.savedData) {
-            adventureData.savedData = await AdventureInfo.findOne({
-              Guild: adventureData.guildId,
-              User: adventureData.player.id,
+          if (adventureManager.savedData) {
+            adventureManager.savedData = await AdventureInfo.findOne({
+              Guild: adventureManager.guildId,
+              User: adventureManager.player.id,
             });
-            defenseMod = adventureData.savedData.DefenseModifier;
+            defenseMod = adventureManager.savedData.DefenseModifier;
           }
 
           if (defenseMod < 100) {
             let damage = abilityInfo[1];
 
-            adventureData.playerHp -= damage;
+            adventureManager.playerHp -= damage;
             if (healAmount > 0) {
               // life steal ability
-              adventureData.opponentHp += healAmount;
+              adventureManager.opponentHp += healAmount;
 
-              adventureData.opponentHp = Math.min(
-                adventureData.opponentHp,
+              adventureManager.opponentHp = Math.min(
+                adventureManager.opponentHp,
                 opponentStand.Healthpoints
               );
             }
 
-            if (adventureData.isConfused)
+            if (adventureManager.isConfused)
               extraTurnEmbed.setTitle(generateGlitchedText("long"));
             else extraTurnEmbed.setTitle(abilityInfo[0]);
           } else {
-            if (adventureData.isConfused)
+            if (adventureManager.isConfused)
               extraTurnEmbed.setTitle(generateGlitchedText("long"));
             else extraTurnEmbed.setTitle(`${opponentStand.Name} missed!`);
           }
         } else if (healAmount > 0) {
           // heal ability
-          adventureData.opponentHp += healAmount;
+          adventureManager.opponentHp += healAmount;
 
-          adventureData.opponentHp = Math.min(
-            adventureData.opponentHp,
+          adventureManager.opponentHp = Math.min(
+            adventureManager.opponentHp,
             opponentStand.Healthpoints
           );
           extraTurnEmbed.setTitle(abilityInfo[0]);
@@ -1060,7 +1061,7 @@ async function botTimeStopTurn(adventureData) {
         // Reset ability count
         abilityCounts[i] = 0;
 
-        await updateAdventureSchema(AdventureInfo, adventureData, {
+        await updateAdventureSchema(AdventureInfo, adventureManager, {
           AttackRollHeight: 100,
           OpponentAbilityCount: abilityCounts,
           DefenseModifier: nextDefenseModifier,
@@ -1073,42 +1074,42 @@ async function botTimeStopTurn(adventureData) {
     if (!hasUsedAbility) {
       let currentDefenseModifier = 1;
 
-      if (adventureData.savedData) {
-        adventureData.savedData = await AdventureInfo.findOne({
-          Guild: adventureData.guildId,
-          User: adventureData.player.id,
+      if (adventureManager.savedData) {
+        adventureManager.savedData = await AdventureInfo.findOne({
+          Guild: adventureManager.guildId,
+          User: adventureManager.player.id,
         });
-        currentDefenseModifier = adventureData.savedData.DefenseModifier;
+        currentDefenseModifier = adventureManager.savedData.DefenseModifier;
       }
 
       if (currentDefenseModifier < 100) {
         let damage = Math.floor(Math.random() * opponentStand.Attack) + 1;
-        if (adventureData.isConfused)
+        if (adventureManager.isConfused)
           extraTurnEmbed.setTitle(generateGlitchedText("long"));
         else
           extraTurnEmbed.setTitle(
             `${opponentStand.Name}'s attack hits! It deals ${damage} damage.`
           );
 
-        adventureData.playerHp -= damage;
+        adventureManager.playerHp -= damage;
       } else {
-        if (adventureData.isConfused)
+        if (adventureManager.isConfused)
           extraTurnEmbed.setTitle(generateGlitchedText("long"));
         else extraTurnEmbed.setTitle(`${opponentStand.Name} missed!`);
       }
 
-      await updateAdventureSchema(AdventureInfo, adventureData, {
+      await updateAdventureSchema(AdventureInfo, adventureManager, {
         AttackRollHeight: 100,
         DefenseModifier: 1,
       });
     }
   } else {
     // DODGE
-    if (adventureData.isConfused)
+    if (adventureManager.isConfused)
       extraTurnEmbed.setTitle(generateGlitchedText("long"));
     else extraTurnEmbed.setTitle(`${opponentStand.Name} prepares to dodge!`);
 
-    await updateAdventureSchema(AdventureInfo, adventureData, {
+    await updateAdventureSchema(AdventureInfo, adventureManager, {
       AttackRollHeight: 75,
       DefenseModifier: 1,
     });
@@ -1117,31 +1118,31 @@ async function botTimeStopTurn(adventureData) {
   return extraTurnEmbed.data;
 }
 
-async function updateAdventureSchema(schema, adventureData, data) {
+async function updateAdventureSchema(schema, adventureManager, data) {
   await schema.updateOne(
     {
-      Guild: adventureData.guildId,
-      User: adventureData.player.id,
+      Guild: adventureManager.guildId,
+      User: adventureManager.player.id,
     },
     { $set: data }
   );
 }
 
-async function checkStandDeath(adventureData) {
+async function checkStandDeath(adventureManager) {
   // DRAW
-  if (adventureData.playerHp <= 0 && adventureData.opponentHp <= 0) {
-    adventureData.playerWinState = "DRAW";
-    adventureData.isMatchOver = true;
+  if (adventureManager.playerHp <= 0 && adventureManager.opponentHp <= 0) {
+    adventureManager.playerWinState = "DRAW";
+    adventureManager.isMatchOver = true;
   }
   // PLAYER WON
-  else if (adventureData.opponentHp <= 0) {
-    adventureData.playerWinState = "WIN";
-    adventureData.isMatchOver = true;
+  else if (adventureManager.opponentHp <= 0) {
+    adventureManager.playerWinState = "WIN";
+    adventureManager.isMatchOver = true;
   }
   // OPPONENT WON
-  else if (adventureData.playerHp <= 0) {
-    adventureData.playerWinState = "LOSE";
-    adventureData.isMatchOver = true;
+  else if (adventureManager.playerHp <= 0) {
+    adventureManager.playerWinState = "LOSE";
+    adventureManager.isMatchOver = true;
   }
 }
 
@@ -1170,33 +1171,33 @@ function generateGlitchedText(type) {
   }
 }
 
-function updateAdventureDisplay(adventureData, embedData) {
-  playerStand = adventureData.playerStand;
-  opponentStand = adventureData.opponentStand;
+function updateAdventureDisplay(adventureManager, embedData) {
+  playerStand = adventureManager.playerStand;
+  opponentStand = adventureManager.opponentStand;
 
-  if (adventureData.savedData) {
+  if (adventureManager.savedData) {
     for (let i = 0; i < playerStand.Ability.length; i++) {
-      adventureData.playerCooldownText += setCooldownText(
+      adventureManager.playerCooldownText += setCooldownText(
         playerStand,
         i,
-        adventureData.savedData.PlayerAbilityCount
+        adventureManager.savedData.PlayerAbilityCount
       );
     }
 
     for (let i = 0; i < opponentStand.Ability.length; i++) {
-      adventureData.opponentCooldownText += setCooldownText(
+      adventureManager.opponentCooldownText += setCooldownText(
         opponentStand,
         i,
-        adventureData.savedData.OpponentAbilityCount
+        adventureManager.savedData.OpponentAbilityCount
       );
     }
   }
 
   console.log(
-    `${adventureData.playerCooldownText} ${adventureData.opponentCooldownText}`
+    `${adventureManager.playerCooldownText} ${adventureManager.opponentCooldownText}`
   );
 
-  if (adventureData.isConfused) {
+  if (adventureManager.isConfused) {
     embedData.fightEmbed.addFields(
       {
         name: `${generateGlitchedText("short")}`,
@@ -1215,39 +1216,39 @@ function updateAdventureDisplay(adventureData, embedData) {
     embedData.fightEmbed.addFields(
       {
         name: `${playerStand.Name}`,
-        value: `Healthpoints: ${Math.max(adventureData.playerHp, 0)} / ${
+        value: `Healthpoints: ${Math.max(adventureManager.playerHp, 0)} / ${
           playerStand.Healthpoints
-        }${adventureData.playerCooldownText}`,
+        }${adventureManager.playerCooldownText}`,
       },
       {
         name: `${opponentStand.Name}`,
-        value: `Healthpoints: ${Math.max(adventureData.opponentHp, 0)} / ${
+        value: `Healthpoints: ${Math.max(adventureManager.opponentHp, 0)} / ${
           opponentStand.Healthpoints
-        }${adventureData.opponentCooldownText}`,
+        }${adventureManager.opponentCooldownText}`,
       }
     );
   }
 }
 
-function updateAbilityUI(adventureData, embedData) {
+function updateAbilityUI(adventureManager, embedData) {
   let buttons = [];
-  for (let i = 0; i < adventureData.playerStand.Ability.length; i++) {
-    if (adventureData.savedData) {
+  for (let i = 0; i < adventureManager.playerStand.Ability.length; i++) {
+    if (adventureManager.savedData) {
       if (
-        adventureData.savedData.PlayerAbilityCount[i] <
-        adventureData.playerStand.Ability[i].cooldown
+        adventureManager.savedData.PlayerAbilityCount[i] <
+        adventureManager.playerStand.Ability[i].cooldown
       )
-        adventureData.areAbilitiesInCooldown[i] = true;
-      else adventureData.areAbilitiesInCooldown[i] = false;
+        adventureManager.areAbilitiesInCooldown[i] = true;
+      else adventureManager.areAbilitiesInCooldown[i] = false;
     }
 
     abilityButton = new ButtonBuilder()
       .setLabel(`Ability ${i + 1}`)
       .setCustomId(
-        `Adventure-Ability-${adventureData.guildId}-${adventureData.player.id}-${adventureData.opponent.id}-${i}`
+        `Adventure-Ability-${adventureManager.guildId}-${adventureManager.player.id}-${adventureManager.opponent.id}-${i}`
       )
       .setStyle(ButtonStyle.Secondary)
-      .setDisabled(adventureData.areAbilitiesInCooldown[i]);
+      .setDisabled(adventureManager.areAbilitiesInCooldown[i]);
     buttons.push(abilityButton);
   }
 
@@ -1290,39 +1291,39 @@ async function reply(buttonInteract, embedList, componentList) {
   });
 }
 
-async function clearAdventureInfo(buttonInteract, adventureData) {
+async function clearAdventureInfo(buttonInteract, adventureManager) {
   await AdventureInfo.findOneAndDelete({
-    Guild: adventureData.guildId,
-    User: adventureData.player.id,
+    Guild: adventureManager.guildId,
+    User: adventureManager.player.id,
   });
   console.log("Cleared AdventureInfo");
 }
 
-async function endAdventure(buttonInteract, adventureData, embedData) {
-  await clearAdventureInfo(buttonInteract, adventureData);
+async function endAdventure(buttonInteract, adventureManager, embedData) {
+  await clearAdventureInfo(buttonInteract, adventureManager);
 
   // Set IsAdventuring to false
-  await updateAdventureSchema(PlayerBooleans, adventureData, {
+  await updateAdventureSchema(PlayerBooleans, adventureManager, {
     IsAdventuring: false,
   });
 
   // Set adventure cooldown
   await Cooldowns.create({
-    Guild: adventureData.guildId,
-    User: adventureData.player.id,
+    Guild: adventureManager.guildId,
+    User: adventureManager.player.id,
     Command: "adventure",
     Cooldown: Date.now(),
   });
 
   let playerStats = await PlayerStats.findOne({
-    Guild: adventureData.guildId,
-    User: adventureData.player.id,
+    Guild: adventureManager.guildId,
+    User: adventureManager.player.id,
   });
 
   if (!playerStats) {
     playerStats = await PlayerStats.create({
-      Guild: adventureData.guildId,
-      User: adventureData.player.id,
+      Guild: adventureManager.guildId,
+      User: adventureManager.player.id,
       DuelWins: 0,
       DuelPlays: 0,
       AdventureWins: 0,
@@ -1330,22 +1331,22 @@ async function endAdventure(buttonInteract, adventureData, embedData) {
     });
   }
 
-  if (adventureData.playerWinState == "WIN")
-    await updateAdventureSchema(PlayerStats, adventureData, {
+  if (adventureManager.playerWinState == "WIN")
+    await updateAdventureSchema(PlayerStats, adventureManager, {
       AdventureWins: playerStats.AdventureWins + 1,
       AdventurePlays: playerStats.AdventurePlays + 1,
     });
   else
-    await updateAdventureSchema(PlayerStats, adventureData, {
+    await updateAdventureSchema(PlayerStats, adventureManager, {
       AdventurePlays: playerStats.AdventurePlays + 1,
     });
 
   // DRAW
-  if (adventureData.playerWinState == "DRAW") {
+  if (adventureManager.playerWinState == "DRAW") {
     embedData.winEmbed.setTitle("The duel ended in a draw!");
 
     let embeds = orderEmbedDisplay(
-      adventureData.isPlayerFirst,
+      adventureManager.isPlayerFirst,
       "DRAW",
       embedData
     );
@@ -1353,19 +1354,19 @@ async function endAdventure(buttonInteract, adventureData, embedData) {
     await reply(buttonInteract, embeds, []);
   }
   // PLAYER WON
-  else if (adventureData.playerWinState == "WIN") {
+  else if (adventureManager.playerWinState == "WIN") {
     embedData.winEmbed.setTitle(
-      `${adventureData.player.username} won the duel!`
+      `${adventureManager.player.username} won the duel!`
     );
 
     // Handle rewards
     embedData.rewardEmbed.setTitle(
-      `${adventureData.player.username} found a loot crate!`
+      `${adventureManager.player.username} found a loot crate!`
     );
-    await giveRewards(adventureData, embedData);
+    await giveRewards(adventureManager, embedData);
 
     let embeds = orderEmbedDisplay(
-      adventureData.isPlayerFirst,
+      adventureManager.isPlayerFirst,
       "WIN",
       embedData
     );
@@ -1373,13 +1374,13 @@ async function endAdventure(buttonInteract, adventureData, embedData) {
     await reply(buttonInteract, embeds, []);
   }
   // OPPONENT WON
-  else if (adventureData.playerWinState == "LOSE") {
+  else if (adventureManager.playerWinState == "LOSE") {
     embedData.winEmbed.setTitle(
-      `${adventureData.opponent.displayName} won the duel!`
+      `${adventureManager.opponent.displayName} won the duel!`
     );
 
     let embeds = orderEmbedDisplay(
-      adventureData.isPlayerFirst,
+      adventureManager.isPlayerFirst,
       "LOSE",
       embedData
     );
@@ -1387,16 +1388,16 @@ async function endAdventure(buttonInteract, adventureData, embedData) {
     await reply(buttonInteract, embeds, []);
   }
   // PLAYER SURRENDER
-  else if (adventureData.playerWinState == "SURRENDER") {
+  else if (adventureManager.playerWinState == "SURRENDER") {
     embedData.turnEmbed.setTitle(
-      `${adventureData.player.username} surrenders! ${adventureData.opponent.displayName} wins the duel.`
+      `${adventureManager.player.username} surrenders! ${adventureManager.opponent.displayName} wins the duel.`
     );
     embedData.winEmbed.setTitle(
-      `${adventureData.opponent.displayName} won the duel!`
+      `${adventureManager.opponent.displayName} won the duel!`
     );
 
     let embeds = orderEmbedDisplay(
-      adventureData.isPlayerFirst,
+      adventureManager.isPlayerFirst,
       "SURRENDER",
       embedData
     );
@@ -1405,7 +1406,7 @@ async function endAdventure(buttonInteract, adventureData, embedData) {
   }
 }
 
-async function giveRewards(adventureData, embedData) {
+async function giveRewards(adventureManager, embedData) {
   let arrowAmount;
   let discAmount;
   let fruitAmount;
@@ -1426,11 +1427,11 @@ async function giveRewards(adventureData, embedData) {
     theWorldShardAmount = Math.floor(Math.random() * 3) + 1;
 
   let playerInventory = await Inventory.findOne({
-    Guild: adventureData.guildId,
-    User: adventureData.player.id,
+    Guild: adventureManager.guildId,
+    User: adventureManager.player.id,
   });
 
-  await updateAdventureSchema(Inventory, adventureData, {
+  await updateAdventureSchema(Inventory, adventureManager, {
     StandArrow: playerInventory.StandArrow + arrowAmount,
     StandDisc: playerInventory.StandDisc + discAmount,
     RocacacaFruit: playerInventory.RocacacaFruit + fruitAmount,
@@ -1449,7 +1450,7 @@ async function giveRewards(adventureData, embedData) {
 }
 
 module.exports = {
-  AdventureData,
+  AdventureManager,
   DuelManager,
   EmbedData,
   botTurn,
