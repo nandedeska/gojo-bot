@@ -539,21 +539,18 @@ class AdventureManager {
   }
 
   updateDisplay() {
-    playerStand = this.playerStand;
-    opponentStand = this.opponentStand;
-
     if (this.savedData) {
-      for (let i = 0; i < playerStand.Ability.length; i++) {
+      for (let i = 0; i < this.playerStand.Ability.length; i++) {
         this.playerCooldownText += setCooldownText(
-          playerStand,
+          this.playerStand,
           i,
           this.savedData.PlayerAbilityCount
         );
       }
 
-      for (let i = 0; i < opponentStand.Ability.length; i++) {
+      for (let i = 0; i < this.opponentStand.Ability.length; i++) {
         this.opponentCooldownText += setCooldownText(
-          opponentStand,
+          this.opponentStand,
           i,
           this.savedData.OpponentAbilityCount
         );
@@ -584,15 +581,15 @@ class AdventureManager {
     } else {
       this.fightEmbed.addFields(
         {
-          name: `${playerStand.Name}`,
+          name: `${this.playerStand.Name}`,
           value: `Healthpoints: ${Math.max(this.playerHp, 0)} / ${
-            playerStand.Healthpoints
+            this.playerStand.Healthpoints
           }${this.playerCooldownText}`,
         },
         {
-          name: `${opponentStand.Name}`,
+          name: `${this.opponentStand.Name}`,
           value: `Healthpoints: ${Math.max(this.opponentHp, 0)} / ${
-            opponentStand.Healthpoints
+            this.opponentStand.Healthpoints
           }${this.opponentCooldownText}`,
         }
       );
