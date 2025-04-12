@@ -978,13 +978,7 @@ class DuelManager {
         .setStyle(ButtonStyle.Danger)
     );
 
-    this.abilityButtons = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setLabel("Ability")
-        .setCustomId("Dummy")
-        .setStyle(ButtonStyle.Secondary)
-        .setDisabled(true)
-    );
+    this.abilityButtons = new ActionRowBuilder();
   }
 
   async updateSchema(schema, data, updateSave = false, player = null) {
