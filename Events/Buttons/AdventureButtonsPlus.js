@@ -135,7 +135,7 @@ module.exports = {
         TimeStopTurns: 0,
       });
     } else {
-      await adventureManager.updateAdventureSchema(AdventureInfo, {
+      await adventureManager.updateSchema(AdventureInfo, {
         PlayerHP: adventureManager.playerHp,
         OpponentHP: adventureManager.opponentHp,
         IsConfused: adventureManager.isConfused,
@@ -214,7 +214,7 @@ async function declineAdventure(buttonInteract, adventureManager) {
   });
 
   // update booleans
-  await adventureManager.updateAdventureSchema(PlayerBooleans, {
+  await adventureManager.updateSchema(PlayerBooleans, {
     IsAdventuring: false,
   });
 
@@ -276,7 +276,7 @@ async function attack(abilityCounts, adventureManager) {
     }
   }
 
-  await adventureManager.updateAdventureSchema(AdventureInfo, {
+  await adventureManager.updateSchema(AdventureInfo, {
     AttackRollHeight: 100,
     PlayerAbilityCount: abilityCounts,
     DefenseModifier: 1,
@@ -305,7 +305,7 @@ async function dodge(abilityCounts, adventureManager) {
     }
   }
 
-  await adventureManager.updateAdventureSchema(AdventureInfo, {
+  await adventureManager.updateSchema(AdventureInfo, {
     AttackRollHeight: 75,
     PlayerAbilityCount: abilityCounts,
     DefenseModifier: 1,
@@ -411,13 +411,13 @@ async function useAbility(abilityIndex, abilityCounts, adventureManager) {
   // update duel data
   // check if player used time stop ability
   if (timeStopTurns > 0)
-    await adventureManager.updateAdventureSchema(AdventureInfo, {
+    await adventureManager.updateSchema(AdventureInfo, {
       AttackRollHeight: 100,
       PlayerAbilityCount: abilityCounts,
       DefenseModifier: currentDefenseModifier,
     });
   else
-    await adventureManager.updateAdventureSchema(AdventureInfo, {
+    await adventureManager.updateSchema(AdventureInfo, {
       AttackRollHeight: 100,
       PlayerAbilityCount: abilityCounts,
       DefenseModifier: currentDefenseModifier,

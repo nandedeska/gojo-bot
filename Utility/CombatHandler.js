@@ -206,7 +206,7 @@ class AdventureManager {
           if (timeStopTurns > 0) {
             // time stop ability
             abilityCounts[i] = 0;
-            await this.updateAdventureSchema(AdventureInfo, {
+            await this.updateSchema(AdventureInfo, {
               AttackRollHeight: 100,
               OpponentAbilityCount: abilityCounts,
               DefenseModifier: nextDefenseModifier,
@@ -277,7 +277,7 @@ class AdventureManager {
           }
 
           // Update saved data
-          await this.updateAdventureSchema(AdventureInfo, {
+          await this.updateSchema(AdventureInfo, {
             AttackRollHeight: 100,
             OpponentAbilityCount: abilityCounts,
             DefenseModifier: nextDefenseModifier,
@@ -333,7 +333,7 @@ class AdventureManager {
           }
         }
 
-        await this.updateAdventureSchema(AdventureInfo, {
+        await this.updateSchema(AdventureInfo, {
           AttackRollHeight: 100,
           OpponentAbilityCount: abilityCounts,
           DefenseModifier: 1,
@@ -359,7 +359,7 @@ class AdventureManager {
         }
       }
 
-      await this.updateAdventureSchema(AdventureInfo, {
+      await this.updateSchema(AdventureInfo, {
         AttackRollHeight: 75,
         OpponentAbilityCount: abilityCounts,
         DefenseModifier: 1,
@@ -449,7 +449,7 @@ class AdventureManager {
           // Reset ability count
           abilityCounts[i] = 0;
 
-          await this.updateAdventureSchema(AdventureInfo, {
+          await this.updateSchema(AdventureInfo, {
             AttackRollHeight: 100,
             OpponentAbilityCount: abilityCounts,
             DefenseModifier: nextDefenseModifier,
@@ -487,7 +487,7 @@ class AdventureManager {
           else extraTurnEmbed.setTitle(`${this.opponentStand.Name} missed!`);
         }
 
-        await this.updateAdventureSchema(AdventureInfo, {
+        await this.updateSchema(AdventureInfo, {
           AttackRollHeight: 100,
           DefenseModifier: 1,
         });
@@ -501,7 +501,7 @@ class AdventureManager {
           `${this.opponentStand.Name} prepares to dodge!`
         );
 
-      await this.updateAdventureSchema(AdventureInfo, {
+      await this.updateSchema(AdventureInfo, {
         AttackRollHeight: 75,
         DefenseModifier: 1,
       });
@@ -661,7 +661,7 @@ class AdventureManager {
     await this.clearAdventureInfo(buttonInteract);
 
     // Set IsAdventuring to false
-    await this.updateAdventureSchema(PlayerBooleans, {
+    await this.updateSchema(PlayerBooleans, {
       IsAdventuring: false,
     });
 
@@ -690,12 +690,12 @@ class AdventureManager {
     }
 
     if (this.playerWinState == "WIN")
-      await this.updateAdventureSchema(PlayerStats, {
+      await this.updateSchema(PlayerStats, {
         AdventureWins: playerStats.AdventureWins + 1,
         AdventurePlays: playerStats.AdventurePlays + 1,
       });
     else
-      await this.updateAdventureSchema(PlayerStats, {
+      await this.updateSchema(PlayerStats, {
         AdventurePlays: playerStats.AdventurePlays + 1,
       });
 
@@ -765,7 +765,7 @@ class AdventureManager {
       User: this.player.id,
     });
 
-    await this.updateAdventureSchema(Inventory, {
+    await this.updateSchema(Inventory, {
       StandArrow: playerInventory.StandArrow + arrowAmount,
       StandDisc: playerInventory.StandDisc + discAmount,
       RocacacaFruit: playerInventory.RocacacaFruit + fruitAmount,
