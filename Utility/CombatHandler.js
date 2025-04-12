@@ -510,7 +510,7 @@ class AdventureManager {
     return extraTurnEmbed.data;
   }
 
-  async updateAdventureSchema(schema, data) {
+  async updateSchema(schema, data) {
     await schema.updateOne(
       {
         Guild: this.guildId,
