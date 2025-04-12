@@ -538,7 +538,7 @@ class AdventureManager {
     }
   }
 
-  updateAdventureDisplay() {
+  updateDisplay() {
     playerStand = this.playerStand;
     opponentStand = this.opponentStand;
 
