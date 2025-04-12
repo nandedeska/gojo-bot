@@ -51,11 +51,11 @@ module.exports = {
       adventureManager.savedData &&
       adventureManager.timeStopTurns <= 0
     ) {
-      await CombatHandler.botTurn(buttonInteract, adventureManager);
+      await adventureManager.botTurn(buttonInteract);
     }
 
     if (adventureManager.isMatchOver)
-      return CombatHandler.endAdventure(buttonInteract, adventureManager);
+      return adventureManager.endAdventure(buttonInteract);
 
     let abilityCounts;
 
@@ -91,26 +91,25 @@ module.exports = {
     }
 
     if (adventureManager.isMatchOver)
-      return CombatHandler.endAdventure(buttonInteract, adventureManager);
+      return adventureManager.endAdventure(buttonInteract, adventureManager);
 
     if (
       adventureManager.isPlayerFirst &&
       adventureManager.savedData &&
       adventureManager.timeStopTurns <= 0
     ) {
-      await CombatHandler.botTurn(buttonInteract, adventureManager);
+      await adventureManager.botTurn(buttonInteract);
     }
 
     if (adventureManager.isMatchOver)
-      return CombatHandler.endAdventure(buttonInteract, adventureManager);
+      return adventureManager.endAdventure(buttonInteract);
 
-    CombatHandler.updateAbilityUI(adventureManager);
-    CombatHandler.updateAdventureDisplay(adventureManager);
+    adventureManager.updateAbilityUI();
+    adventureManager.updateAdventureDisplay();
 
-    let embeds = CombatHandler.orderEmbedDisplay(
+    let embeds = adventureManager.orderEmbedDisplay(
       adventureManager.isPlayerFirst,
-      adventureManager.playerWinState,
-      adventureManager
+      adventureManager.playerWinState
     );
 
     if (!isNewAdventure)
@@ -136,15 +135,11 @@ module.exports = {
         TimeStopTurns: 0,
       });
     } else {
-      await CombatHandler.updateAdventureSchema(
-        AdventureInfo,
-        adventureManager,
-        {
-          PlayerHP: adventureManager.playerHp,
-          OpponentHP: adventureManager.opponentHp,
-          IsConfused: adventureManager.isConfused,
-        }
-      );
+      await adventureManager.updateAdventureSchema(AdventureInfo, {
+        PlayerHP: adventureManager.playerHp,
+        OpponentHP: adventureManager.opponentHp,
+        IsConfused: adventureManager.isConfused,
+      });
     }
   },
 };
@@ -195,8 +190,8 @@ async function acceptAdventure(buttonInteract, adventureManager) {
     });
   }
 
-  CombatHandler.updateAbilityUI(adventureManager);
-  CombatHandler.updateAdventureDisplay(adventureManager);
+  adventureManager.updateAbilityUI();
+  adventureManager.updateAdventureDisplay();
 
   await buttonInteract.deferUpdate();
   await buttonInteract.editReply({
@@ -219,7 +214,7 @@ async function declineAdventure(buttonInteract, adventureManager) {
   });
 
   // update booleans
-  await CombatHandler.updateAdventureSchema(PlayerBooleans, adventureManager, {
+  await adventureManager.updateAdventureSchema(PlayerBooleans, {
     IsAdventuring: false,
   });
 
@@ -281,14 +276,14 @@ async function attack(abilityCounts, adventureManager) {
     }
   }
 
-  await CombatHandler.updateAdventureSchema(AdventureInfo, adventureManager, {
+  await adventureManager.updateAdventureSchema(AdventureInfo, {
     AttackRollHeight: 100,
     PlayerAbilityCount: abilityCounts,
     DefenseModifier: 1,
     TimeStopTurns: adventureManager.timeStopTurns - 1,
   });
 
-  await CombatHandler.checkStandDeath(adventureManager);
+  await adventureManager.checkStandDeath();
 }
 
 async function dodge(abilityCounts, adventureManager) {
@@ -310,14 +305,14 @@ async function dodge(abilityCounts, adventureManager) {
     }
   }
 
-  await CombatHandler.updateAdventureSchema(AdventureInfo, adventureManager, {
+  await adventureManager.updateAdventureSchema(AdventureInfo, {
     AttackRollHeight: 75,
     PlayerAbilityCount: abilityCounts,
     DefenseModifier: 1,
     TimeStopTurns: adventureManager.timeStopTurns - 1,
   });
 
-  await CombatHandler.checkStandDeath(adventureManager);
+  await adventureManager.checkStandDeath();
 }
 
 async function useAbility(abilityIndex, abilityCounts, adventureManager) {
@@ -416,20 +411,20 @@ async function useAbility(abilityIndex, abilityCounts, adventureManager) {
   // update duel data
   // check if player used time stop ability
   if (timeStopTurns > 0)
-    await CombatHandler.updateAdventureSchema(AdventureInfo, adventureManager, {
+    await adventureManager.updateAdventureSchema(AdventureInfo, {
       AttackRollHeight: 100,
       PlayerAbilityCount: abilityCounts,
       DefenseModifier: currentDefenseModifier,
     });
   else
-    await CombatHandler.updateAdventureSchema(AdventureInfo, adventureManager, {
+    await adventureManager.updateAdventureSchema(AdventureInfo, {
       AttackRollHeight: 100,
       PlayerAbilityCount: abilityCounts,
       DefenseModifier: currentDefenseModifier,
       TimeStopTurns: adventureManager.timeStopTurns - 1,
     });
 
-  await CombatHandler.checkStandDeath(adventureManager);
+  await adventureManager.checkStandDeath();
 }
 
 function surrender(buttonInteract, adventureManager) {
@@ -438,5 +433,5 @@ function surrender(buttonInteract, adventureManager) {
   );
 
   adventureManager.playerWinState = "SURRENDER";
-  CombatHandler.endAdventure(buttonInteract, adventureManager);
+  adventureManager.endAdventure(buttonInteract);
 }
