@@ -176,28 +176,22 @@ class AdventureManager {
     );
   }
 
-  async botTurn(buttonInteract) {
+  async botTurn() {
     const rand = Math.random();
     this.opponentTurnEmbed = new EmbedBuilder().setColor("#D31A38");
-
-    let guildId = this.guildId;
-    let player = this.player;
-    let playerStand = this.playerStand;
-    let opponent = this.opponent;
-    let opponentStand = this.opponentStand;
 
     let abilityCounts;
     if (this.savedData) abilityCounts = this.savedData.OpponentAbilityCount;
 
     if (rand < 0.8) {
       let hasUsedAbility = false;
-      for (let i = 0; i < opponentStand.Ability.length; i++) {
-        if (abilityCounts[i] >= opponentStand.Ability[i].cooldown) {
-          let ability = opponentStand.Ability[i];
+      for (let i = 0; i < this.opponentStand.Ability.length; i++) {
+        if (abilityCounts[i] >= this.opponentStand.Ability[i].cooldown) {
+          let ability = this.opponentStand.Ability[i];
           let abilityId = ability.id;
           let abilityInfo = StandAbilities.abilities[abilityId](
-            opponentStand,
-            playerStand,
+            this.opponentStand,
+            this.playerStand,
             ability
           );
 
@@ -228,8 +222,8 @@ class AdventureManager {
             let defenseMod = 1;
             if (this.savedData) {
               this.savedData = await AdventureInfo.findOne({
-                Guild: guildId,
-                User: player.id,
+                Guild: this.guildId,
+                User: this.player.id,
               });
               defenseMod = this.savedData.DefenseModifier;
             }
@@ -239,7 +233,7 @@ class AdventureManager {
 
             if (
               attackRoll >=
-              playerStand.Defense * defenseMod * currentDefenseModifier
+              this.playerStand.Defense * defenseMod * currentDefenseModifier
             ) {
               this.playerHp -= damage;
 
@@ -248,7 +242,7 @@ class AdventureManager {
                 this.opponentHp += healAmount;
                 this.opponentHp = Math.min(
                   this.opponentHp,
-                  opponentStand.Healthpoints
+                  this.opponentStand.Healthpoints
                 );
               }
 
@@ -262,7 +256,7 @@ class AdventureManager {
                 this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
               else
                 this.opponentTurnEmbed.setTitle(
-                  `${opponentStand.Name} missed!`
+                  `${this.opponentStand.Name} missed!`
                 );
             }
           }
@@ -271,13 +265,13 @@ class AdventureManager {
             this.opponentHp += healAmount;
             this.opponentHp = Math.min(
               this.opponentHp,
-              opponentStand.Healthpoints
+              this.opponentStand.Healthpoints
             );
             this.opponentTurnEmbed.setTitle(abilityInfo[0]);
           } else this.opponentTurnEmbed.setTitle(abilityInfo[0]);
 
           // Increment all abilities except this
-          for (let j = 0; j < opponentStand.Ability.length; j++) {
+          for (let j = 0; j < this.opponentStand.Ability.length; j++) {
             if (j == i) abilityCounts[j] = 0;
             else abilityCounts[j] = this.savedData.OpponentAbilityCount[j] + 1;
           }
@@ -304,30 +298,34 @@ class AdventureManager {
 
         if (this.savedData) {
           this.savedData = await AdventureInfo.findOne({
-            Guild: guildId,
-            User: player.id,
+            Guild: this.guildId,
+            User: this.player.id,
           });
           currentDefenseModifier = this.savedData.DefenseModifier;
         }
 
-        if (attackRoll >= playerStand.Defense * currentDefenseModifier) {
-          let damage = Math.floor(Math.random() * opponentStand.Attack) + 1;
+        if (attackRoll >= this.playerStand.Defense * currentDefenseModifier) {
+          let damage =
+            Math.floor(Math.random() * this.opponentStand.Attack) + 1;
           if (this.isConfused)
             this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
           else
             this.opponentTurnEmbed.setTitle(
-              `${opponentStand.Name}'s attack hits! It deals ${damage} damage.`
+              `${this.opponentStand.Name}'s attack hits! It deals ${damage} damage.`
             );
 
           this.playerHp -= damage;
         } else {
           if (this.isConfused)
             this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-          else this.opponentTurnEmbed.setTitle(`${opponentStand.Name} missed!`);
+          else
+            this.opponentTurnEmbed.setTitle(
+              `${this.opponentStand.Name} missed!`
+            );
         }
 
         // Increment ability count
-        for (let i = 0; i < opponentStand.Ability.length; i++) {
+        for (let i = 0; i < this.opponentStand.Ability.length; i++) {
           try {
             abilityCounts[i] = this.savedData.OpponentAbilityCount[i] + 1;
           } catch (err) {
@@ -349,11 +347,11 @@ class AdventureManager {
         this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
       else
         this.opponentTurnEmbed.setTitle(
-          `${opponentStand.Name} prepares to dodge!`
+          `${this.opponentStand.Name} prepares to dodge!`
         );
 
       // increment ability count
-      for (let i = 0; i < opponentStand.Ability.length; i++) {
+      for (let i = 0; i < this.opponentStand.Ability.length; i++) {
         try {
           abilityCounts[i] = this.savedData.OpponentAbilityCount[i] + 1;
         } catch (err) {
