@@ -54,6 +54,17 @@ class AdventureManager {
   playerCooldownText;
   opponentCooldownText;
 
+  fightEmbed;
+  turnEmbed;
+  opponentTurnEmbed;
+  opponentExtraTurnEmbeds;
+  quoteEmbed;
+  winEmbed;
+  rewardEmbed;
+
+  adventureButtons;
+  abilityButtons;
+
   constructor() {}
 
   async init(guildId, player, opponent) {
@@ -96,6 +107,73 @@ class AdventureManager {
       this.isConfused = this.savedData.IsConfused;
       this.timeStopTurns = this.savedData.TimeStopTurns;
     }
+
+    this.fightEmbed = new EmbedBuilder()
+      .setAuthor({
+        name: `DUEL: ${this.player.username} vs ${this.opponent.displayName}`,
+      })
+      .setColor("#D31A38")
+      .setImage(
+        "https://cdn.discordapp.com/attachments/562958339034841098/1088740524342640700/image.png"
+      );
+
+    this.turnEmbed = new EmbedBuilder().setColor("#D31A38");
+    this.opponentTurnEmbed = null;
+    this.opponentExtraTurnEmbeds = [];
+
+    this.quoteEmbed = new EmbedBuilder()
+      .setColor("#80FEFF")
+      .setDescription(
+        `**"${
+          this.opponent.quotePool[
+            Math.floor(Math.random() * this.opponent.quotePool.length)
+          ]
+        }"**`
+      )
+      .setFooter({ text: `${this.opponent.displayName}` });
+
+    this.winEmbed = new EmbedBuilder()
+      .setColor("#D31A38")
+      .setImage(
+        "https://cdn.discordapp.com/attachments/675612229676040192/1089139526624084040/image.png"
+      );
+
+    this.rewardEmbed = new EmbedBuilder()
+      .setColor("#FFDF00")
+      .setAuthor({ name: "LOOT CRATE" })
+      .setImage(
+        "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5851f423-3ac3-4eef-88d5-2be0fc69382b/de3ayma-b38313b3-a404-4604-91e9-c7b9908f8ad1.png/v1/fill/w_1600,h_900,q_80,strp/jojo_stand_arrow_heads_by_mdwyer5_de3ayma-fullview.jpg?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9OTAwIiwicGF0aCI6IlwvZlwvNTg1MWY0MjMtM2FjMy00ZWVmLTg4ZDUtMmJlMGZjNjkzODJiXC9kZTNheW1hLWIzODMxM2IzLWE0MDQtNDYwNC05MWU5LWM3Yjk5MDhmOGFkMS5wbmciLCJ3aWR0aCI6Ijw9MTYwMCJ9XV0sImF1ZCI6WyJ1cm46c2VydmljZTppbWFnZS5vcGVyYXRpb25zIl19.y66dqY4BgvgJUSz2mCTRTKXmvoI5yxtf9yGNV349Ls0"
+      )
+      .setDescription("CONTACT DEVELOPER: REWARD EMBED ERROR");
+
+    this.adventureButtons = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("Attack")
+        .setCustomId(
+          `Adventure-Attack-${this.guildId}-${this.player.id}-${this.opponent.id}`
+        )
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setLabel("Dodge")
+        .setCustomId(
+          `Adventure-Dodge-${this.guildId}-${this.player.id}-${this.opponent.id}`
+        )
+        .setStyle(ButtonStyle.Primary),
+      new ButtonBuilder()
+        .setLabel("Surrender")
+        .setCustomId(
+          `Adventure-Surrender-${this.guildId}-${this.player.id}-${this.opponent.id}`
+        )
+        .setStyle(ButtonStyle.Danger)
+    );
+
+    this.abilityButtons = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setLabel("Ability")
+        .setCustomId("Dummy")
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(true)
+    );
   }
 }
 
@@ -619,6 +697,7 @@ class DuelManager {
   }
 }
 
+async function botTurn(buttonInteract, adventureManager) {
 class EmbedData {
   fightEmbed;
   turnEmbed;
@@ -766,9 +845,8 @@ class EmbedData {
   }
 }
 
-async function botTurn(buttonInteract, adventureManager, embedData) {
   const rand = Math.random();
-  embedData.opponentTurnEmbed = new EmbedBuilder().setColor("#D31A38");
+  adventureManager.opponentTurnEmbed = new EmbedBuilder().setColor("#D31A38");
 
   let guildId = adventureManager.guildId;
   let player = adventureManager.player;
@@ -810,11 +888,11 @@ async function botTurn(buttonInteract, adventureManager, embedData) {
           });
 
           for (let i = 0; i < timeStopTurns; i++) {
-            embedData.opponentExtraTurnEmbeds.push(
+            adventureManager.opponentExtraTurnEmbeds.push(
               await botTimeStopTurn(adventureManager)
             );
           }
-          embedData.opponentTurnEmbed.setTitle(abilityInfo[0]);
+          adventureManager.opponentTurnEmbed.setTitle(abilityInfo[0]);
         }
         // ATTACK-BASED ABILITY
         else if (damage > 0) {
@@ -847,18 +925,18 @@ async function botTurn(buttonInteract, adventureManager, embedData) {
 
             // HEARTACHES ABILITY
             if (adventureManager.isConfused)
-              embedData.opponentTurnEmbed.setTitle(
+              adventureManager.opponentTurnEmbed.setTitle(
                 generateGlitchedText("long")
               );
-            else embedData.opponentTurnEmbed.setTitle(abilityInfo[0]);
+            else adventureManager.opponentTurnEmbed.setTitle(abilityInfo[0]);
           } else {
             // HEARTACHES ABILITY
             if (adventureManager.isConfused)
-              embedData.opponentTurnEmbed.setTitle(
+              adventureManager.opponentTurnEmbed.setTitle(
                 generateGlitchedText("long")
               );
             else
-              embedData.opponentTurnEmbed.setTitle(
+              adventureManager.opponentTurnEmbed.setTitle(
                 `${opponentStand.Name} missed!`
               );
           }
@@ -870,8 +948,8 @@ async function botTurn(buttonInteract, adventureManager, embedData) {
             adventureManager.opponentHp,
             opponentStand.Healthpoints
           );
-          embedData.opponentTurnEmbed.setTitle(abilityInfo[0]);
-        } else embedData.opponentTurnEmbed.setTitle(abilityInfo[0]);
+          adventureManager.opponentTurnEmbed.setTitle(abilityInfo[0]);
+        } else adventureManager.opponentTurnEmbed.setTitle(abilityInfo[0]);
 
         // Increment all abilities except this
         for (let j = 0; j < opponentStand.Ability.length; j++) {
@@ -913,18 +991,24 @@ async function botTurn(buttonInteract, adventureManager, embedData) {
       if (attackRoll >= playerStand.Defense * currentDefenseModifier) {
         let damage = Math.floor(Math.random() * opponentStand.Attack) + 1;
         if (adventureManager.isConfused)
-          embedData.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
+          adventureManager.opponentTurnEmbed.setTitle(
+            generateGlitchedText("long")
+          );
         else
-          embedData.opponentTurnEmbed.setTitle(
+          adventureManager.opponentTurnEmbed.setTitle(
             `${opponentStand.Name}'s attack hits! It deals ${damage} damage.`
           );
 
         adventureManager.playerHp -= damage;
       } else {
         if (adventureManager.isConfused)
-          embedData.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
+          adventureManager.opponentTurnEmbed.setTitle(
+            generateGlitchedText("long")
+          );
         else
-          embedData.opponentTurnEmbed.setTitle(`${opponentStand.Name} missed!`);
+          adventureManager.opponentTurnEmbed.setTitle(
+            `${opponentStand.Name} missed!`
+          );
       }
 
       // Increment ability count
@@ -948,9 +1032,9 @@ async function botTurn(buttonInteract, adventureManager, embedData) {
   } else {
     // DODGE
     if (adventureManager.isConfused)
-      embedData.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
+      adventureManager.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
     else
-      embedData.opponentTurnEmbed.setTitle(
+      adventureManager.opponentTurnEmbed.setTitle(
         `${opponentStand.Name} prepares to dodge!`
       );
 
@@ -1171,7 +1255,7 @@ function generateGlitchedText(type) {
   }
 }
 
-function updateAdventureDisplay(adventureManager, embedData) {
+function updateAdventureDisplay(adventureManager) {
   playerStand = adventureManager.playerStand;
   opponentStand = adventureManager.opponentStand;
 
@@ -1198,7 +1282,7 @@ function updateAdventureDisplay(adventureManager, embedData) {
   );
 
   if (adventureManager.isConfused) {
-    embedData.fightEmbed.addFields(
+    adventureManager.fightEmbed.addFields(
       {
         name: `${generateGlitchedText("short")}`,
         value: `${generateGlitchedText("short")}: ${generateGlitchedText(
@@ -1213,7 +1297,7 @@ function updateAdventureDisplay(adventureManager, embedData) {
       }
     );
   } else {
-    embedData.fightEmbed.addFields(
+    adventureManager.fightEmbed.addFields(
       {
         name: `${playerStand.Name}`,
         value: `Healthpoints: ${Math.max(adventureManager.playerHp, 0)} / ${
@@ -1230,7 +1314,7 @@ function updateAdventureDisplay(adventureManager, embedData) {
   }
 }
 
-function updateAbilityUI(adventureManager, embedData) {
+function updateAbilityUI(adventureManager) {
   let buttons = [];
   for (let i = 0; i < adventureManager.playerStand.Ability.length; i++) {
     if (adventureManager.savedData) {
@@ -1252,34 +1336,36 @@ function updateAbilityUI(adventureManager, embedData) {
     buttons.push(abilityButton);
   }
 
-  embedData.abilityButtons.setComponents(buttons);
+  adventureManager.abilityButtons.setComponents(buttons);
 }
 
-function orderEmbedDisplay(isPlayerFirst, playerWinState, embedData) {
+function orderEmbedDisplay(isPlayerFirst, playerWinState, adventureManager) {
   let embeds = [];
 
   if (playerWinState == "SURRENDER") {
-    embeds.push(embedData.turnEmbed, embedData.winEmbed);
+    embeds.push(adventureManager.turnEmbed, adventureManager.winEmbed);
     return embeds;
   }
 
   if (isPlayerFirst) {
-    if (embedData.turnEmbed?.data?.title) embeds.push(embedData.turnEmbed);
-    if (embedData.opponentTurnEmbed?.data?.title)
-      embeds.push(embedData.opponentTurnEmbed);
-    if (embedData.opponentExtraTurnEmbeds.length > 0)
-      embeds.push(...embedData.opponentExtraTurnEmbeds);
+    if (adventureManager.turnEmbed?.data?.title)
+      embeds.push(adventureManager.turnEmbed);
+    if (adventureManager.opponentTurnEmbed?.data?.title)
+      embeds.push(adventureManager.opponentTurnEmbed);
+    if (adventureManager.opponentExtraTurnEmbeds.length > 0)
+      embeds.push(...adventureManager.opponentExtraTurnEmbeds);
   } else {
-    if (embedData.opponentTurnEmbed?.data?.title)
-      embeds.push(embedData.opponentTurnEmbed);
-    if (embedData.opponentExtraTurnEmbeds.length > 0)
-      embeds.push(...embedData.opponentExtraTurnEmbeds);
-    if (embedData.turnEmbed?.data?.title) embeds.push(embedData.turnEmbed);
+    if (adventureManager.opponentTurnEmbed?.data?.title)
+      embeds.push(adventureManager.opponentTurnEmbed);
+    if (adventureManager.opponentExtraTurnEmbeds.length > 0)
+      embeds.push(...adventureManager.opponentExtraTurnEmbeds);
+    if (adventureManager.turnEmbed?.data?.title)
+      embeds.push(adventureManager.turnEmbed);
   }
 
-  if (playerWinState == "ONGOING") embeds.push(embedData.fightEmbed);
-  else embeds.push(embedData.winEmbed);
-  if (playerWinState == "WIN") embeds.push(embedData.rewardEmbed);
+  if (playerWinState == "ONGOING") embeds.push(adventureManager.fightEmbed);
+  else embeds.push(adventureManager.winEmbed);
+  if (playerWinState == "WIN") embeds.push(adventureManager.rewardEmbed);
   return embeds;
 }
 
@@ -1299,7 +1385,7 @@ async function clearAdventureInfo(buttonInteract, adventureManager) {
   console.log("Cleared AdventureInfo");
 }
 
-async function endAdventure(buttonInteract, adventureManager, embedData) {
+async function endAdventure(buttonInteract, adventureManager) {
   await clearAdventureInfo(buttonInteract, adventureManager);
 
   // Set IsAdventuring to false
@@ -1343,70 +1429,70 @@ async function endAdventure(buttonInteract, adventureManager, embedData) {
 
   // DRAW
   if (adventureManager.playerWinState == "DRAW") {
-    embedData.winEmbed.setTitle("The duel ended in a draw!");
+    adventureManager.winEmbed.setTitle("The duel ended in a draw!");
 
     let embeds = orderEmbedDisplay(
       adventureManager.isPlayerFirst,
       "DRAW",
-      embedData
+      adventureManager
     );
 
     await reply(buttonInteract, embeds, []);
   }
   // PLAYER WON
   else if (adventureManager.playerWinState == "WIN") {
-    embedData.winEmbed.setTitle(
+    adventureManager.winEmbed.setTitle(
       `${adventureManager.player.username} won the duel!`
     );
 
     // Handle rewards
-    embedData.rewardEmbed.setTitle(
+    adventureManager.rewardEmbed.setTitle(
       `${adventureManager.player.username} found a loot crate!`
     );
-    await giveRewards(adventureManager, embedData);
+    await giveRewards(adventureManager, adventureManager);
 
     let embeds = orderEmbedDisplay(
       adventureManager.isPlayerFirst,
       "WIN",
-      embedData
+      adventureManager
     );
 
     await reply(buttonInteract, embeds, []);
   }
   // OPPONENT WON
   else if (adventureManager.playerWinState == "LOSE") {
-    embedData.winEmbed.setTitle(
+    adventureManager.winEmbed.setTitle(
       `${adventureManager.opponent.displayName} won the duel!`
     );
 
     let embeds = orderEmbedDisplay(
       adventureManager.isPlayerFirst,
       "LOSE",
-      embedData
+      adventureManager
     );
 
     await reply(buttonInteract, embeds, []);
   }
   // PLAYER SURRENDER
   else if (adventureManager.playerWinState == "SURRENDER") {
-    embedData.turnEmbed.setTitle(
+    adventureManager.turnEmbed.setTitle(
       `${adventureManager.player.username} surrenders! ${adventureManager.opponent.displayName} wins the duel.`
     );
-    embedData.winEmbed.setTitle(
+    adventureManager.winEmbed.setTitle(
       `${adventureManager.opponent.displayName} won the duel!`
     );
 
     let embeds = orderEmbedDisplay(
       adventureManager.isPlayerFirst,
       "SURRENDER",
-      embedData
+      adventureManager
     );
 
     await reply(buttonInteract, embeds, []);
   }
 }
 
-async function giveRewards(adventureManager, embedData) {
+async function giveRewards(adventureManager) {
   let arrowAmount;
   let discAmount;
   let fruitAmount;
@@ -1446,13 +1532,12 @@ async function giveRewards(adventureManager, embedData) {
   if (theWorldShardAmount > 0)
     rewardText += `**RARE DROP!** ${theWorldShardAmount}x The World Shard`;
 
-  embedData.rewardEmbed.data.description = rewardText;
+  adventureManager.rewardEmbed.data.description = rewardText;
 }
 
 module.exports = {
   AdventureManager,
   DuelManager,
-  EmbedData,
   botTurn,
   checkStandDeath,
   endAdventure,

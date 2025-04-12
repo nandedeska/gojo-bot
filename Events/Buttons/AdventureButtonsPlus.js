@@ -46,23 +46,16 @@ module.exports = {
 
     adventureManager.playerWinState = "ONGOING";
 
-    let embedData = new EmbedData();
-    await embedData.init(adventureManager);
-
     if (
       !adventureManager.isPlayerFirst &&
       adventureManager.savedData &&
       adventureManager.timeStopTurns <= 0
     ) {
-      await CombatHandler.botTurn(buttonInteract, adventureManager, embedData);
+      await CombatHandler.botTurn(buttonInteract, adventureManager);
     }
 
     if (adventureManager.isMatchOver)
-      return CombatHandler.endAdventure(
-        buttonInteract,
-        adventureManager,
-        embedData
-      );
+      return CombatHandler.endAdventure(buttonInteract, adventureManager);
 
     let abilityCounts;
 
@@ -79,59 +72,51 @@ module.exports = {
 
     switch (splitText[1]) {
       case "Accept":
-        await acceptAdventure(buttonInteract, adventureManager, embedData);
+        await acceptAdventure(buttonInteract, adventureManager);
         isNewAdventure = true;
         break;
       case "Decline":
         return await declineAdventure(buttonInteract, adventureManager);
       case "Attack":
-        await attack(abilityCounts, adventureManager, embedData);
+        await attack(abilityCounts, adventureManager);
         break;
       case "Dodge":
-        await dodge(abilityCounts, adventureManager, embedData);
+        await dodge(abilityCounts, adventureManager);
         break;
       case "Ability":
-        await useAbility(abilityCounts, adventureManager, embedData);
+        await useAbility(abilityCounts, adventureManager);
         break;
       case "Surrender":
-        return surrender(buttonInteract, adventureManager, embedData);
+        return surrender(buttonInteract, adventureManager);
     }
 
     if (adventureManager.isMatchOver)
-      return CombatHandler.endAdventure(
-        buttonInteract,
-        adventureManager,
-        embedData
-      );
+      return CombatHandler.endAdventure(buttonInteract, adventureManager);
 
     if (
       adventureManager.isPlayerFirst &&
       adventureManager.savedData &&
       adventureManager.timeStopTurns <= 0
     ) {
-      await CombatHandler.botTurn(buttonInteract, adventureManager, embedData);
+      await CombatHandler.botTurn(buttonInteract, adventureManager);
     }
 
     if (adventureManager.isMatchOver)
-      return CombatHandler.endAdventure(
-        buttonInteract,
-        adventureManager,
-        embedData
-      );
+      return CombatHandler.endAdventure(buttonInteract, adventureManager);
 
-    CombatHandler.updateAbilityUI(adventureManager, embedData);
-    CombatHandler.updateAdventureDisplay(adventureManager, embedData);
+    CombatHandler.updateAbilityUI(adventureManager);
+    CombatHandler.updateAdventureDisplay(adventureManager);
 
     let embeds = CombatHandler.orderEmbedDisplay(
       adventureManager.isPlayerFirst,
       adventureManager.playerWinState,
-      embedData
+      adventureManager
     );
 
     if (!isNewAdventure)
       await CombatHandler.reply(buttonInteract, embeds, [
-        embedData.adventureButtons,
-        embedData.abilityButtons,
+        adventureManager.adventureButtons,
+        adventureManager.abilityButtons,
       ]);
 
     if (!adventureManager.savedData) {
@@ -164,7 +149,7 @@ module.exports = {
   },
 };
 
-async function acceptAdventure(buttonInteract, adventureManager, embedData) {
+async function acceptAdventure(buttonInteract, adventureManager) {
   // check if player is in cooldown
   const cooldown = await Cooldowns.findOne({
     Guild: adventureManager.guildId,
@@ -210,14 +195,17 @@ async function acceptAdventure(buttonInteract, adventureManager, embedData) {
     });
   }
 
-  CombatHandler.updateAbilityUI(adventureManager, embedData);
-  CombatHandler.updateAdventureDisplay(adventureManager, embedData);
+  CombatHandler.updateAbilityUI(adventureManager);
+  CombatHandler.updateAdventureDisplay(adventureManager);
 
   await buttonInteract.deferUpdate();
   await buttonInteract.editReply({
     content: null,
-    embeds: [embedData.quoteEmbed, embedData.fightEmbed],
-    components: [embedData.adventureButtons, embedData.abilityButtons],
+    embeds: [adventureManager.quoteEmbed, adventureManager.fightEmbed],
+    components: [
+      adventureManager.adventureButtons,
+      adventureManager.abilityButtons,
+    ],
   });
 }
 
@@ -243,7 +231,7 @@ async function declineAdventure(buttonInteract, adventureManager) {
   });
 }
 
-async function attack(abilityCounts, adventureManager, embedData) {
+async function attack(abilityCounts, adventureManager) {
   var attackRoll =
     Math.floor(Math.random() * adventureManager.attackRollHeight) + 1;
 
@@ -265,22 +253,22 @@ async function attack(abilityCounts, adventureManager, embedData) {
       Math.floor(Math.random() * adventureManager.playerStand.Attack) + 1;
 
     if (adventureManager.isConfused) {
-      embedData.turnEmbed.setTitle(
+      adventureManager.turnEmbed.setTitle(
         CombatHandler.generateGlitchedText("long")
       );
     } else
-      embedData.turnEmbed.setTitle(
+      adventureManager.turnEmbed.setTitle(
         `${adventureManager.playerStand.Name}'s attack hits! It deals ${damage} damage.`
       );
 
     adventureManager.opponentHp -= damage;
   } else {
     if (adventureManager.isConfused)
-      embedData.turnEmbed.setTitle(
+      adventureManager.turnEmbed.setTitle(
         CombatHandler.generateGlitchedText("long")
       );
     else
-      embedData.turnEmbed.setTitle(
+      adventureManager.turnEmbed.setTitle(
         `${adventureManager.playerStand.Name} missed!`
       );
   }
@@ -303,13 +291,13 @@ async function attack(abilityCounts, adventureManager, embedData) {
   await CombatHandler.checkStandDeath(adventureManager);
 }
 
-async function dodge(abilityCounts, adventureManager, embedData) {
+async function dodge(abilityCounts, adventureManager) {
   if (adventureManager.isConfused)
-    embedData.turnEmbed.setTitle(
+    adventureManager.turnEmbed.setTitle(
       CombatHandler.generateGlitchedText("long")
     );
   else
-    embedData.turnEmbed.setTitle(
+    adventureManager.turnEmbed.setTitle(
       `${adventureManager.playerStand.Name} prepares to dodge!`
     );
 
@@ -332,7 +320,7 @@ async function dodge(abilityCounts, adventureManager, embedData) {
   await CombatHandler.checkStandDeath(adventureManager);
 }
 
-async function useAbility(abilityIndex, abilityCounts, adventureManager, embedData) {
+async function useAbility(abilityIndex, abilityCounts, adventureManager) {
   // fetch ability
   let ability = adventureManager.playerStand.Ability[abilityIndex];
   let abilityId = ability.id;
@@ -444,11 +432,11 @@ async function useAbility(abilityIndex, abilityCounts, adventureManager, embedDa
   await CombatHandler.checkStandDeath(adventureManager);
 }
 
-function surrender(buttonInteract, adventureManager, embedData) {
-  embedData.turnEmbed.setTitle(
+function surrender(buttonInteract, adventureManager) {
+  adventureManager.turnEmbed.setTitle(
     `${adventureManager.player.username} surrenders! ${adventureManager.opponent.displayName} wins the duel.`
   );
 
   adventureManager.playerWinState = "SURRENDER";
-  CombatHandler.endAdventure(buttonInteract, adventureManager, embedData);
+  CombatHandler.endAdventure(buttonInteract, adventureManager);
 }
