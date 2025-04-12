@@ -608,7 +608,7 @@ class AdventureManager {
         else this.areAbilitiesInCooldown[i] = false;
       }
 
-      abilityButton = new ButtonBuilder()
+      let abilityButton = new ButtonBuilder()
         .setLabel(`Ability ${i + 1}`)
         .setCustomId(
           `Adventure-Ability-${this.guildId}-${this.player.id}-${this.opponent.id}-${i}`
