@@ -621,15 +621,15 @@ class AdventureManager {
     this.abilityButtons.setComponents(buttons);
   }
 
-  orderEmbedDisplay(isPlayerFirst, playerWinState) {
+  orderEmbedDisplay() {
     let embeds = [];
 
-    if (playerWinState == "SURRENDER") {
+    if (this.playerWinState == "SURRENDER") {
       embeds.push(this.turnEmbed, this.winEmbed);
       return embeds;
     }
 
-    if (isPlayerFirst) {
+    if (this.isPlayerFirst) {
       if (this.turnEmbed?.data?.title) embeds.push(this.turnEmbed);
       if (this.opponentTurnEmbed?.data?.title)
         embeds.push(this.opponentTurnEmbed);
@@ -643,9 +643,9 @@ class AdventureManager {
       if (this.turnEmbed?.data?.title) embeds.push(this.turnEmbed);
     }
 
-    if (playerWinState == "ONGOING") embeds.push(this.fightEmbed);
+    if (this.playerWinState == "ONGOING") embeds.push(this.fightEmbed);
     else embeds.push(this.winEmbed);
-    if (playerWinState == "WIN") embeds.push(this.rewardEmbed);
+    if (this.playerWinState == "WIN") embeds.push(this.rewardEmbed);
     return embeds;
   }
 
