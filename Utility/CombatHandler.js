@@ -118,7 +118,7 @@ class AdventureManager {
       );
 
     this.turnEmbed = new EmbedBuilder().setColor("#D31A38");
-    this.opponentTurnEmbed = null;
+    this.opponentTurnEmbed = new EmbedBuilder().setColor("#D31A38");
     this.opponentExtraTurnEmbeds = [];
 
     this.quoteEmbed = new EmbedBuilder()
@@ -178,7 +178,6 @@ class AdventureManager {
 
   async botTurn() {
     const rand = Math.random();
-    this.opponentTurnEmbed = new EmbedBuilder().setColor("#D31A38");
 
     let abilityCounts;
     if (this.savedData) abilityCounts = this.savedData.OpponentAbilityCount;
