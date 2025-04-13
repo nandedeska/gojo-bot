@@ -1,5 +1,168 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require("discord.js");
+const {
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  Embed,
+} = require("discord.js");
 const CombatHandler = require("../Utility/CombatHandler");
+
+describe("AdventureManager", () => {
+  let adventureManager;
+
+  beforeEach(() => {
+    adventureManager = new CombatHandler.AdventureManager();
+  });
+
+  describe("orderEmbedDisplay()", () => {
+    beforeEach(() => {
+      adventureManager.fightEmbed = new EmbedBuilder();
+      adventureManager.turnEmbed = new EmbedBuilder();
+      adventureManager.opponentTurnEmbed = new EmbedBuilder();
+      adventureManager.quoteEmbed = new EmbedBuilder();
+      adventureManager.winEmbed = new EmbedBuilder();
+      adventureManager.rewardEmbed = new EmbedBuilder();
+      adventureManager.opponentExtraTurnEmbeds = [];
+    });
+
+    describe("if player goes first", () => {
+      beforeEach(() => {
+        adventureManager.isPlayerFirst = true;
+      });
+
+      it("should not return opponentTurnEmbed when it has no content", () => {
+        let turnEmbed = new EmbedBuilder();
+        let fightEmbed = new EmbedBuilder();
+        adventureManager.playerWinState = "ONGOING";
+
+        let result = adventureManager.orderEmbedDisplay();
+
+        expect(result).toStrictEqual([turnEmbed, fightEmbed]);
+      });
+
+      it("should return opponentTurnEmbed when it has content", () => {
+        let turnEmbed = new EmbedBuilder();
+        let opponentTurnEmbed = new EmbedBuilder().setTitle("Opponent Turn");
+        let fightEmbed = new EmbedBuilder();
+        adventureManager.opponentTurnEmbed.setTitle("Opponent Turn");
+        adventureManager.playerWinState = "ONGOING";
+
+        let result = adventureManager.orderEmbedDisplay();
+
+        expect(result).toStrictEqual([
+          turnEmbed,
+          opponentTurnEmbed,
+          fightEmbed,
+        ]);
+      });
+
+      it("should return opponentExtraTurnEmbeds when they are present", () => {
+        let turnEmbed = new EmbedBuilder();
+        let opponentTurnEmbed = new EmbedBuilder().setTitle("Opponent Turn");
+        let fightEmbed = new EmbedBuilder();
+        adventureManager.opponentTurnEmbed.setTitle("Opponent Turn");
+        adventureManager.opponentExtraTurnEmbeds = [0, 0, 0];
+        adventureManager.playerWinState = "ONGOING";
+
+        let result = adventureManager.orderEmbedDisplay();
+
+        expect(result).toStrictEqual([
+          turnEmbed,
+          opponentTurnEmbed,
+          0,
+          0,
+          0,
+          fightEmbed,
+        ]);
+      });
+    });
+
+    describe("if opponent goes first", () => {
+      beforeEach(() => {
+        adventureManager.isPlayerFirst = false;
+      });
+
+      it("should not return turnEmbed when it has no content", () => {
+        let opponentTurnEmbed = new EmbedBuilder();
+        let fightEmbed = new EmbedBuilder();
+        adventureManager.playerWinState = "ONGOING";
+
+        let result = adventureManager.orderEmbedDisplay();
+
+        expect(result).toStrictEqual([opponentTurnEmbed, fightEmbed]);
+      });
+
+      it("should return turnEmbed when it has content", () => {
+        let turnEmbed = new EmbedBuilder().setTitle("Player Turn");
+        let opponentTurnEmbed = new EmbedBuilder();
+        let fightEmbed = new EmbedBuilder();
+        adventureManager.turnEmbed.setTitle("Player Turn");
+        adventureManager.playerWinState = "ONGOING";
+
+        let result = adventureManager.orderEmbedDisplay();
+
+        expect(result).toStrictEqual([
+          opponentTurnEmbed,
+          turnEmbed,
+          fightEmbed,
+        ]);
+      });
+
+      it("should return opponentExtraTurnEmbeds when they are present", () => {
+        let turnEmbed = new EmbedBuilder().setTitle("Player Turn");
+        let opponentTurnEmbed = new EmbedBuilder();
+        let fightEmbed = new EmbedBuilder();
+        adventureManager.turnEmbed.setTitle("Player Turn");
+        adventureManager.opponentExtraTurnEmbeds = [0, 0, 0];
+        adventureManager.playerWinState = "ONGOING";
+
+        let result = adventureManager.orderEmbedDisplay();
+
+        expect(result).toStrictEqual([
+          opponentTurnEmbed,
+          0,
+          0,
+          0,
+          turnEmbed,
+          fightEmbed,
+        ]);
+      });
+    });
+
+    it("should return winEmbed when match is over", () => {
+      let turnEmbed = new EmbedBuilder();
+      let winEmbed = new EmbedBuilder();
+      adventureManager.isPlayerFirst = true;
+      adventureManager.playerWinState = "";
+
+      let result = adventureManager.orderEmbedDisplay();
+
+      expect(result).toStrictEqual([turnEmbed, winEmbed]);
+    });
+
+    it("should return rewardEmbed when player is winner", () => {
+      let turnEmbed = new EmbedBuilder();
+      let winEmbed = new EmbedBuilder();
+      let rewardEmbed = new EmbedBuilder();
+      adventureManager.isPlayerFirst = true;
+      adventureManager.playerWinState = "WIN";
+
+      let result = adventureManager.orderEmbedDisplay();
+
+      expect(result).toStrictEqual([turnEmbed, winEmbed, rewardEmbed]);
+    });
+
+    it("should return turnEmbed and winEmbed when player surrenders", () => {
+      let turnEmbed = new EmbedBuilder();
+      let winEmbed = new EmbedBuilder();
+      adventureManager.isPlayerFirst = true;
+      adventureManager.playerWinState = "SURRENDER";
+
+      let result = adventureManager.orderEmbedDisplay();
+
+      expect(result).toStrictEqual([turnEmbed, winEmbed]);
+    });
+  });
+});
 
 describe("DuelManager", () => {
   /*describe("init()", () => {

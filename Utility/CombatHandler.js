@@ -629,14 +629,13 @@ class AdventureManager {
     }
 
     if (this.isPlayerFirst) {
-      if (this.turnEmbed?.data?.title) embeds.push(this.turnEmbed);
+      embeds.push(this.turnEmbed);
       if (this.opponentTurnEmbed?.data?.title)
         embeds.push(this.opponentTurnEmbed);
       if (this.opponentExtraTurnEmbeds.length > 0)
         embeds.push(...this.opponentExtraTurnEmbeds);
     } else {
-      if (this.opponentTurnEmbed?.data?.title)
-        embeds.push(this.opponentTurnEmbed);
+      embeds.push(this.opponentTurnEmbed);
       if (this.opponentExtraTurnEmbeds.length > 0)
         embeds.push(...this.opponentExtraTurnEmbeds);
       if (this.turnEmbed?.data?.title) embeds.push(this.turnEmbed);
