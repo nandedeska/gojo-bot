@@ -356,7 +356,7 @@ async function useAbility(abilityIndex, adventureManager) {
 
         adventureManager.playerHp = Math.min(
           adventureManager.playerHp,
-          playerStand.Healthpoints
+          adventureManager.playerStand.Healthpoints
         );
       }
 
@@ -381,7 +381,7 @@ async function useAbility(abilityIndex, adventureManager) {
 
     adventureManager.playerHp = Math.min(
       adventureManager.playerHp,
-      playerStand.Healthpoints
+      adventureManager.playerStand.Healthpoints
     );
     adventureManager.turnEmbed.setTitle(abilityInfo[0]);
   }
