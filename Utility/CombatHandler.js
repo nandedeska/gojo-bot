@@ -701,7 +701,7 @@ class AdventureManager {
     if (this.playerWinState == "DRAW") {
       this.winEmbed.setTitle("The duel ended in a draw!");
 
-      let embeds = this.orderEmbedDisplay(this.isPlayerFirst, "DRAW");
+      let embeds = this.orderEmbedDisplay();
 
       await reply(buttonInteract, embeds, []);
     }
@@ -713,7 +713,7 @@ class AdventureManager {
       this.rewardEmbed.setTitle(`${this.player.username} found a loot crate!`);
       await this.giveRewards();
 
-      let embeds = this.orderEmbedDisplay(this.isPlayerFirst, "WIN");
+      let embeds = this.orderEmbedDisplay();
 
       await reply(buttonInteract, embeds, []);
     }
@@ -721,7 +721,7 @@ class AdventureManager {
     else if (this.playerWinState == "LOSE") {
       this.winEmbed.setTitle(`${this.opponent.displayName} won the duel!`);
 
-      let embeds = this.orderEmbedDisplay(this.isPlayerFirst, "LOSE");
+      let embeds = this.orderEmbedDisplay();
 
       await reply(buttonInteract, embeds, []);
     }
@@ -732,7 +732,7 @@ class AdventureManager {
       );
       this.winEmbed.setTitle(`${this.opponent.displayName} won the duel!`);
 
-      let embeds = this.orderEmbedDisplay(this.isPlayerFirst, "SURRENDER");
+      let embeds = this.orderEmbedDisplay();
 
       await reply(buttonInteract, embeds, []);
     }

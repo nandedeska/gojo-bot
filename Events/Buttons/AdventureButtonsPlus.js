@@ -107,10 +107,7 @@ module.exports = {
     adventureManager.updateAbilityUI();
     adventureManager.updateDisplay();
 
-    let embeds = adventureManager.orderEmbedDisplay(
-      adventureManager.isPlayerFirst,
-      adventureManager.playerWinState
-    );
+    let embeds = adventureManager.orderEmbedDisplay();
 
     if (!isNewAdventure)
       await CombatHandler.reply(buttonInteract, embeds, [
