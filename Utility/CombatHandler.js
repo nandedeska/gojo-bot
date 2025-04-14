@@ -632,6 +632,37 @@ class AdventureManager {
     this.abilityButtons.setComponents(buttons);
   }
 
+  updateAbilityCounts(stand, exceptionIndex = -1) {
+    let otherStand =
+      stand == this.playerStand ? this.opponentStand : this.playerStand;
+
+    for (let i = 0; i < stand.Ability.length; i++) {
+      let abilityInfo = StandAbilities.abilities[stand.Ability[i].id](
+        stand,
+        otherStand,
+        stand.Ability[i]
+      );
+      let isTimeStopAbility = abilityInfo[6] > 0;
+
+      if (stand == this.playerStand) {
+        if (i == exceptionIndex) {
+          if (isTimeStopAbility) this.playerAbilityCount[i] = -abilityInfo[6];
+          else this.playerAbilityCount[i] = 0;
+        } else {
+          this.playerAbilityCount[i] = this.savedData.PlayerAbilityCount[i] + 1;
+        }
+      } else if (stand == this.opponentStand) {
+        if (i == exceptionIndex) {
+          if (isTimeStopAbility) this.opponentAbilityCount[i] = -abilityInfo[6];
+          else this.opponentAbilityCount[i] = 0;
+        } else {
+          this.opponentAbilityCount[i] =
+            this.savedData.OpponentAbilityCount[i] + 1;
+        }
+      }
+    }
+  }
+
   orderEmbedDisplay() {
     let embeds = [];
 

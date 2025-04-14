@@ -13,6 +13,137 @@ describe("AdventureManager", () => {
     adventureManager = new CombatHandler.AdventureManager();
   });
 
+  describe("updateAbilityCounts()", () => {
+    beforeEach(() => {
+      adventureManager.playerAbilityCount = [0, 0, 0];
+      adventureManager.opponentAbilityCount = [0, 0, 0];
+      adventureManager.savedData = {
+        PlayerAbilityCount: [1, 2, 3],
+        OpponentAbilityCount: [4, 5, 6],
+      };
+    });
+
+    it("should increment all player ability counts when no exception index is passed", () => {
+      adventureManager.playerStand = {
+        Ability: [{ id: "barrage" }, { id: "barrage" }, { id: "barrage" }],
+      };
+      adventureManager.timeStopTurns = 0;
+      let stand = adventureManager.playerStand;
+
+      adventureManager.updateAbilityCounts(stand);
+      let result = adventureManager.playerAbilityCount;
+
+      expect(result).toStrictEqual([2, 3, 4]);
+    });
+
+    it("should increment all opponent ability counts when no exception index is passed", () => {
+      adventureManager.opponentStand = {
+        Ability: [{ id: "barrage" }, { id: "barrage" }, { id: "barrage" }],
+      };
+      adventureManager.timeStopTurns = 0;
+      let stand = adventureManager.opponentStand;
+
+      adventureManager.updateAbilityCounts(stand);
+      let result = adventureManager.opponentAbilityCount;
+
+      expect(result).toStrictEqual([5, 6, 7]);
+    });
+
+    it("should increment all player ability counts but reset one when an exception index is passed", () => {
+      adventureManager.playerStand = {
+        Ability: [{ id: "barrage" }, { id: "barrage" }, { id: "barrage" }],
+      };
+      adventureManager.timeStopTurns = 0;
+      let stand = adventureManager.playerStand;
+
+      adventureManager.updateAbilityCounts(stand, 1);
+      let result = adventureManager.playerAbilityCount;
+
+      expect(result).toStrictEqual([2, 0, 4]);
+    });
+
+    it("should increment all opponent ability counts but reset one when an exception index is passed", () => {
+      adventureManager.opponentStand = {
+        Ability: [{ id: "barrage" }, { id: "barrage" }, { id: "barrage" }],
+      };
+      adventureManager.timeStopTurns = 0;
+      let stand = adventureManager.opponentStand;
+
+      adventureManager.updateAbilityCounts(stand, 2);
+      let result = adventureManager.opponentAbilityCount;
+
+      expect(result).toStrictEqual([5, 6, 0]);
+    });
+
+    it("should increment player time stop ability count when time is not stopped", () => {
+      adventureManager.playerStand = {
+        Ability: [
+          { id: "barrage" },
+          { id: "timestop", turns: 3 },
+          { id: "barrage" },
+        ],
+      };
+      adventureManager.timeStopTurns = 0;
+      let stand = adventureManager.playerStand;
+
+      adventureManager.updateAbilityCounts(stand);
+      let result = adventureManager.playerAbilityCount;
+
+      expect(result).toStrictEqual([2, 3, 4]);
+    });
+
+    it("should increment opponent time stop ability count when time is not stopped", () => {
+      adventureManager.opponentStand = {
+        Ability: [
+          { id: "barrage" },
+          { id: "barrage" },
+          { id: "timestop", turns: 4 },
+        ],
+      };
+      adventureManager.timeStopTurns = 0;
+      let stand = adventureManager.opponentStand;
+
+      adventureManager.updateAbilityCounts(stand);
+      let result = adventureManager.opponentAbilityCount;
+
+      expect(result).toStrictEqual([5, 6, 7]);
+    });
+
+    it("should set player time stop ability count below zero when time stop is used", () => {
+      adventureManager.playerStand = {
+        Ability: [
+          { id: "barrage" },
+          { id: "timestop", turns: 3 },
+          { id: "barrage" },
+        ],
+      };
+      adventureManager.timeStopTurns = 1;
+      let stand = adventureManager.playerStand;
+
+      adventureManager.updateAbilityCounts(stand, 1);
+      let result = adventureManager.playerAbilityCount;
+
+      expect(result).toStrictEqual([2, -3, 4]);
+    });
+
+    it("should set opponent time stop ability count below zero when time stop is used", () => {
+      adventureManager.opponentStand = {
+        Ability: [
+          { id: "barrage" },
+          { id: "barrage" },
+          { id: "timestop", turns: 4 },
+        ],
+      };
+      adventureManager.timeStopTurns = 1;
+      let stand = adventureManager.opponentStand;
+
+      adventureManager.updateAbilityCounts(stand, 2);
+      let result = adventureManager.opponentAbilityCount;
+
+      expect(result).toStrictEqual([5, 6, -4]);
+    });
+  });
+
   describe("orderEmbedDisplay()", () => {
     beforeEach(() => {
       adventureManager.fightEmbed = new EmbedBuilder();
