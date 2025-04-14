@@ -78,7 +78,7 @@ module.exports = {
         await dodge(adventureManager);
         break;
       case "Ability":
-        await useAbility(adventureManager);
+        await useAbility(splitText[5], adventureManager);
         break;
       case "Surrender":
         return surrender(buttonInteract, adventureManager);
