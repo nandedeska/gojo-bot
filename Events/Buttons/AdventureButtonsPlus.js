@@ -257,14 +257,7 @@ async function attack(adventureManager) {
       );
   }
 
-  for (let i = 0; i < adventureManager.playerStand.Ability.length; i++) {
-    try {
-      adventureManager.playerAbilityCount[i] =
-        adventureManager.savedData.PlayerAbilityCount[i] + 1;
-    } catch (err) {
-      console.log(err);
-    }
-  }
+  adventureManager.updateAbilityCounts(adventureManager.playerStand);
 
   await adventureManager.updateSchema(AdventureInfo, {
     AttackRollHeight: 100,
@@ -287,14 +280,7 @@ async function dodge(adventureManager) {
     );
 
   // increment ability count
-  for (let i = 0; i < adventureManager.playerStand.Ability.length; i++) {
-    try {
-      adventureManager.playerAbilityCount[i] =
-        adventureManager.savedData.PlayerAbilityCount[i] + 1;
-    } catch (err) {
-      console.log(err);
-    }
-  }
+  adventureManager.updateAbilityCounts(adventureManager.playerStand);
 
   await adventureManager.updateSchema(AdventureInfo, {
     AttackRollHeight: 75,
@@ -387,18 +373,10 @@ async function useAbility(abilityIndex, adventureManager) {
   }
 
   // increment other ability counts except for used ability
-  for (let i = 0; i < adventureManager.playerStand.Ability.length; i++) {
-    if (i == abilityIndex) {
-      adventureManager.playerAbilityCount[i] = 0;
-    } else {
-      try {
-        adventureManager.playerAbilityCount[i] =
-          adventureManager.savedData.PlayerAbilityCount[i] + 1;
-      } catch (err) {
-        console.log(err);
-      }
-    }
-  }
+  adventureManager.updateAbilityCounts(
+    adventureManager.playerStand,
+    abilityIndex
+  );
 
   // update duel data
   // check if player used time stop ability

@@ -278,13 +278,7 @@ class AdventureManager {
             this.opponentTurnEmbed.setTitle(abilityInfo[0]);
           } else this.opponentTurnEmbed.setTitle(abilityInfo[0]);
 
-          // Increment all abilities except this
-          for (let j = 0; j < this.opponentStand.Ability.length; j++) {
-            if (j == i) this.opponentAbilityCount[j] = 0;
-            else
-              this.opponentAbilityCount[j] =
-                this.savedData.OpponentAbilityCount[j] + 1;
-          }
+          this.updateAbilityCounts(this.opponentStand, i);
 
           // Update saved data
           await this.updateSchema(AdventureInfo, {
@@ -335,14 +329,7 @@ class AdventureManager {
         }
 
         // Increment ability count
-        for (let i = 0; i < this.opponentStand.Ability.length; i++) {
-          try {
-            this.opponentAbilityCount[i] =
-              this.savedData.OpponentAbilityCount[i] + 1;
-          } catch (err) {
-            console.log(err);
-          }
-        }
+        this.updateAbilityCounts(this.opponentStand);
 
         await this.updateSchema(AdventureInfo, {
           AttackRollHeight: 100,
@@ -362,14 +349,7 @@ class AdventureManager {
         );
 
       // increment ability count
-      for (let i = 0; i < this.opponentStand.Ability.length; i++) {
-        try {
-          this.opponentAbilityCount[i] =
-            this.savedData.OpponentAbilityCount[i] + 1;
-        } catch (err) {
-          console.log(err);
-        }
-      }
+      this.updateAbilityCounts(this.opponentStand);
 
       await this.updateSchema(AdventureInfo, {
         AttackRollHeight: 75,
