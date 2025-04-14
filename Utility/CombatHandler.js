@@ -42,6 +42,9 @@ class AdventureManager {
 
   savedData;
 
+  playerAbilityCount;
+  opponentAbilityCount;
+
   attackRollHeight;
   timeStopTurns;
 
@@ -92,6 +95,11 @@ class AdventureManager {
     );
     this.isConfused = false;
 
+    this.playerAbilityCount = Array(this.playerStand.Ability.length).fill(0);
+    this.opponentAbilityCount = Array(this.opponentStand.Ability.length).fill(
+      0
+    );
+
     this.playerCooldownText = "";
     this.opponentCooldownText = "";
 
@@ -106,6 +114,8 @@ class AdventureManager {
       this.attackRollHeight = this.savedData.AttackRollHeight;
       this.isConfused = this.savedData.IsConfused;
       this.timeStopTurns = this.savedData.TimeStopTurns;
+      this.playerAbilityCount = this.savedData.PlayerAbilityCount;
+      this.opponentAbilityCount = this.savedData.OpponentAbilityCount;
     }
 
     this.fightEmbed = new EmbedBuilder()
@@ -179,13 +189,12 @@ class AdventureManager {
   async botTurn() {
     const rand = Math.random();
 
-    let abilityCounts;
-    if (this.savedData) abilityCounts = this.savedData.OpponentAbilityCount;
-
     if (rand < 0.8) {
       let hasUsedAbility = false;
       for (let i = 0; i < this.opponentStand.Ability.length; i++) {
-        if (abilityCounts[i] >= this.opponentStand.Ability[i].cooldown) {
+        if (
+          this.opponentAbilityCount[i] >= this.opponentStand.Ability[i].cooldown
+        ) {
           let ability = this.opponentStand.Ability[i];
           let abilityId = ability.id;
           let abilityInfo = StandAbilities.abilities[abilityId](
@@ -204,10 +213,10 @@ class AdventureManager {
           // TIME STOP ABILITY
           if (timeStopTurns > 0) {
             // time stop ability
-            abilityCounts[i] = 0;
+            this.opponentAbilityCount[i] = 0;
             await this.updateSchema(AdventureInfo, {
               AttackRollHeight: 100,
-              OpponentAbilityCount: abilityCounts,
+              OpponentAbilityCount: this.opponentAbilityCount,
               DefenseModifier: nextDefenseModifier,
             });
 
@@ -271,14 +280,16 @@ class AdventureManager {
 
           // Increment all abilities except this
           for (let j = 0; j < this.opponentStand.Ability.length; j++) {
-            if (j == i) abilityCounts[j] = 0;
-            else abilityCounts[j] = this.savedData.OpponentAbilityCount[j] + 1;
+            if (j == i) this.opponentAbilityCount[j] = 0;
+            else
+              this.opponentAbilityCount[j] =
+                this.savedData.OpponentAbilityCount[j] + 1;
           }
 
           // Update saved data
           await this.updateSchema(AdventureInfo, {
             AttackRollHeight: 100,
-            OpponentAbilityCount: abilityCounts,
+            OpponentAbilityCount: this.opponentAbilityCount,
             DefenseModifier: nextDefenseModifier,
           });
 
@@ -326,7 +337,8 @@ class AdventureManager {
         // Increment ability count
         for (let i = 0; i < this.opponentStand.Ability.length; i++) {
           try {
-            abilityCounts[i] = this.savedData.OpponentAbilityCount[i] + 1;
+            this.opponentAbilityCount[i] =
+              this.savedData.OpponentAbilityCount[i] + 1;
           } catch (err) {
             console.log(err);
           }
@@ -334,7 +346,7 @@ class AdventureManager {
 
         await this.updateSchema(AdventureInfo, {
           AttackRollHeight: 100,
-          OpponentAbilityCount: abilityCounts,
+          OpponentAbilityCount: this.opponentAbilityCount,
           DefenseModifier: 1,
         });
 
@@ -352,7 +364,8 @@ class AdventureManager {
       // increment ability count
       for (let i = 0; i < this.opponentStand.Ability.length; i++) {
         try {
-          abilityCounts[i] = this.savedData.OpponentAbilityCount[i] + 1;
+          this.opponentAbilityCount[i] =
+            this.savedData.OpponentAbilityCount[i] + 1;
         } catch (err) {
           console.log(err);
         }
@@ -360,7 +373,7 @@ class AdventureManager {
 
       await this.updateSchema(AdventureInfo, {
         AttackRollHeight: 75,
-        OpponentAbilityCount: abilityCounts,
+        OpponentAbilityCount: this.opponentAbilityCount,
         DefenseModifier: 1,
       });
 
@@ -370,9 +383,6 @@ class AdventureManager {
 
   async botTimeStopTurn() {
     const rand = Math.random();
-    let abilityCounts;
-
-    if (this.savedData) abilityCounts = this.savedData.OpponentAbilityCount;
 
     let extraTurnEmbed = new EmbedBuilder().setColor("#D31A38");
     if (rand < 0.95) {
@@ -380,7 +390,9 @@ class AdventureManager {
       let hasUsedAbility = false;
       for (let i = 0; i < this.opponentStand.Ability.length; i++) {
         // Check if bot can use ability
-        if (abilityCounts[i] >= this.opponentStand.Ability[i].cooldown) {
+        if (
+          this.opponentAbilityCount[i] >= this.opponentStand.Ability[i].cooldown
+        ) {
           console.log(`BOT: ABILITY ${i + 1}`);
           // fetch ability
           let ability = this.opponentStand.Ability[i];
@@ -446,11 +458,11 @@ class AdventureManager {
           } else extraTurnEmbed.setTitle(abilityInfo[0]);
 
           // Reset ability count
-          abilityCounts[i] = 0;
+          this.opponentAbilityCount[i] = 0;
 
           await this.updateSchema(AdventureInfo, {
             AttackRollHeight: 100,
-            OpponentAbilityCount: abilityCounts,
+            OpponentAbilityCount: this.opponentAbilityCount,
             DefenseModifier: nextDefenseModifier,
           });
 

@@ -57,16 +57,10 @@ module.exports = {
     if (adventureManager.isMatchOver)
       return adventureManager.endAdventure(buttonInteract);
 
-    let abilityCounts;
-
     let player = adventureManager.player;
     let playerStand = adventureManager.playerStand;
     let opponent = adventureManager.opponent;
     let opponentStand = adventureManager.opponentStand;
-
-    if (adventureManager.savedData)
-      abilityCounts = adventureManager.savedData.PlayerAbilityCount;
-    else abilityCounts = Array(playerStand.Ability.length).fill(0);
 
     let isNewAdventure = false;
 
@@ -78,13 +72,13 @@ module.exports = {
       case "Decline":
         return await declineAdventure(buttonInteract, adventureManager);
       case "Attack":
-        await attack(abilityCounts, adventureManager);
+        await attack(adventureManager);
         break;
       case "Dodge":
-        await dodge(abilityCounts, adventureManager);
+        await dodge(adventureManager);
         break;
       case "Ability":
-        await useAbility(abilityCounts, adventureManager);
+        await useAbility(adventureManager);
         break;
       case "Surrender":
         return surrender(buttonInteract, adventureManager);
@@ -116,8 +110,6 @@ module.exports = {
       ]);
 
     if (!adventureManager.savedData) {
-      let playerAbilityCount = Array(playerStand.Ability.length).fill(0);
-      let opponentAbilityCount = Array(opponentStand.Ability.length).fill(0);
       await AdventureInfo.create({
         Guild: guildId,
         User: player.id,
@@ -125,8 +117,8 @@ module.exports = {
         PlayerHP: adventureManager.playerHp,
         OpponentHP: adventureManager.opponentHp,
         AttackRollHeight: 100,
-        PlayerAbilityCount: playerAbilityCount,
-        OpponentAbilityCount: opponentAbilityCount,
+        PlayerAbilityCount: adventureManager.playerAbilityCount,
+        OpponentAbilityCount: adventureManager.opponentAbilityCount,
         DefenseModifier: 1,
         IsConfused: adventureManager.isConfused,
         TimeStopTurns: 0,
@@ -223,7 +215,7 @@ async function declineAdventure(buttonInteract, adventureManager) {
   });
 }
 
-async function attack(abilityCounts, adventureManager) {
+async function attack(adventureManager) {
   var attackRoll =
     Math.floor(Math.random() * adventureManager.attackRollHeight) + 1;
 
@@ -267,7 +259,8 @@ async function attack(abilityCounts, adventureManager) {
 
   for (let i = 0; i < adventureManager.playerStand.Ability.length; i++) {
     try {
-      abilityCounts[i] = adventureManager.savedData.PlayerAbilityCount[i] + 1;
+      adventureManager.playerAbilityCount[i] =
+        adventureManager.savedData.PlayerAbilityCount[i] + 1;
     } catch (err) {
       console.log(err);
     }
@@ -275,7 +268,7 @@ async function attack(abilityCounts, adventureManager) {
 
   await adventureManager.updateSchema(AdventureInfo, {
     AttackRollHeight: 100,
-    PlayerAbilityCount: abilityCounts,
+    PlayerAbilityCount: adventureManager.playerAbilityCount,
     DefenseModifier: 1,
     TimeStopTurns: adventureManager.timeStopTurns - 1,
   });
@@ -283,7 +276,7 @@ async function attack(abilityCounts, adventureManager) {
   await adventureManager.checkStandDeath();
 }
 
-async function dodge(abilityCounts, adventureManager) {
+async function dodge(adventureManager) {
   if (adventureManager.isConfused)
     adventureManager.turnEmbed.setTitle(
       CombatHandler.generateGlitchedText("long")
@@ -296,7 +289,8 @@ async function dodge(abilityCounts, adventureManager) {
   // increment ability count
   for (let i = 0; i < adventureManager.playerStand.Ability.length; i++) {
     try {
-      abilityCounts[i] = adventureManager.savedData.PlayerAbilityCount[i] + 1;
+      adventureManager.playerAbilityCount[i] =
+        adventureManager.savedData.PlayerAbilityCount[i] + 1;
     } catch (err) {
       console.log(err);
     }
@@ -304,7 +298,7 @@ async function dodge(abilityCounts, adventureManager) {
 
   await adventureManager.updateSchema(AdventureInfo, {
     AttackRollHeight: 75,
-    PlayerAbilityCount: abilityCounts,
+    PlayerAbilityCount: adventureManager.playerAbilityCount,
     DefenseModifier: 1,
     TimeStopTurns: adventureManager.timeStopTurns - 1,
   });
@@ -312,7 +306,7 @@ async function dodge(abilityCounts, adventureManager) {
   await adventureManager.checkStandDeath();
 }
 
-async function useAbility(abilityIndex, abilityCounts, adventureManager) {
+async function useAbility(abilityIndex, adventureManager) {
   // fetch ability
   let ability = adventureManager.playerStand.Ability[abilityIndex];
   let abilityId = ability.id;
@@ -330,7 +324,7 @@ async function useAbility(abilityIndex, abilityCounts, adventureManager) {
   // execute ability
   if (timeStopTurns > 0) {
     // time stop ability
-    abilityCounts[abilityIndex] = 0;
+    adventureManager.playerAbilityCount[abilityIndex] = 0;
     adventureManager.timeStopTurns = timeStopTurns;
     adventureManager.turnEmbed.setTitle(abilityInfo[0]);
   } else if (damage > 0) {
@@ -395,10 +389,11 @@ async function useAbility(abilityIndex, abilityCounts, adventureManager) {
   // increment other ability counts except for used ability
   for (let i = 0; i < adventureManager.playerStand.Ability.length; i++) {
     if (i == abilityIndex) {
-      abilityCounts[i] = 0;
+      adventureManager.playerAbilityCount[i] = 0;
     } else {
       try {
-        abilityCounts[i] = adventureManager.savedData.PlayerAbilityCount[i] + 1;
+        adventureManager.playerAbilityCount[i] =
+          adventureManager.savedData.PlayerAbilityCount[i] + 1;
       } catch (err) {
         console.log(err);
       }
@@ -410,13 +405,13 @@ async function useAbility(abilityIndex, abilityCounts, adventureManager) {
   if (timeStopTurns > 0)
     await adventureManager.updateSchema(AdventureInfo, {
       AttackRollHeight: 100,
-      PlayerAbilityCount: abilityCounts,
+      PlayerAbilityCount: adventureManager.playerAbilityCount,
       DefenseModifier: currentDefenseModifier,
     });
   else
     await adventureManager.updateSchema(AdventureInfo, {
       AttackRollHeight: 100,
-      PlayerAbilityCount: abilityCounts,
+      PlayerAbilityCount: adventureManager.playerAbilityCount,
       DefenseModifier: currentDefenseModifier,
       TimeStopTurns: adventureManager.timeStopTurns - 1,
     });
