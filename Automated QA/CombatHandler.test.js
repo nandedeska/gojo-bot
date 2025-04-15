@@ -11,6 +11,52 @@ describe("AdventureManager", () => {
 
   beforeEach(() => {
     adventureManager = new CombatHandler.AdventureManager();
+    adventureManager.player = { id: "123" };
+    adventureManager.opponent = { id: "321" };
+  });
+
+  describe("updateAbilityUI()", () => {
+    it("should display stand's ability buttons", () => {
+      adventureManager.playerStand = {
+        Ability: [{ cooldown: 5 }, { cooldown: 2 }],
+      };
+      adventureManager.abilityButtons = new ActionRowBuilder();
+      adventureManager.areAbilitiesInCooldown = [true, false];
+      adventureManager.playerAbilityCount = [0];
+
+      adventureManager.updateAbilityUI();
+      let result = adventureManager.abilityButtons.components.length;
+
+      expect(result).toBe(2);
+    });
+
+    describe("when checking ability cooldowns", () => {
+      beforeEach(() => {
+        adventureManager.playerStand = { Ability: [{ cooldown: 5 }] };
+        adventureManager.areAbilitiesInCooldown = [null];
+        adventureManager.abilityButtons = new ActionRowBuilder();
+      });
+
+      it("should disable ability button when stand cooldown is active", () => {
+        adventureManager.playerAbilityCount = [0];
+
+        adventureManager.updateAbilityUI();
+        let result =
+          adventureManager.abilityButtons.components[0].data.disabled;
+
+        expect(result).toBe(true);
+      });
+
+      it("should enable ability button when stand cooldown is over", () => {
+        adventureManager.playerAbilityCount = [5];
+
+        adventureManager.updateAbilityUI();
+        let result =
+          adventureManager.abilityButtons.components[0].data.disabled;
+
+        expect(result).toBe(false);
+      });
+    });
   });
 
   describe("updateAbilityCounts()", () => {

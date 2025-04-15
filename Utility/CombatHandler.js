@@ -590,14 +590,9 @@ class AdventureManager {
   updateAbilityUI() {
     let buttons = [];
     for (let i = 0; i < this.playerStand.Ability.length; i++) {
-      if (this.savedData) {
-        if (
-          this.savedData.PlayerAbilityCount[i] <
-          this.playerStand.Ability[i].cooldown
-        )
-          this.areAbilitiesInCooldown[i] = true;
-        else this.areAbilitiesInCooldown[i] = false;
-      }
+      if (this.playerAbilityCount[i] < this.playerStand.Ability[i].cooldown)
+        this.areAbilitiesInCooldown[i] = true;
+      else this.areAbilitiesInCooldown[i] = false;
 
       let abilityButton = new ButtonBuilder()
         .setLabel(`Ability ${i + 1}`)
