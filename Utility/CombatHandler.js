@@ -530,25 +530,19 @@ class AdventureManager {
   }
 
   updateDisplay() {
-    if (this.savedData) {
-      for (let i = 0; i < this.playerStand.Ability.length; i++) {
-        this.playerCooldownText += setCooldownText(
-          this.playerStand,
-          i,
-          this.savedData.PlayerAbilityCount
-        );
-      }
-
-      for (let i = 0; i < this.opponentStand.Ability.length; i++) {
-        this.opponentCooldownText += setCooldownText(
-          this.opponentStand,
-          i,
-          this.savedData.OpponentAbilityCount
-        );
-      }
+    for (let i = 0; i < this.playerStand.Ability.length; i++) {
+      this.playerCooldownText += setCooldownText(
+        this.playerAbilityCount[i],
+        this.playerStand.Ability[i].cooldown
+      );
     }
 
-    console.log(`${this.playerCooldownText} ${this.opponentCooldownText}`);
+    for (let i = 0; i < this.opponentStand.Ability.length; i++) {
+      this.opponentCooldownText += setCooldownText(
+        this.opponentAbilityCount[i],
+        this.opponentStand.Ability[i].cooldown
+      );
+    }
 
     if (this.isConfused) {
       this.fightEmbed.addFields(

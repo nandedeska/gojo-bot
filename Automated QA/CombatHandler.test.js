@@ -53,6 +53,138 @@ describe("AdventureManager", () => {
     });
   });
 
+  describe("updateDisplay()", () => {
+    beforeEach(() => {
+      adventureManager.playerCooldownText = "";
+      adventureManager.opponentCooldownText = "";
+      adventureManager.fightEmbed = new EmbedBuilder();
+    });
+
+    describe("stands with only one ability", () => {
+      beforeEach(() => {
+        adventureManager.playerStand = { Ability: [{ cooldown: 5 }] };
+        adventureManager.opponentStand = { Ability: [{ cooldown: 3 }] };
+      });
+
+      it('should display "Ability Ready!" when player cooldown is over', () => {
+        adventureManager.playerAbilityCount = [5];
+        adventureManager.opponentAbilityCount = [3];
+
+        adventureManager.updateDisplay();
+        let result = adventureManager.playerCooldownText;
+
+        expect(result).toBe("\nAbility Ready!");
+      });
+
+      it('should display "Ability Ready!" when opponent cooldown is over', () => {
+        adventureManager.playerAbilityCount = [5];
+        adventureManager.opponentAbilityCount = [3];
+
+        adventureManager.updateDisplay();
+        let result = adventureManager.opponentCooldownText;
+
+        expect(result).toBe("\nAbility Ready!");
+      });
+
+      it('should display "Ability Cooldown: x Turns" when player cooldown is active', () => {
+        adventureManager.playerAbilityCount = [3];
+        adventureManager.opponentAbilityCount = [2];
+
+        adventureManager.updateDisplay();
+        let result = adventureManager.playerCooldownText;
+
+        expect(result).toBe("\nAbility Cooldown: 2 Turns");
+      });
+
+      it('should display "Ability Cooldown: x Turns" when opponent cooldown is active', () => {
+        adventureManager.playerAbilityCount = [3];
+        adventureManager.opponentAbilityCount = [2];
+
+        adventureManager.updateDisplay();
+        let result = adventureManager.opponentCooldownText;
+
+        expect(result).toBe("\nAbility Cooldown: 1 Turns");
+      });
+    });
+
+    describe("stands with more than one ability", () => {
+      beforeEach(() => {
+        adventureManager.playerStand = {
+          Ability: [{ cooldown: 5 }, { cooldown: 7 }],
+        };
+        adventureManager.opponentStand = {
+          Ability: [{ cooldown: 3 }, { cooldown: 9 }, { cooldown: 4 }],
+        };
+      });
+
+      it('should display "Ability Ready!" for all abilities when player cooldowns are over', () => {
+        adventureManager.playerAbilityCount = [5, 7];
+        adventureManager.opponentAbilityCount = [3, 9, 4];
+
+        adventureManager.updateDisplay();
+        let result = adventureManager.playerCooldownText;
+
+        expect(result).toBe("\nAbility Ready!\nAbility Ready!");
+      });
+
+      it('should display "Ability Ready!" for all abilities when opponent cooldowns are over', () => {
+        adventureManager.playerAbilityCount = [5, 7];
+        adventureManager.opponentAbilityCount = [3, 9, 4];
+
+        adventureManager.updateDisplay();
+        let result = adventureManager.opponentCooldownText;
+
+        expect(result).toBe("\nAbility Ready!\nAbility Ready!\nAbility Ready!");
+      });
+
+      it('should display "Ability Cooldown: x Turns" when player cooldowns are active', () => {
+        adventureManager.playerAbilityCount = [1, 1];
+        adventureManager.opponentAbilityCount = [2, 2, 2];
+
+        adventureManager.updateDisplay();
+        let result = adventureManager.playerCooldownText;
+
+        expect(result).toBe(
+          "\nAbility Cooldown: 4 Turns\nAbility Cooldown: 6 Turns"
+        );
+      });
+
+      it('should display "Ability Cooldown: x Turns" when opponent cooldowns are active', () => {
+        adventureManager.playerAbilityCount = [1, 1];
+        adventureManager.opponentAbilityCount = [2, 2, 2];
+
+        adventureManager.updateDisplay();
+        let result = adventureManager.opponentCooldownText;
+
+        expect(result).toBe(
+          "\nAbility Cooldown: 1 Turns\nAbility Cooldown: 7 Turns\nAbility Cooldown: 2 Turns"
+        );
+      });
+
+      it('should display both "Ability Ready!" and "Ability Cooldown: x Turns" when some player cooldowns are active', () => {
+        adventureManager.playerAbilityCount = [5, 0];
+        adventureManager.opponentAbilityCount = [0, 3, 4];
+
+        adventureManager.updateDisplay();
+        let result = adventureManager.playerCooldownText;
+
+        expect(result).toBe("\nAbility Ready!\nAbility Cooldown: 7 Turns");
+      });
+
+      it('should display both "Ability Ready!" and "Ability Cooldown: x Turns" when some opponent cooldowns are active', () => {
+        adventureManager.playerAbilityCount = [5, 0];
+        adventureManager.opponentAbilityCount = [0, 3, 4];
+
+        adventureManager.updateDisplay();
+        let result = adventureManager.opponentCooldownText;
+
+        expect(result).toBe(
+          "\nAbility Cooldown: 3 Turns\nAbility Cooldown: 6 Turns\nAbility Ready!"
+        );
+      });
+    });
+  });
+
   describe("updateAbilityUI()", () => {
     it("should display stand's ability buttons", () => {
       adventureManager.playerStand = {
