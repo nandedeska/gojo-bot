@@ -15,6 +15,44 @@ describe("AdventureManager", () => {
     adventureManager.opponent = { id: "321" };
   });
 
+  describe("checkStandDeath()", () => {
+    it("should set win state to ongoing when player and opponent are above 0 hp", () => {
+      adventureManager.playerHp = 50;
+      adventureManager.opponentHp = 50;
+
+      adventureManager.checkStandDeath();
+
+      expect(adventureManager.playerWinState).toBe("ONGOING");
+    });
+
+    it("should set win state to draw when player and opponent have no hp", () => {
+      adventureManager.playerHp = 0;
+      adventureManager.opponentHp = 0;
+
+      adventureManager.checkStandDeath();
+
+      expect(adventureManager.playerWinState).toBe("DRAW");
+    });
+
+    it("should set win state to lose when player has no hp", () => {
+      adventureManager.playerHp = 0;
+      adventureManager.opponentHp = 50;
+
+      adventureManager.checkStandDeath();
+
+      expect(adventureManager.playerWinState).toBe("LOSE");
+    });
+
+    it("should set win state to win when opponent has no hp", () => {
+      adventureManager.playerHp = 50;
+      adventureManager.opponentHp = 0;
+
+      adventureManager.checkStandDeath();
+
+      expect(adventureManager.playerWinState).toBe("WIN");
+    });
+  });
+
   describe("updateAbilityUI()", () => {
     it("should display stand's ability buttons", () => {
       adventureManager.playerStand = {

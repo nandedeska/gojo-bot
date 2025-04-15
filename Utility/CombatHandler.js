@@ -526,7 +526,7 @@ class AdventureManager {
     else if (this.playerHp <= 0) {
       this.playerWinState = "LOSE";
       this.isMatchOver = true;
-    }
+    } else this.playerWinState = "ONGOING";
   }
 
   updateDisplay() {
