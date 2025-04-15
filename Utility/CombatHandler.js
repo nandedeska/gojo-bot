@@ -670,7 +670,7 @@ class AdventureManager {
     return embeds;
   }
 
-  async clearAdventureInfo(buttonInteract) {
+  async clearAdventureInfo() {
     await AdventureInfo.findOneAndDelete({
       Guild: this.guildId,
       User: this.player.id,
