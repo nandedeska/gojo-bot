@@ -510,6 +510,9 @@ describe("DuelManager", () => {
       it("should display faster stand's ability buttons when the duel starts", () => {
         duelManager.timeStopTurns = 0;
         duelManager.areAbilitiesInCooldown = [true, true];
+        duelManager.challengerAbilityCount = Array(
+          duelManager.challengerStand.Ability.length
+        ).fill(0);
 
         duelManager.updateAbilityUI();
         let result = duelManager.abilityButtons.components.length;
@@ -518,10 +521,8 @@ describe("DuelManager", () => {
       });
 
       it("should display same stand's ability buttons when time is stopped", () => {
-        duelManager.savedData = {
-          ChallengerAbilityCount: [0, 0],
-          ChallengedAbilityCount: [0],
-        };
+        duelManager.challengerAbilityCount = [0, 0];
+        duelManager.challengedAbilityCount = [0];
         duelManager.timeStopTurns = 1;
         duelManager.areAbilitiesInCooldown = [true];
 
@@ -532,12 +533,11 @@ describe("DuelManager", () => {
       });
 
       it("should display next stand's ability buttons otherwise", () => {
-        duelManager.savedData = {
-          ChallengerAbilityCount: [0, 0],
-          ChallengedAbilityCount: [0],
-        };
+        duelManager.challengerAbilityCount = [0, 0];
+        duelManager.challengedAbilityCount = [0];
         duelManager.timeStopTurns = 0;
         duelManager.areAbilitiesInCooldown = [true];
+        duelManager.savedData = {};
 
         duelManager.updateAbilityUI();
         let result = duelManager.abilityButtons.components.length;
@@ -555,14 +555,13 @@ describe("DuelManager", () => {
           new ButtonBuilder()
         );
         duelManager.timeStopTurns = 0;
+        duelManager.savedData = {};
       });
 
       it("should disable ability button when challenger cooldown is active", () => {
         duelManager.currentStand = duelManager.challengedStand;
         duelManager.otherStand = duelManager.challengerStand;
-        duelManager.savedData = {
-          ChallengerAbilityCount: [0],
-        };
+        duelManager.challengerAbilityCount = [0];
 
         duelManager.updateAbilityUI();
         let result = duelManager.abilityButtons.components[0].data.disabled;
@@ -573,9 +572,7 @@ describe("DuelManager", () => {
       it("should disable ability button when challenged cooldown is active", () => {
         duelManager.currentStand = duelManager.challengerStand;
         duelManager.otherStand = duelManager.challengedStand;
-        duelManager.savedData = {
-          ChallengedAbilityCount: [0],
-        };
+        duelManager.challengedAbilityCount = [0];
 
         duelManager.updateAbilityUI();
         let result = duelManager.abilityButtons.components[0].data.disabled;
@@ -586,9 +583,7 @@ describe("DuelManager", () => {
       it("should enable ability button when challenger cooldown is over", () => {
         duelManager.currentStand = duelManager.challengedStand;
         duelManager.otherStand = duelManager.challengerStand;
-        duelManager.savedData = {
-          ChallengerAbilityCount: [5],
-        };
+        duelManager.challengerAbilityCount = [5];
 
         duelManager.updateAbilityUI();
         let result = duelManager.abilityButtons.components[0].data.disabled;
@@ -599,9 +594,7 @@ describe("DuelManager", () => {
       it("should enable ability button when challenged cooldown is over", () => {
         duelManager.currentStand = duelManager.challengerStand;
         duelManager.otherStand = duelManager.challengedStand;
-        duelManager.savedData = {
-          ChallengedAbilityCount: [3],
-        };
+        duelManager.challengedAbilityCount = [3];
 
         duelManager.updateAbilityUI();
         let result = duelManager.abilityButtons.components[0].data.disabled;

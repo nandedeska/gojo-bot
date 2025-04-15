@@ -1056,19 +1056,10 @@ class DuelManager {
       this.savedData && this.timeStopTurns <= 0
         ? this.otherStand
         : this.currentStand;
-    let abilityCount = [];
-
-    if (this.savedData) {
-      abilityCount =
-        stand == this.challengerStand
-          ? this.savedData.ChallengerAbilityCount
-          : this.savedData.ChallengedAbilityCount;
-    } else {
-      abilityCount =
-        stand == this.challengerStand
-          ? Array(this.challengerStand.Ability.length).fill(0)
-          : Array(this.challengedStand.Ability.length).fill(0);
-    }
+    let abilityCount =
+      stand == this.challengerStand
+        ? this.challengerAbilityCount
+        : this.challengedAbilityCount;
 
     for (let i = 0; i < stand.Ability.length; i++) {
       if (abilityCount[i] < stand.Ability[i].cooldown)
