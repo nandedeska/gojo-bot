@@ -550,10 +550,8 @@ describe("DuelManager", () => {
       beforeEach(() => {
         duelManager.challengerStand = { Ability: [{ cooldown: 5 }] };
         duelManager.challengedStand = { Ability: [{ cooldown: 3 }] };
-        duelManager.areAbilitiesInCooldown = [true];
-        duelManager.abilityButtons = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-        );
+        duelManager.areAbilitiesInCooldown = [null];
+        duelManager.abilityButtons = new ActionRowBuilder();
         duelManager.timeStopTurns = 0;
         duelManager.savedData = {};
       });
