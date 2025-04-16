@@ -266,7 +266,7 @@ async function attack(adventureManager) {
     TimeStopTurns: adventureManager.timeStopTurns - 1,
   });
 
-  await adventureManager.checkStandDeath();
+  adventureManager.checkStandDeath();
 }
 
 async function dodge(adventureManager) {
@@ -289,7 +289,7 @@ async function dodge(adventureManager) {
     TimeStopTurns: adventureManager.timeStopTurns - 1,
   });
 
-  await adventureManager.checkStandDeath();
+  adventureManager.checkStandDeath();
 }
 
 async function useAbility(abilityIndex, adventureManager) {
@@ -394,7 +394,7 @@ async function useAbility(abilityIndex, adventureManager) {
       TimeStopTurns: adventureManager.timeStopTurns - 1,
     });
 
-  await adventureManager.checkStandDeath();
+  adventureManager.checkStandDeath();
 }
 
 function surrender(buttonInteract, adventureManager) {

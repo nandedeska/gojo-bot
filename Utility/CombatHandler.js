@@ -239,7 +239,7 @@ class AdventureManager {
       DefenseModifier: 1,
     });
 
-    await this.checkStandDeath();
+    this.checkStandDeath();
   }
 
   async botDodge() {
@@ -259,7 +259,7 @@ class AdventureManager {
       DefenseModifier: 1,
     });
 
-    await this.checkStandDeath();
+    this.checkStandDeath();
   }
 
   async botUseAbility() {
@@ -516,7 +516,7 @@ class AdventureManager {
     );
   }
 
-  async checkStandDeath() {
+  checkStandDeath() {
     // DRAW
     if (this.playerHp <= 0 && this.opponentHp <= 0) {
       this.playerWinState = "DRAW";
