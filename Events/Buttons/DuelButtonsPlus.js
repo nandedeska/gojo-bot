@@ -281,7 +281,7 @@ async function dodge(duelManager) {
     true
   );
 
-  await duelManager.checkStandDeath();
+  duelManager.checkStandDeath();
 }
 
 async function useAbility(abilityIndex, duelManager) {
@@ -386,7 +386,7 @@ async function useAbility(abilityIndex, duelManager) {
     true
   );
 
-  await duelManager.checkStandDeath();
+  duelManager.checkStandDeath();
 }
 
 async function surrender(buttonInteract, duelManager) {
