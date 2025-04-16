@@ -191,174 +191,179 @@ class AdventureManager {
 
     if (rand < 0.8) {
       let hasUsedAbility = false;
-      for (let i = 0; i < this.opponentStand.Ability.length; i++) {
-        if (
-          this.opponentAbilityCount[i] >= this.opponentStand.Ability[i].cooldown
-        ) {
-          let ability = this.opponentStand.Ability[i];
-          let abilityId = ability.id;
-          let abilityInfo = StandAbilities.abilities[abilityId](
-            this.opponentStand,
-            this.playerStand,
-            ability
-          );
+      hasUsedAbility = await this.botUseAbility();
 
-          let damage = abilityInfo[1];
-          let healAmount = abilityInfo[2];
-          let nextDefenseModifier = abilityInfo[3];
-          let currentDefenseModifier = abilityInfo[4];
-          this.isConfused = abilityInfo[5];
-          let timeStopTurns = abilityInfo[6];
+      await this.checkStandDeath();
 
-          // TIME STOP ABILITY
-          if (timeStopTurns > 0) {
-            // time stop ability
-            this.opponentAbilityCount[i] = 0;
-            await this.updateSchema(AdventureInfo, {
-              AttackRollHeight: 100,
-              OpponentAbilityCount: this.opponentAbilityCount,
-              DefenseModifier: nextDefenseModifier,
-            });
+      if (this.isMatchOver) return;
 
-            for (let i = 0; i < timeStopTurns; i++) {
-              this.opponentExtraTurnEmbeds.push(await this.botTimeStopTurn());
-            }
-            this.opponentTurnEmbed.setTitle(abilityInfo[0]);
-          }
-          // ATTACK-BASED ABILITY
-          else if (damage > 0) {
-            let defenseMod = 1;
-            if (this.savedData) {
-              this.savedData = await AdventureInfo.findOne({
-                Guild: this.guildId,
-                User: this.player.id,
-              });
-              defenseMod = this.savedData.DefenseModifier;
-            }
+      if (!hasUsedAbility) await this.botAttack();
+    } else await this.botDodge();
+  }
 
-            let attackRoll =
-              Math.floor(Math.random() * this.attackRollHeight) + 1;
+  async botAttack() {
+    let attackRoll = Math.floor(Math.random() * this.attackRollHeight) + 1;
+    let currentDefenseModifier = 1;
 
-            if (
-              attackRoll >=
-              this.playerStand.Defense * defenseMod * currentDefenseModifier
-            ) {
-              this.playerHp -= damage;
+    if (this.savedData) {
+      this.savedData = await AdventureInfo.findOne({
+        Guild: this.guildId,
+        User: this.player.id,
+      });
+      currentDefenseModifier = this.savedData.DefenseModifier;
+    }
 
-              // LIFE STEAL
-              if (healAmount > 0) {
-                this.opponentHp += healAmount;
-                this.opponentHp = Math.min(
-                  this.opponentHp,
-                  this.opponentStand.Healthpoints
-                );
-              }
+    if (attackRoll >= this.playerStand.Defense * currentDefenseModifier) {
+      let damage = Math.floor(Math.random() * this.opponentStand.Attack) + 1;
+      if (this.isConfused)
+        this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
+      else
+        this.opponentTurnEmbed.setTitle(
+          `${this.opponentStand.Name}'s attack hits! It deals ${damage} damage.`
+        );
 
-              // HEARTACHES ABILITY
-              if (this.isConfused)
-                this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-              else this.opponentTurnEmbed.setTitle(abilityInfo[0]);
-            } else {
-              // HEARTACHES ABILITY
-              if (this.isConfused)
-                this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-              else
-                this.opponentTurnEmbed.setTitle(
-                  `${this.opponentStand.Name} missed!`
-                );
-            }
-          }
-          // HEAL ABILITY
-          else if (healAmount > 0) {
-            this.opponentHp += healAmount;
-            this.opponentHp = Math.min(
-              this.opponentHp,
-              this.opponentStand.Healthpoints
-            );
-            this.opponentTurnEmbed.setTitle(abilityInfo[0]);
-          } else this.opponentTurnEmbed.setTitle(abilityInfo[0]);
+      this.playerHp -= damage;
+    } else {
+      if (this.isConfused)
+        this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
+      else
+        this.opponentTurnEmbed.setTitle(`${this.opponentStand.Name} missed!`);
+    }
 
-          this.updateAbilityCounts(this.opponentStand, i);
+    // Increment ability count
+    this.updateAbilityCounts(this.opponentStand);
 
-          // Update saved data
+    await this.updateSchema(AdventureInfo, {
+      AttackRollHeight: 100,
+      OpponentAbilityCount: this.opponentAbilityCount,
+      DefenseModifier: 1,
+    });
+
+    await this.checkStandDeath();
+  }
+
+  async botDodge() {
+    if (this.isConfused)
+      this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
+    else
+      this.opponentTurnEmbed.setTitle(
+        `${this.opponentStand.Name} prepares to dodge!`
+      );
+
+    // increment ability count
+    this.updateAbilityCounts(this.opponentStand);
+
+    await this.updateSchema(AdventureInfo, {
+      AttackRollHeight: 75,
+      OpponentAbilityCount: this.opponentAbilityCount,
+      DefenseModifier: 1,
+    });
+
+    await this.checkStandDeath();
+  }
+
+  async botUseAbility() {
+    for (let i = 0; i < this.opponentStand.Ability.length; i++) {
+      if (
+        this.opponentAbilityCount[i] >= this.opponentStand.Ability[i].cooldown
+      ) {
+        let ability = this.opponentStand.Ability[i];
+        let abilityId = ability.id;
+        let abilityInfo = StandAbilities.abilities[abilityId](
+          this.opponentStand,
+          this.playerStand,
+          ability
+        );
+
+        let damage = abilityInfo[1];
+        let healAmount = abilityInfo[2];
+        let nextDefenseModifier = abilityInfo[3];
+        let currentDefenseModifier = abilityInfo[4];
+        this.isConfused = abilityInfo[5];
+        let timeStopTurns = abilityInfo[6];
+
+        // TIME STOP ABILITY
+        if (timeStopTurns > 0) {
+          // time stop ability
+          this.opponentAbilityCount[i] = 0;
           await this.updateSchema(AdventureInfo, {
             AttackRollHeight: 100,
             OpponentAbilityCount: this.opponentAbilityCount,
             DefenseModifier: nextDefenseModifier,
           });
 
-          hasUsedAbility = true;
-
-          // Check if stand died
-          await this.checkStandDeath();
-
-          if (this.isMatchOver) return;
+          for (let i = 0; i < timeStopTurns; i++) {
+            this.opponentExtraTurnEmbeds.push(await this.botTimeStopTurn());
+          }
+          this.opponentTurnEmbed.setTitle(abilityInfo[0]);
         }
-      }
+        // ATTACK-BASED ABILITY
+        else if (damage > 0) {
+          let defenseMod = 1;
+          if (this.savedData) {
+            this.savedData = await AdventureInfo.findOne({
+              Guild: this.guildId,
+              User: this.player.id,
+            });
+            defenseMod = this.savedData.DefenseModifier;
+          }
 
-      if (!hasUsedAbility) {
-        let attackRoll = Math.floor(Math.random() * this.attackRollHeight) + 1;
-        let currentDefenseModifier = 1;
+          let attackRoll =
+            Math.floor(Math.random() * this.attackRollHeight) + 1;
 
-        if (this.savedData) {
-          this.savedData = await AdventureInfo.findOne({
-            Guild: this.guildId,
-            User: this.player.id,
-          });
-          currentDefenseModifier = this.savedData.DefenseModifier;
+          if (
+            attackRoll >=
+            this.playerStand.Defense * defenseMod * currentDefenseModifier
+          ) {
+            this.playerHp -= damage;
+
+            // LIFE STEAL
+            if (healAmount > 0) {
+              this.opponentHp += healAmount;
+              this.opponentHp = Math.min(
+                this.opponentHp,
+                this.opponentStand.Healthpoints
+              );
+            }
+
+            // HEARTACHES ABILITY
+            if (this.isConfused)
+              this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
+            else this.opponentTurnEmbed.setTitle(abilityInfo[0]);
+          } else {
+            // HEARTACHES ABILITY
+            if (this.isConfused)
+              this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
+            else
+              this.opponentTurnEmbed.setTitle(
+                `${this.opponentStand.Name} missed!`
+              );
+          }
         }
+        // HEAL ABILITY
+        else if (healAmount > 0) {
+          this.opponentHp += healAmount;
+          this.opponentHp = Math.min(
+            this.opponentHp,
+            this.opponentStand.Healthpoints
+          );
+          this.opponentTurnEmbed.setTitle(abilityInfo[0]);
+        } else this.opponentTurnEmbed.setTitle(abilityInfo[0]);
 
-        if (attackRoll >= this.playerStand.Defense * currentDefenseModifier) {
-          let damage =
-            Math.floor(Math.random() * this.opponentStand.Attack) + 1;
-          if (this.isConfused)
-            this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-          else
-            this.opponentTurnEmbed.setTitle(
-              `${this.opponentStand.Name}'s attack hits! It deals ${damage} damage.`
-            );
+        this.updateAbilityCounts(this.opponentStand, i);
 
-          this.playerHp -= damage;
-        } else {
-          if (this.isConfused)
-            this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-          else
-            this.opponentTurnEmbed.setTitle(
-              `${this.opponentStand.Name} missed!`
-            );
-        }
-
-        // Increment ability count
-        this.updateAbilityCounts(this.opponentStand);
-
+        // Update saved data
         await this.updateSchema(AdventureInfo, {
           AttackRollHeight: 100,
           OpponentAbilityCount: this.opponentAbilityCount,
-          DefenseModifier: 1,
+          DefenseModifier: nextDefenseModifier,
         });
 
-        await this.checkStandDeath();
+        return true;
       }
-    } else {
-      // DODGE
-      if (this.isConfused)
-        this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-      else
-        this.opponentTurnEmbed.setTitle(
-          `${this.opponentStand.Name} prepares to dodge!`
-        );
-
-      // increment ability count
-      this.updateAbilityCounts(this.opponentStand);
-
-      await this.updateSchema(AdventureInfo, {
-        AttackRollHeight: 75,
-        OpponentAbilityCount: this.opponentAbilityCount,
-        DefenseModifier: 1,
-      });
-
-      await this.checkStandDeath();
     }
+
+    return false;
   }
 
   async botTimeStopTurn() {
