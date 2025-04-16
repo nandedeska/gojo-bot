@@ -767,7 +767,7 @@ class AdventureManager {
     discAmount = Math.round((discAmount / sum) * 8);
     fruitAmount = Math.round((fruitAmount / sum) * 8);
 
-    if (opponent.id == "dio")
+    if (this.opponent.id == "dio")
       theWorldShardAmount = Math.floor(Math.random() * 3) + 1;
 
     let playerInventory = await Inventory.findOne({
