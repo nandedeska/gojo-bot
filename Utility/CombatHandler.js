@@ -212,7 +212,6 @@ class AdventureManager {
       currentDefenseModifier = this.savedData.DefenseModifier;
     }
 
-      let damage = Math.floor(Math.random() * this.opponentStand.Attack) + 1;
       if (this.isConfused)
         this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
       else
@@ -222,6 +221,7 @@ class AdventureManager {
     if (
       tryAttack(this.playerStand, currentDefenseModifier, this.attackRollHeight)
     ) {
+      let damage = rollDamage(this.opponentStand);
 
       this.playerHp -= damage;
     } else {
@@ -1312,6 +1312,10 @@ function tryAttack(defendingStand, defenseModifier, attackRollHeight) {
   else return false;
 }
 
+function rollDamage(attackingStand) {
+  return Math.floor(Math.random() * attackingStand.Attack) + 1;
+}
+
 function setCooldownText(currentAbilityCount, abilityCooldown) {
   if (currentAbilityCount < abilityCooldown) {
     return `\nAbility Cooldown: ${abilityCooldown - currentAbilityCount} Turns`;
@@ -1350,6 +1354,7 @@ module.exports = {
   DuelManager,
   generateGlitchedText,
   reply,
+  rollDamage,
   setCooldownText,
   tryAttack,
 };

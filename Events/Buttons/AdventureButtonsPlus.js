@@ -233,8 +233,7 @@ async function attack(adventureManager) {
       adventureManager.attackRollHeight
     )
   ) {
-    var damage =
-      Math.floor(Math.random() * adventureManager.playerStand.Attack) + 1;
+    var damage = CombatHandler.rollDamage(adventureManager.playerStand);
 
     if (adventureManager.isConfused) {
       adventureManager.turnEmbed.setTitle(
