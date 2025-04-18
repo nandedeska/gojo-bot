@@ -216,9 +216,6 @@ async function declineAdventure(buttonInteract, adventureManager) {
 }
 
 async function attack(adventureManager) {
-  var attackRoll =
-    Math.floor(Math.random() * adventureManager.attackRollHeight) + 1;
-
   var currentDefenseModifier = 1;
 
   if (adventureManager.savedData) {
@@ -230,8 +227,11 @@ async function attack(adventureManager) {
   }
 
   if (
-    attackRoll >=
-    adventureManager.opponentStand.Defense * currentDefenseModifier
+    CombatHandler.tryAttack(
+      adventureManager.opponentStand,
+      currentDefenseModifier,
+      adventureManager.attackRollHeight
+    )
   ) {
     var damage =
       Math.floor(Math.random() * adventureManager.playerStand.Attack) + 1;
@@ -325,13 +325,12 @@ async function useAbility(abilityIndex, adventureManager) {
       defenseMod = adventureManager.savedData.DefenseModifier;
     }
 
-    var attackRoll =
-      Math.floor(Math.random() * adventureManager.attackRollHeight) + 1;
     if (
-      attackRoll >=
-      adventureManager.opponentStand.Defense *
-        defenseMod *
-        currentDefenseModifier
+      CombatHandler.tryAttack(
+        adventureManager.opponentStand,
+        defenseMod * currentDefenseModifier,
+        adventureManager.attackRollHeight
+      )
     ) {
       var damage = abilityInfo[1];
 

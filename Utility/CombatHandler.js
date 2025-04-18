@@ -202,7 +202,6 @@ class AdventureManager {
   }
 
   async botAttack() {
-    let attackRoll = Math.floor(Math.random() * this.attackRollHeight) + 1;
     let currentDefenseModifier = 1;
 
     if (this.savedData) {
@@ -213,7 +212,6 @@ class AdventureManager {
       currentDefenseModifier = this.savedData.DefenseModifier;
     }
 
-    if (attackRoll >= this.playerStand.Defense * currentDefenseModifier) {
       let damage = Math.floor(Math.random() * this.opponentStand.Attack) + 1;
       if (this.isConfused)
         this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
@@ -221,6 +219,9 @@ class AdventureManager {
         this.opponentTurnEmbed.setTitle(
           `${this.opponentStand.Name}'s attack hits! It deals ${damage} damage.`
         );
+    if (
+      tryAttack(this.playerStand, currentDefenseModifier, this.attackRollHeight)
+    ) {
 
       this.playerHp -= damage;
     } else {
@@ -308,12 +309,12 @@ class AdventureManager {
             defenseMod = this.savedData.DefenseModifier;
           }
 
-          let attackRoll =
-            Math.floor(Math.random() * this.attackRollHeight) + 1;
-
           if (
-            attackRoll >=
-            this.playerStand.Defense * defenseMod * currentDefenseModifier
+            tryAttack(
+              this.playerStand,
+              defenseMod * currentDefenseModifier,
+              this.attackRollHeight
+            )
           ) {
             this.playerHp -= damage;
 
@@ -1304,6 +1305,13 @@ class DuelManager {
   }
 }
 
+function tryAttack(defendingStand, defenseModifier, attackRollHeight) {
+  let attackRoll = Math.floor(Math.random() * attackRollHeight) + 1;
+
+  if (attackRoll >= defendingStand.Defense * defenseModifier) return true;
+  else return false;
+}
+
 function setCooldownText(currentAbilityCount, abilityCooldown) {
   if (currentAbilityCount < abilityCooldown) {
     return `\nAbility Cooldown: ${abilityCooldown - currentAbilityCount} Turns`;
@@ -1343,4 +1351,5 @@ module.exports = {
   generateGlitchedText,
   reply,
   setCooldownText,
+  tryAttack,
 };
