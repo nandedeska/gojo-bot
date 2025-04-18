@@ -235,25 +235,20 @@ async function attack(adventureManager) {
   ) {
     var damage = CombatHandler.rollDamage(adventureManager.playerStand);
 
-    if (adventureManager.isConfused) {
-      adventureManager.turnEmbed.setTitle(
-        CombatHandler.generateGlitchedText("long")
-      );
-    } else
-      adventureManager.turnEmbed.setTitle(
-        `${adventureManager.playerStand.Name}'s attack hits! It deals ${damage} damage.`
-      );
+    CombatHandler.setTurnText(
+      adventureManager.turnEmbed,
+      "ATTACK",
+      adventureManager.playerStand,
+      { damage: damage }
+    );
 
     adventureManager.opponentHp -= damage;
   } else {
-    if (adventureManager.isConfused)
-      adventureManager.turnEmbed.setTitle(
-        CombatHandler.generateGlitchedText("long")
-      );
-    else
-      adventureManager.turnEmbed.setTitle(
-        `${adventureManager.playerStand.Name} missed!`
-      );
+    CombatHandler.setTurnText(
+      adventureManager.turnEmbed,
+      "MISS",
+      adventureManager.playerStand
+    );
   }
 
   adventureManager.updateAbilityCounts(adventureManager.playerStand);
@@ -269,14 +264,11 @@ async function attack(adventureManager) {
 }
 
 async function dodge(adventureManager) {
-  if (adventureManager.isConfused)
-    adventureManager.turnEmbed.setTitle(
-      CombatHandler.generateGlitchedText("long")
-    );
-  else
-    adventureManager.turnEmbed.setTitle(
-      `${adventureManager.playerStand.Name} prepares to dodge!`
-    );
+  CombatHandler.setTurnText(
+    adventureManager.turnEmbed,
+    "DODGE",
+    adventureManager.playerStand
+  );
 
   // increment ability count
   adventureManager.updateAbilityCounts(adventureManager.playerStand);
@@ -311,7 +303,12 @@ async function useAbility(abilityIndex, adventureManager) {
     // time stop ability
     adventureManager.playerAbilityCount[abilityIndex] = 0;
     adventureManager.timeStopTurns = timeStopTurns;
-    adventureManager.turnEmbed.setTitle(abilityInfo[0]);
+    CombatHandler.setTurnText(
+      adventureManager.turnEmbed,
+      "ABILITY",
+      adventureManager.playerStand,
+      { abilityText: abilityInfo[0] }
+    );
   } else if (damage > 0) {
     // attack based ability
     var defenseMod = 1;
@@ -344,20 +341,18 @@ async function useAbility(abilityIndex, adventureManager) {
         );
       }
 
-      if (adventureManager.isConfused)
-        adventureManager.turnEmbed.setTitle(
-          CombatHandler.generateGlitchedText("long")
-        );
-      else adventureManager.turnEmbed.setTitle(abilityInfo[0]);
+      CombatHandler.setTurnText(
+        adventureManager.turnEmbed,
+        "ABILITY",
+        adventureManager.playerStand,
+        { abilityText: abilityInfo[0] }
+      );
     } else {
-      if (adventureManager.isConfused)
-        adventureManager.turnEmbed.setTitle(
-          CombatHandler.generateGlitchedText("long")
-        );
-      else
-        adventureManager.turnEmbed.setTitle(
-          `${adventureManager.playerStand.Name} missed!`
-        );
+      CombatHandler.setTurnText(
+        adventureManager.turnEmbed,
+        "MISS",
+        adventureManager.playerStand
+      );
     }
   } else if (healAmount > 0) {
     // heal ability
@@ -367,7 +362,12 @@ async function useAbility(abilityIndex, adventureManager) {
       adventureManager.playerHp,
       adventureManager.playerStand.Healthpoints
     );
-    adventureManager.turnEmbed.setTitle(abilityInfo[0]);
+    CombatHandler.setTurnText(
+      adventureManager.turnEmbed,
+      "ABILITY",
+      adventureManager.playerStand,
+      { abilityText: abilityInfo[0] }
+    );
   }
 
   // increment other ability counts except for used ability

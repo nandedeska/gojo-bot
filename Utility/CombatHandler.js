@@ -212,23 +212,17 @@ class AdventureManager {
       currentDefenseModifier = this.savedData.DefenseModifier;
     }
 
-      if (this.isConfused)
-        this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-      else
-        this.opponentTurnEmbed.setTitle(
-          `${this.opponentStand.Name}'s attack hits! It deals ${damage} damage.`
-        );
     if (
       tryAttack(this.playerStand, currentDefenseModifier, this.attackRollHeight)
     ) {
       let damage = rollDamage(this.opponentStand);
+      setTurnText(this.opponentTurnEmbed, "ATTACK", this.opponentStand, {
+        damage: damage,
+      });
 
       this.playerHp -= damage;
     } else {
-      if (this.isConfused)
-        this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-      else
-        this.opponentTurnEmbed.setTitle(`${this.opponentStand.Name} missed!`);
+      setTurnText(this.opponentTurnEmbed, "MISS", this.opponentStand);
     }
 
     // Increment ability count
@@ -244,12 +238,7 @@ class AdventureManager {
   }
 
   async botDodge() {
-    if (this.isConfused)
-      this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-    else
-      this.opponentTurnEmbed.setTitle(
-        `${this.opponentStand.Name} prepares to dodge!`
-      );
+    setTurnText(this.opponentTurnEmbed, "DODGE", this.opponentStand);
 
     // increment ability count
     this.updateAbilityCounts(this.opponentStand);
@@ -296,7 +285,10 @@ class AdventureManager {
           for (let i = 0; i < timeStopTurns; i++) {
             this.opponentExtraTurnEmbeds.push(await this.botTimeStopTurn());
           }
-          this.opponentTurnEmbed.setTitle(abilityInfo[0]);
+
+          setTurnText(this.opponentTurnEmbed, "ABILITY", this.opponentStand, {
+            abilityText: abilityInfo[0],
+          });
         }
         // ATTACK-BASED ABILITY
         else if (damage > 0) {
@@ -327,18 +319,11 @@ class AdventureManager {
               );
             }
 
-            // HEARTACHES ABILITY
-            if (this.isConfused)
-              this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-            else this.opponentTurnEmbed.setTitle(abilityInfo[0]);
+            setTurnText(this.opponentTurnEmbed, "ABILITY", this.opponentStand, {
+              abilityText: abilityInfo[0],
+            });
           } else {
-            // HEARTACHES ABILITY
-            if (this.isConfused)
-              this.opponentTurnEmbed.setTitle(generateGlitchedText("long"));
-            else
-              this.opponentTurnEmbed.setTitle(
-                `${this.opponentStand.Name} missed!`
-              );
+            setTurnText(this.opponentTurnEmbed, "MISS", this.opponentStand);
           }
         }
         // HEAL ABILITY
@@ -348,8 +333,14 @@ class AdventureManager {
             this.opponentHp,
             this.opponentStand.Healthpoints
           );
-          this.opponentTurnEmbed.setTitle(abilityInfo[0]);
-        } else this.opponentTurnEmbed.setTitle(abilityInfo[0]);
+
+          setTurnText(this.opponentTurnEmbed, "ABILITY", this.opponentStand, {
+            abilityText: abilityInfo[0],
+          });
+        } else
+          setTurnText(this.opponentTurnEmbed, "ABILITY", this.opponentStand, {
+            abilityText: abilityInfo[0],
+          });
 
         this.updateAbilityCounts(this.opponentStand, i);
 
@@ -1316,6 +1307,24 @@ function rollDamage(attackingStand) {
   return Math.floor(Math.random() * attackingStand.Attack) + 1;
 }
 
+function setTurnText(
+  turnEmbed,
+  turnState,
+  stand,
+  data = { damage: "INVALID", abilityText: "INVALID", isConfused: false }
+) {
+  let text = "INVALID";
+
+  if (data.isConfused) text = generateGlitchedText("long");
+  else if (turnState == "ABILITY") text = data.abilityText;
+  else if (turnState == "ATTACK")
+    text = `${stand.Name}'s attack hits! It deals ${data.damage} damage.`;
+  else if (turnState == "DODGE") text = `${stand.Name} prepares to dodge!`;
+  else if (turnState == "MISS") text = `${stand.Name} missed!`;
+
+  turnEmbed.setTitle(text);
+}
+
 function setCooldownText(currentAbilityCount, abilityCooldown) {
   if (currentAbilityCount < abilityCooldown) {
     return `\nAbility Cooldown: ${abilityCooldown - currentAbilityCount} Turns`;
@@ -1356,5 +1365,6 @@ module.exports = {
   reply,
   rollDamage,
   setCooldownText,
+  setTurnText,
   tryAttack,
 };
