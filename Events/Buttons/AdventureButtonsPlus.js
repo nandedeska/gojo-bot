@@ -385,6 +385,7 @@ async function useAbility(abilityIndex, adventureManager) {
       AttackRollHeight: 100,
       PlayerAbilityCount: adventureManager.playerAbilityCount,
       DefenseModifier: currentDefenseModifier,
+      TimeStopTurns: adventureManager.timeStopTurns,
     });
   else
     await adventureManager.updateSchema(AdventureInfo, {
