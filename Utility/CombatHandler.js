@@ -414,14 +414,11 @@ class AdventureManager {
                 );
               }
 
-              if (this.isConfused)
-                extraTurnEmbed.setTitle(generateGlitchedText("long"));
-              else extraTurnEmbed.setTitle(abilityInfo[0]);
+              setTurnText(extraTurnEmbed, "ABILITY", this.opponentStand, {
+                abilityText: abilityInfo[0],
+              });
             } else {
-              if (this.isConfused)
-                extraTurnEmbed.setTitle(generateGlitchedText("long"));
-              else
-                extraTurnEmbed.setTitle(`${this.opponentStand.Name} missed!`);
+              setTurnText(extraTurnEmbed, "MISS", this.opponentStand);
             }
           } else if (healAmount > 0) {
             // heal ability
@@ -431,8 +428,14 @@ class AdventureManager {
               this.opponentHp,
               this.opponentStand.Healthpoints
             );
-            extraTurnEmbed.setTitle(abilityInfo[0]);
-          } else extraTurnEmbed.setTitle(abilityInfo[0]);
+
+            setTurnText(extraTurnEmbed, "ABILITY", this.opponentStand, {
+              abilityText: abilityInfo[0],
+            });
+          } else
+            setTurnText(extraTurnEmbed, "ABILITY", this.opponentStand, {
+              abilityText: abilityInfo[0],
+            });
 
           // Reset ability count
           this.opponentAbilityCount[i] = 0;
@@ -461,18 +464,13 @@ class AdventureManager {
         if (currentDefenseModifier < 100) {
           let damage =
             Math.floor(Math.random() * this.opponentStand.Attack) + 1;
-          if (this.isConfused)
-            extraTurnEmbed.setTitle(generateGlitchedText("long"));
-          else
-            extraTurnEmbed.setTitle(
-              `${this.opponentStand.Name}'s attack hits! It deals ${damage} damage.`
-            );
+          setTurnText(extraTurnEmbed, "ATTACK", this.opponentStand, {
+            damage: damage,
+          });
 
           this.playerHp -= damage;
         } else {
-          if (this.isConfused)
-            extraTurnEmbed.setTitle(generateGlitchedText("long"));
-          else extraTurnEmbed.setTitle(`${this.opponentStand.Name} missed!`);
+          setTurnText(extraTurnEmbed, "MISS", this.opponentStand);
         }
 
         await this.updateSchema(AdventureInfo, {
@@ -482,12 +480,7 @@ class AdventureManager {
       }
     } else {
       // DODGE
-      if (this.isConfused)
-        extraTurnEmbed.setTitle(generateGlitchedText("long"));
-      else
-        extraTurnEmbed.setTitle(
-          `${this.opponentStand.Name} prepares to dodge!`
-        );
+      setTurnText(extraTurnEmbed, "DODGE", this.opponentStand);
 
       await this.updateSchema(AdventureInfo, {
         AttackRollHeight: 75,
