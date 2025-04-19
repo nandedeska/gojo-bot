@@ -462,8 +462,7 @@ class AdventureManager {
         }
 
         if (currentDefenseModifier < 100) {
-          let damage =
-            Math.floor(Math.random() * this.opponentStand.Attack) + 1;
+          let damage = rollDamage(this.opponentStand);
           setTurnText(extraTurnEmbed, "ATTACK", this.opponentStand, {
             damage: damage,
           });
