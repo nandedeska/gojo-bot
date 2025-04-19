@@ -311,8 +311,8 @@ async function useAbility(abilityIndex, duelManager) {
     let attackRoll =
       Math.floor(Math.random() * duelManager.attackRollHeight) + 1;
     let defenseMod = 1;
-    if (currentDefenseModifier)
-      defenseMod = currentDefenseModifier.DefenseModifier;
+    if (duelManager.savedData)
+      defenseMod = duelManager.savedData.DefenseModifier;
     if (
       attackRoll >=
       duelManager.otherStand.Defense * defenseMod * currentDefenseModifier
