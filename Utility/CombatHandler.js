@@ -440,10 +440,16 @@ class AdventureManager {
           // Reset ability count
           this.opponentAbilityCount[i] = 0;
 
+          if (this.timeStopTurns <= 1)
             await this.updateSchema(AdventureInfo, {
               AttackRollHeight: 100,
               OpponentAbilityCount: this.opponentAbilityCount,
               DefenseModifier: nextTurnDefenseModifier,
+            });
+          else
+            await this.updateSchema(AdventureInfo, {
+              AttackRollHeight: 100,
+              OpponentAbilityCount: this.opponentAbilityCount,
             });
 
           hasUsedAbility = true;
