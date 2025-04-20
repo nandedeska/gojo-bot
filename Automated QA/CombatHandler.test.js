@@ -1,6 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder } = require("discord.js");
 const CombatHandler = require("../Utility/CombatHandler");
 const { AdventureManager } = require("../Utility/AdventureManager");
+const { DuelManager } = require("../Utility/DuelManager");
 
 describe("AdventureManager", () => {
   let adventureManager;
@@ -589,7 +590,7 @@ describe("DuelManager", () => {
   describe("checkStandDeath()", () => {
     let duelManager;
     beforeEach(() => {
-      duelManager = new CombatHandler.DuelManager();
+      duelManager = new DuelManager();
       duelManager.playerWinState = "ONGOING";
     });
 
@@ -636,7 +637,7 @@ describe("DuelManager", () => {
     let challengedStand;
 
     beforeEach(() => {
-      duelManager = new CombatHandler.DuelManager();
+      duelManager = new DuelManager();
       duelManager.challengerCooldownText = "";
       duelManager.challengedCooldownText = "";
       duelManager.fightEmbed = new EmbedBuilder();
@@ -771,7 +772,7 @@ describe("DuelManager", () => {
     let duelManager;
 
     beforeEach(() => {
-      duelManager = new CombatHandler.DuelManager();
+      duelManager = new DuelManager();
       duelManager.challenger = { id: "123" };
       duelManager.challenged = { id: "321" };
     });
@@ -888,7 +889,7 @@ describe("DuelManager", () => {
     let duelManager;
 
     beforeEach(() => {
-      duelManager = new CombatHandler.DuelManager();
+      duelManager = new DuelManager();
       duelManager.challenger = { id: "123" };
       duelManager.challenged = { id: "321" };
       duelManager.challengerAbilityCount = [0, 0, 0];
