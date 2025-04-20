@@ -218,11 +218,14 @@ class AdventureManager {
       let damage = rollDamage(this.opponentStand);
       setTurnText(this.opponentTurnEmbed, "ATTACK", this.opponentStand, {
         damage: damage,
+        isConfused: this.isConfused,
       });
 
       this.playerHp -= damage;
     } else {
-      setTurnText(this.opponentTurnEmbed, "MISS", this.opponentStand);
+      setTurnText(this.opponentTurnEmbed, "MISS", this.opponentStand, {
+        isConfused: this.isConfused,
+      });
     }
 
     // Increment ability count
@@ -238,7 +241,9 @@ class AdventureManager {
   }
 
   async botDodge() {
-    setTurnText(this.opponentTurnEmbed, "DODGE", this.opponentStand);
+    setTurnText(this.opponentTurnEmbed, "DODGE", this.opponentStand, {
+      isConfused: this.isConfused,
+    });
 
     // increment ability count
     this.updateAbilityCounts(this.opponentStand);
@@ -288,6 +293,7 @@ class AdventureManager {
 
           setTurnText(this.opponentTurnEmbed, "ABILITY", this.opponentStand, {
             abilityText: abilityInfo[0],
+            isConfused: this.isConfused,
           });
         }
         // ATTACK-BASED ABILITY
@@ -321,9 +327,12 @@ class AdventureManager {
 
             setTurnText(this.opponentTurnEmbed, "ABILITY", this.opponentStand, {
               abilityText: abilityInfo[0],
+              isConfused: this.isConfused,
             });
           } else {
-            setTurnText(this.opponentTurnEmbed, "MISS", this.opponentStand);
+            setTurnText(this.opponentTurnEmbed, "MISS", this.opponentStand, {
+              isConfused: this.isConfused,
+            });
           }
         }
         // HEAL ABILITY
@@ -336,10 +345,12 @@ class AdventureManager {
 
           setTurnText(this.opponentTurnEmbed, "ABILITY", this.opponentStand, {
             abilityText: abilityInfo[0],
+            isConfused: this.isConfused,
           });
         } else
           setTurnText(this.opponentTurnEmbed, "ABILITY", this.opponentStand, {
             abilityText: abilityInfo[0],
+            isConfused: this.isConfused,
           });
 
         this.updateAbilityCounts(this.opponentStand, i);
@@ -416,9 +427,12 @@ class AdventureManager {
 
               setTurnText(extraTurnEmbed, "ABILITY", this.opponentStand, {
                 abilityText: abilityInfo[0],
+                isConfused: this.isConfused,
               });
             } else {
-              setTurnText(extraTurnEmbed, "MISS", this.opponentStand);
+              setTurnText(extraTurnEmbed, "MISS", this.opponentStand, {
+                isConfused: this.isConfused,
+              });
             }
           } else if (healAmount > 0) {
             // heal ability
@@ -431,10 +445,12 @@ class AdventureManager {
 
             setTurnText(extraTurnEmbed, "ABILITY", this.opponentStand, {
               abilityText: abilityInfo[0],
+              isConfused: this.isConfused,
             });
           } else
             setTurnText(extraTurnEmbed, "ABILITY", this.opponentStand, {
               abilityText: abilityInfo[0],
+              isConfused: this.isConfused,
             });
 
           // Reset ability count
@@ -471,11 +487,14 @@ class AdventureManager {
           let damage = rollDamage(this.opponentStand);
           setTurnText(extraTurnEmbed, "ATTACK", this.opponentStand, {
             damage: damage,
+            isConfused: this.isConfused,
           });
 
           this.playerHp -= damage;
         } else {
-          setTurnText(extraTurnEmbed, "MISS", this.opponentStand);
+          setTurnText(extraTurnEmbed, "MISS", this.opponentStand, {
+            isConfused: this.isConfused,
+          });
         }
 
         await this.updateSchema(AdventureInfo, {
@@ -485,7 +504,9 @@ class AdventureManager {
       }
     } else {
       // DODGE
-      setTurnText(extraTurnEmbed, "DODGE", this.opponentStand);
+      setTurnText(extraTurnEmbed, "DODGE", this.opponentStand, {
+        isConfused: this.isConfused,
+      });
 
       await this.updateSchema(AdventureInfo, {
         AttackRollHeight: 75,

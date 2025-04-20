@@ -239,7 +239,7 @@ async function attack(adventureManager) {
       adventureManager.turnEmbed,
       "ATTACK",
       adventureManager.playerStand,
-      { damage: damage }
+      { damage: damage, isConfused: adventureManager.isConfused }
     );
 
     adventureManager.opponentHp -= damage;
@@ -247,7 +247,10 @@ async function attack(adventureManager) {
     CombatHandler.setTurnText(
       adventureManager.turnEmbed,
       "MISS",
-      adventureManager.playerStand
+      adventureManager.playerStand,
+      {
+        isConfused: adventureManager.isConfused,
+      }
     );
   }
 
@@ -267,7 +270,10 @@ async function dodge(adventureManager) {
   CombatHandler.setTurnText(
     adventureManager.turnEmbed,
     "DODGE",
-    adventureManager.playerStand
+    adventureManager.playerStand,
+    {
+      isConfused: adventureManager.isConfused,
+    }
   );
 
   // increment ability count
@@ -308,7 +314,7 @@ async function useAbility(abilityIndex, adventureManager) {
       adventureManager.turnEmbed,
       "ABILITY",
       adventureManager.playerStand,
-      { abilityText: abilityInfo[0] }
+      { abilityText: abilityInfo[0], isConfused: adventureManager.isConfused }
     );
   } else if (damage > 0) {
     // attack based ability
@@ -346,13 +352,16 @@ async function useAbility(abilityIndex, adventureManager) {
         adventureManager.turnEmbed,
         "ABILITY",
         adventureManager.playerStand,
-        { abilityText: abilityInfo[0] }
+        { abilityText: abilityInfo[0], isConfused: adventureManager.isConfused }
       );
     } else {
       CombatHandler.setTurnText(
         adventureManager.turnEmbed,
         "MISS",
-        adventureManager.playerStand
+        adventureManager.playerStand,
+        {
+          isConfused: adventureManager.isConfused,
+        }
       );
     }
   } else if (healAmount > 0) {
@@ -367,7 +376,7 @@ async function useAbility(abilityIndex, adventureManager) {
       adventureManager.turnEmbed,
       "ABILITY",
       adventureManager.playerStand,
-      { abilityText: abilityInfo[0] }
+      { abilityText: abilityInfo[0], isConfused: adventureManager.isConfused }
     );
   }
 
