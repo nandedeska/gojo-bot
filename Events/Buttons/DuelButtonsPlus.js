@@ -6,6 +6,7 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
+const { DuelManager } = require("../../Utility/DuelManager");
 const CombatHandler = require("../../Utility/CombatHandler");
 const PlayerBooleans = require("../../Schemas/PlayerBooleans");
 const StandAbilities = require("../../Local Storage/standAbilities");
@@ -31,7 +32,7 @@ module.exports = {
     var challenger = await client.users.cache.get(splitArray[3]);
     var challenged = await client.users.cache.get(splitArray[4]);
 
-    let duelManager = new CombatHandler.DuelManager();
+    let duelManager = new DuelManager();
     await duelManager.init(guildId, challenger, challenged, client);
 
     if (
