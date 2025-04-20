@@ -1309,14 +1309,14 @@ function setTurnText(
   turnEmbed,
   turnState,
   stand,
-  data = { damage: "INVALID", abilityText: "INVALID", isConfused: false }
+  { damage = "INVALID", abilityText = "INVALID", isConfused = false } = {}
 ) {
   let text = "INVALID";
 
-  if (data.isConfused) text = generateGlitchedText("long");
-  else if (turnState == "ABILITY") text = data.abilityText;
+  if (isConfused) text = generateGlitchedText("long");
+  else if (turnState == "ABILITY") text = abilityText;
   else if (turnState == "ATTACK")
-    text = `${stand.Name}'s attack hits! It deals ${data.damage} damage.`;
+    text = `${stand.Name}'s attack hits! It deals ${damage} damage.`;
   else if (turnState == "DODGE") text = `${stand.Name} prepares to dodge!`;
   else if (turnState == "MISS") text = `${stand.Name} missed!`;
 
