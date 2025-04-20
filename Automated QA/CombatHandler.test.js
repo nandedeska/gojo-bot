@@ -250,6 +250,25 @@ describe("AdventureManager", () => {
         );
       });
     });
+
+    it("should display glitched text when player is confused", () => {
+      adventureManager.playerStand = {
+        Ability: [{ cooldown: 5 }, { cooldown: 7 }],
+      };
+      adventureManager.opponentStand = {
+        Ability: [{ cooldown: 3 }, { cooldown: 9 }, { cooldown: 4 }],
+      };
+      adventureManager.playerAbilityCount = [5, 0];
+      adventureManager.opponentAbilityCount = [0, 3, 4];
+      adventureManager.isConfused = true;
+      let generateText = jest
+        .spyOn(CombatHandler, "generateGlitchedText")
+        .mockImplementation();
+
+      adventureManager.updateDisplay();
+
+      expect(generateText).toHaveBeenCalledTimes(10);
+    });
   });
 
   describe("updateAbilityUI()", () => {
