@@ -6,7 +6,7 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
-const { AdventureManager, EmbedData } = require("../../Utility/CombatHandler");
+const { AdventureManager } = require("../../Utility/AdventureManager");
 const CombatHandler = require("../../Utility/CombatHandler");
 const StandStats = require("../../Schemas/StandStats");
 const Inventory = require("../../Schemas/PlayerInventory");
