@@ -202,18 +202,18 @@ class AdventureManager {
   }
 
   async botAttack() {
-    let currentDefenseModifier = 1;
+    let enemyDefenseModifier = 1;
 
     if (this.savedData) {
       this.savedData = await AdventureInfo.findOne({
         Guild: this.guildId,
         User: this.player.id,
       });
-      currentDefenseModifier = this.savedData.DefenseModifier;
+      enemyDefenseModifier = this.savedData.DefenseModifier;
     }
 
     if (
-      tryAttack(this.playerStand, currentDefenseModifier, this.attackRollHeight)
+      tryAttack(this.playerStand, enemyDefenseModifier, this.attackRollHeight)
     ) {
       let damage = rollDamage(this.opponentStand);
       setTurnText(this.opponentTurnEmbed, "ATTACK", this.opponentStand, {
@@ -267,8 +267,8 @@ class AdventureManager {
 
         let damage = abilityInfo[1];
         let healAmount = abilityInfo[2];
-        let nextDefenseModifier = abilityInfo[3];
-        let currentDefenseModifier = abilityInfo[4];
+        let nextTurnDefenseModifier = abilityInfo[3];
+        let thisTurnDefenseModifier = abilityInfo[4];
         this.isConfused = abilityInfo[5];
         let timeStopTurns = abilityInfo[6];
 
@@ -279,7 +279,7 @@ class AdventureManager {
           await this.updateSchema(AdventureInfo, {
             AttackRollHeight: 100,
             OpponentAbilityCount: this.opponentAbilityCount,
-            DefenseModifier: nextDefenseModifier,
+            DefenseModifier: nextTurnDefenseModifier,
           });
 
           for (let i = 0; i < timeStopTurns; i++) {
@@ -292,19 +292,19 @@ class AdventureManager {
         }
         // ATTACK-BASED ABILITY
         else if (damage > 0) {
-          let defenseMod = 1;
+          let enemyDefenseModifier = 1;
           if (this.savedData) {
             this.savedData = await AdventureInfo.findOne({
               Guild: this.guildId,
               User: this.player.id,
             });
-            defenseMod = this.savedData.DefenseModifier;
+            enemyDefenseModifier = this.savedData.DefenseModifier;
           }
 
           if (
             tryAttack(
               this.playerStand,
-              defenseMod * currentDefenseModifier,
+              enemyDefenseModifier * thisTurnDefenseModifier,
               this.attackRollHeight
             )
           ) {
@@ -348,7 +348,7 @@ class AdventureManager {
         await this.updateSchema(AdventureInfo, {
           AttackRollHeight: 100,
           OpponentAbilityCount: this.opponentAbilityCount,
-          DefenseModifier: nextDefenseModifier,
+          DefenseModifier: nextTurnDefenseModifier,
         });
 
         return true;
@@ -382,7 +382,7 @@ class AdventureManager {
 
           let damage = abilityInfo[1];
           let healAmount = abilityInfo[2];
-          let nextDefenseModifier = abilityInfo[3];
+          let nextTurnDefenseModifier = abilityInfo[3];
           this.isConfused = abilityInfo[5];
           let timeStopTurns = abilityInfo[6];
 
@@ -391,16 +391,16 @@ class AdventureManager {
             extraTurnEmbed.setTitle(abilityInfo[0]);
           } else if (damage > 0) {
             // ATTACK BASED ABILITY
-            let defenseMod = 1;
+            let enemyDefenseModifier = 1;
             if (this.savedData) {
               this.savedData = await AdventureInfo.findOne({
                 Guild: this.guildId,
                 User: this.player.id,
               });
-              defenseMod = this.savedData.DefenseModifier;
+              enemyDefenseModifier = this.savedData.DefenseModifier;
             }
 
-            if (defenseMod < 100) {
+            if (enemyDefenseModifier < 100) {
               let damage = abilityInfo[1];
 
               this.playerHp -= damage;
@@ -440,28 +440,28 @@ class AdventureManager {
           // Reset ability count
           this.opponentAbilityCount[i] = 0;
 
-          await this.updateSchema(AdventureInfo, {
-            AttackRollHeight: 100,
-            OpponentAbilityCount: this.opponentAbilityCount,
-            DefenseModifier: nextDefenseModifier,
-          });
+            await this.updateSchema(AdventureInfo, {
+              AttackRollHeight: 100,
+              OpponentAbilityCount: this.opponentAbilityCount,
+              DefenseModifier: nextTurnDefenseModifier,
+            });
 
           hasUsedAbility = true;
         }
       }
 
       if (!hasUsedAbility) {
-        let currentDefenseModifier = 1;
+        let enemyDefenseModifier = 1;
 
         if (this.savedData) {
           this.savedData = await AdventureInfo.findOne({
             Guild: this.guildId,
             User: this.player.id,
           });
-          currentDefenseModifier = this.savedData.DefenseModifier;
+          enemyDefenseModifier = this.savedData.DefenseModifier;
         }
 
-        if (currentDefenseModifier < 100) {
+        if (enemyDefenseModifier < 100) {
           let damage = rollDamage(this.opponentStand);
           setTurnText(extraTurnEmbed, "ATTACK", this.opponentStand, {
             damage: damage,

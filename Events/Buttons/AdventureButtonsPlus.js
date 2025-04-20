@@ -216,20 +216,20 @@ async function declineAdventure(buttonInteract, adventureManager) {
 }
 
 async function attack(adventureManager) {
-  var currentDefenseModifier = 1;
+  var enemyDefenseModifier = 1;
 
   if (adventureManager.savedData) {
     adventureManager.savedData = await AdventureInfo.findOne({
       Guild: adventureManager.guildId,
       User: adventureManager.player.id,
     });
-    currentDefenseModifier = adventureManager.savedData.DefenseModifier;
+    enemyDefenseModifier = adventureManager.savedData.DefenseModifier;
   }
 
   if (
     CombatHandler.tryAttack(
       adventureManager.opponentStand,
-      currentDefenseModifier,
+      enemyDefenseModifier,
       adventureManager.attackRollHeight
     )
   ) {
@@ -295,7 +295,8 @@ async function useAbility(abilityIndex, adventureManager) {
 
   var damage = abilityInfo[1];
   var healAmount = abilityInfo[2];
-  var currentDefenseModifier = abilityInfo[3];
+  var nextTurnDefenseModifier = abilityInfo[3];
+  var thisTurnDefenseModifier = abilityInfo[4];
   var timeStopTurns = abilityInfo[6];
 
   // execute ability
@@ -311,20 +312,20 @@ async function useAbility(abilityIndex, adventureManager) {
     );
   } else if (damage > 0) {
     // attack based ability
-    var defenseMod = 1;
+    var enemyDefenseModifier = 1;
 
     if (adventureManager.savedData) {
       adventureManager.savedData = await AdventureInfo.findOne({
         Guild: adventureManager.guildId,
         User: adventureManager.player.id,
       });
-      defenseMod = adventureManager.savedData.DefenseModifier;
+      enemyDefenseModifier = adventureManager.savedData.DefenseModifier;
     }
 
     if (
       CombatHandler.tryAttack(
         adventureManager.opponentStand,
-        defenseMod * currentDefenseModifier,
+        enemyDefenseModifier * thisTurnDefenseModifier,
         adventureManager.attackRollHeight
       )
     ) {
@@ -382,14 +383,14 @@ async function useAbility(abilityIndex, adventureManager) {
     await adventureManager.updateSchema(AdventureInfo, {
       AttackRollHeight: 100,
       PlayerAbilityCount: adventureManager.playerAbilityCount,
-      DefenseModifier: currentDefenseModifier,
+      DefenseModifier: nextTurnDefenseModifier,
       TimeStopTurns: adventureManager.timeStopTurns,
     });
   else
     await adventureManager.updateSchema(AdventureInfo, {
       AttackRollHeight: 100,
       PlayerAbilityCount: adventureManager.playerAbilityCount,
-      DefenseModifier: currentDefenseModifier,
+      DefenseModifier: nextTurnDefenseModifier,
       TimeStopTurns: adventureManager.timeStopTurns - 1,
     });
 
