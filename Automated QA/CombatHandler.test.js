@@ -15,6 +15,76 @@ describe("AdventureManager", () => {
     adventureManager.opponent = { id: "321" };
   });
 
+  describe("botTurn", () => {
+    let attack;
+    let dodge;
+    let checkDeath;
+
+    beforeEach(() => {
+      attack = jest.spyOn(adventureManager, "botAttack").mockImplementation();
+      dodge = jest.spyOn(adventureManager, "botDodge").mockImplementation();
+      checkDeath = jest
+        .spyOn(adventureManager, "checkStandDeath")
+        .mockImplementation();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should not attack when an ability is used", async () => {
+      jest.spyOn(Math, "random").mockImplementation(() => {
+        return 0.5;
+      });
+      jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+        return true;
+      });
+      adventureManager.isMatchOver = false;
+
+      await adventureManager.botTurn();
+
+      expect(attack).not.toHaveBeenCalled();
+    });
+
+    it("should not attack when a stand has died from an ability", async () => {
+      jest.spyOn(Math, "random").mockImplementation(() => {
+        return 0.5;
+      });
+      jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+        return false;
+      });
+      adventureManager.isMatchOver = true;
+
+      await adventureManager.botTurn();
+
+      expect(attack).not.toHaveBeenCalled();
+    });
+
+    it("should attack when no abilities were used", async () => {
+      jest.spyOn(Math, "random").mockImplementation(() => {
+        return 0.5;
+      });
+      jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+        return false;
+      });
+      adventureManager.isMatchOver = false;
+
+      await adventureManager.botTurn();
+
+      expect(attack).toHaveBeenCalled();
+    });
+
+    it("should dodge when neither attacking nor using ability", async () => {
+      jest.spyOn(Math, "random").mockImplementation(() => {
+        return 0.8;
+      });
+
+      await adventureManager.botTurn();
+
+      expect(dodge).toHaveBeenCalled();
+    });
+  });
+
   describe("checkStandDeath()", () => {
     it("should set win state to ongoing when player and opponent are above 0 hp", () => {
       adventureManager.playerHp = 50;
