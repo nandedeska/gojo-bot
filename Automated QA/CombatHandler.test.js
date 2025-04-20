@@ -1,11 +1,12 @@
 const { EmbedBuilder, ActionRowBuilder } = require("discord.js");
 const CombatHandler = require("../Utility/CombatHandler");
+const { AdventureManager } = require("../Utility/AdventureManager");
 
 describe("AdventureManager", () => {
   let adventureManager;
 
   beforeEach(() => {
-    adventureManager = new CombatHandler.AdventureManager();
+    adventureManager = new AdventureManager();
     adventureManager.player = { id: "123" };
     adventureManager.opponent = { id: "321" };
   });
