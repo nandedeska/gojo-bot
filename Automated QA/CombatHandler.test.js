@@ -128,6 +128,29 @@ describe("AdventureManager", () => {
     });
   });
 
+  describe("botDodge()", () => {
+    let setTurnText;
+
+    beforeEach(() => {
+      setTurnText = jest
+        .spyOn(CombatHandler, "setTurnText")
+        .mockImplementation();
+      jest.spyOn(adventureManager, "updateSchema").mockImplementation();
+      jest.spyOn(adventureManager, "updateAbilityCounts").mockImplementation();
+      jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should set dodge text when dodging", () => {
+      adventureManager.botDodge();
+
+      expect(setTurnText.mock.calls[0][1]).toBe("DODGE");
+    });
+  });
+
   describe("checkStandDeath()", () => {
     it("should set win state to ongoing when player and opponent are above 0 hp", () => {
       adventureManager.playerHp = 50;
