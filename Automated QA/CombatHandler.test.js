@@ -12,17 +12,14 @@ describe("AdventureManager", () => {
     adventureManager.opponent = { id: "321" };
   });
 
-  describe("botTurn", () => {
+  describe("botTurn()", () => {
     let attack;
     let dodge;
-    let checkDeath;
 
     beforeEach(() => {
       attack = jest.spyOn(adventureManager, "botAttack").mockImplementation();
       dodge = jest.spyOn(adventureManager, "botDodge").mockImplementation();
-      checkDeath = jest
-        .spyOn(adventureManager, "checkStandDeath")
-        .mockImplementation();
+      jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
     });
 
     afterEach(() => {
