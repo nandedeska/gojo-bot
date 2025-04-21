@@ -14,10 +14,14 @@ describe("AdventureManager", () => {
   });
 
   describe("botTurn()", () => {
+    let setTurnText;
     let attack;
     let dodge;
 
     beforeEach(() => {
+      setTurnText = jest
+        .spyOn(CombatHandler, "setTurnText")
+        .mockImplementation();
       attack = jest.spyOn(adventureManager, "botAttack").mockImplementation();
       dodge = jest.spyOn(adventureManager, "botDodge").mockImplementation();
       jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
@@ -27,18 +31,79 @@ describe("AdventureManager", () => {
       jest.restoreAllMocks();
     });
 
-    it("should not attack when an ability is used", async () => {
-      jest.spyOn(Math, "random").mockImplementation(() => {
-        return 0.5;
-      });
-      jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
-        return true;
-      });
-      adventureManager.isMatchOver = false;
+    describe("bot uses ability", () => {
+      it("should not attack when an ability is used", async () => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.5;
+        });
+        jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+          return true;
+        });
+        adventureManager.isMatchOver = false;
 
-      await adventureManager.botTurn();
+        await adventureManager.botTurn();
 
-      expect(attack).not.toHaveBeenCalled();
+        expect(attack).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("bot uses attack", () => {
+      it("should attack when no abilities were used", async () => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.5;
+        });
+        jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+          return false;
+        });
+        jest.spyOn(adventureManager, "botAttack").mockImplementation(() => {
+          return { hasAttackHit: true, damage: 50 };
+        });
+        adventureManager.isMatchOver = false;
+
+        await adventureManager.botTurn();
+
+        expect(attack).toHaveBeenCalled();
+      });
+
+      it("should set attack text when attack hits", async () => {
+        jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+          return false;
+        });
+        jest.spyOn(adventureManager, "botAttack").mockImplementation(() => {
+          return { hasAttackHit: true, damage: 50 };
+        });
+        adventureManager.isMatchOver = false;
+
+        await adventureManager.botTurn();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("ATTACK");
+      });
+
+      it("should set miss text when attack misses", async () => {
+        jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+          return false;
+        });
+        jest.spyOn(adventureManager, "botAttack").mockImplementation(() => {
+          return { hasAttackHit: false, damage: 0 };
+        });
+        adventureManager.isMatchOver = false;
+
+        await adventureManager.botTurn();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("MISS");
+      });
+    });
+
+    describe("bot uses dodge", () => {
+      it("should dodge when neither attacking nor using ability", async () => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.8;
+        });
+
+        await adventureManager.botTurn();
+
+        expect(dodge).toHaveBeenCalled();
+      });
     });
 
     it("should not attack when a stand has died from an ability", async () => {
@@ -54,41 +119,13 @@ describe("AdventureManager", () => {
 
       expect(attack).not.toHaveBeenCalled();
     });
-
-    it("should attack when no abilities were used", async () => {
-      jest.spyOn(Math, "random").mockImplementation(() => {
-        return 0.5;
-      });
-      jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
-        return false;
-      });
-      adventureManager.isMatchOver = false;
-
-      await adventureManager.botTurn();
-
-      expect(attack).toHaveBeenCalled();
-    });
-
-    it("should dodge when neither attacking nor using ability", async () => {
-      jest.spyOn(Math, "random").mockImplementation(() => {
-        return 0.8;
-      });
-
-      await adventureManager.botTurn();
-
-      expect(dodge).toHaveBeenCalled();
-    });
   });
 
   describe("botAttack()", () => {
     let rollDamage;
-    let setTurnText;
 
     beforeEach(() => {
       rollDamage = jest.spyOn(CombatHandler, "rollDamage").mockImplementation();
-      setTurnText = jest
-        .spyOn(CombatHandler, "setTurnText")
-        .mockImplementation();
       jest.spyOn(adventureManager, "updateSchema").mockImplementation();
       jest.spyOn(adventureManager, "updateAbilityCounts").mockImplementation();
       jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
@@ -106,26 +143,6 @@ describe("AdventureManager", () => {
       adventureManager.botAttack();
 
       expect(rollDamage).toHaveBeenCalledTimes(1);
-    });
-
-    it("should set attack text when attack hits", () => {
-      jest.spyOn(CombatHandler, "tryAttack").mockImplementation(() => {
-        return true;
-      });
-
-      adventureManager.botAttack();
-
-      expect(setTurnText.mock.calls[0][1]).toBe("ATTACK");
-    });
-
-    it("should set miss text when attack misses", () => {
-      jest.spyOn(CombatHandler, "tryAttack").mockImplementation(() => {
-        return false;
-      });
-
-      adventureManager.botAttack();
-
-      expect(setTurnText.mock.calls[0][1]).toBe("MISS");
     });
   });
 

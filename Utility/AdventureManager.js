@@ -179,11 +179,34 @@ class AdventureManager {
 
       if (this.isMatchOver) return;
 
-      if (!hasUsedAbility) await this.botAttack();
+      if (!hasUsedAbility) {
+        let { hasAttackHit, damage } = await this.botAttack();
+        if (hasAttackHit)
+          CombatHandler.setTurnText(
+            this.opponentTurnEmbed,
+            "ATTACK",
+            this.opponentStand,
+            {
+              damage: damage,
+              isConfused: this.isConfused,
+            }
+          );
+        else
+          CombatHandler.setTurnText(
+            this.opponentTurnEmbed,
+            "MISS",
+            this.opponentStand,
+            {
+              isConfused: this.isConfused,
+            }
+          );
+      }
     } else await this.botDodge();
   }
 
   async botAttack() {
+    let hasAttackHit = false;
+    let damage = 0;
     let enemyDefenseModifier = 1;
 
     if (this.savedData) {
@@ -201,27 +224,11 @@ class AdventureManager {
         this.attackRollHeight
       )
     ) {
-      let damage = CombatHandler.rollDamage(this.opponentStand);
-      CombatHandler.setTurnText(
-        this.opponentTurnEmbed,
-        "ATTACK",
-        this.opponentStand,
-        {
-          damage: damage,
-          isConfused: this.isConfused,
-        }
-      );
+      damage = CombatHandler.rollDamage(this.opponentStand);
 
       this.playerHp -= damage;
-    } else {
-      CombatHandler.setTurnText(
-        this.opponentTurnEmbed,
-        "MISS",
-        this.opponentStand,
-        {
-          isConfused: this.isConfused,
-        }
-      );
+
+      hasAttackHit = true;
     }
 
     // Increment ability count
@@ -234,6 +241,8 @@ class AdventureManager {
     });
 
     this.checkStandDeath();
+
+    return { hasAttackHit, damage };
   }
 
   async botDodge() {
