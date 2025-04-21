@@ -79,6 +79,59 @@ describe("AdventureManager", () => {
     });
   });
 
+  describe("botAttack()", () => {
+    let rollDamage;
+    let setTurnText;
+
+    beforeEach(() => {
+      rollDamage = jest.spyOn(CombatHandler, "rollDamage").mockImplementation();
+      setTurnText = jest
+        .spyOn(CombatHandler, "setTurnText")
+        .mockImplementation();
+      jest.spyOn(adventureManager, "updateSchema").mockImplementation();
+      jest.spyOn(adventureManager, "updateAbilityCounts").mockImplementation();
+      jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
+
+      adventureManager.playerStand = { Defense: 25 };
+      adventureManager.opponentStand = { Attack: 25 };
+      adventureManager.opponentTurnEmbed = new EmbedBuilder();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should roll for damage when attack hits", () => {
+      jest.spyOn(CombatHandler, "tryAttack").mockImplementation(() => {
+        return true;
+      });
+
+      adventureManager.botAttack();
+
+      expect(rollDamage).toHaveBeenCalledTimes(1);
+    });
+
+    it("should set attack text when attack hits", () => {
+      jest.spyOn(CombatHandler, "tryAttack").mockImplementation(() => {
+        return true;
+      });
+
+      adventureManager.botAttack();
+
+      expect(setTurnText.mock.calls[0][1]).toBe("ATTACK");
+    });
+
+    it("should set miss text when attack misses", () => {
+      jest.spyOn(CombatHandler, "tryAttack").mockImplementation(() => {
+        return false;
+      });
+
+      adventureManager.botAttack();
+
+      expect(setTurnText.mock.calls[0][1]).toBe("MISS");
+    });
+  });
+
   describe("checkStandDeath()", () => {
     it("should set win state to ongoing when player and opponent are above 0 hp", () => {
       adventureManager.playerHp = 50;
