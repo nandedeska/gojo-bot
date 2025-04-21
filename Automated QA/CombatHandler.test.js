@@ -91,10 +91,6 @@ describe("AdventureManager", () => {
       jest.spyOn(adventureManager, "updateSchema").mockImplementation();
       jest.spyOn(adventureManager, "updateAbilityCounts").mockImplementation();
       jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
-
-      adventureManager.playerStand = { Defense: 25 };
-      adventureManager.opponentStand = { Attack: 25 };
-      adventureManager.opponentTurnEmbed = new EmbedBuilder();
     });
 
     afterEach(() => {
