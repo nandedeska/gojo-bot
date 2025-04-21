@@ -2,6 +2,7 @@ const { EmbedBuilder, ActionRowBuilder } = require("discord.js");
 const CombatHandler = require("../Utility/CombatHandler");
 const { AdventureManager } = require("../Utility/AdventureManager");
 const { DuelManager } = require("../Utility/DuelManager");
+const AdventureInfo = require("../Schemas/AdventureInfo");
 
 describe("AdventureManager", () => {
   let adventureManager;
@@ -148,6 +149,161 @@ describe("AdventureManager", () => {
       adventureManager.botDodge();
 
       expect(setTurnText.mock.calls[0][1]).toBe("DODGE");
+    });
+  });
+
+  describe("botUseAbility()", () => {
+    let rollDamage;
+    let setTurnText;
+    let timeStopTurn;
+
+    beforeEach(() => {
+      jest.spyOn(CombatHandler, "tryAttack").mockImplementation(() => {
+        return true;
+      });
+      rollDamage = jest.spyOn(CombatHandler, "rollDamage").mockImplementation();
+      setTurnText = jest
+        .spyOn(CombatHandler, "setTurnText")
+        .mockImplementation();
+      timeStopTurn = jest
+        .spyOn(adventureManager, "botTimeStopTurn")
+        .mockImplementation();
+      jest.spyOn(adventureManager, "updateSchema").mockImplementation();
+      jest.spyOn(adventureManager, "updateAbilityCounts").mockImplementation();
+      jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
+
+      adventureManager.opponentStand = {
+        Ability: [
+          { cooldown: 5, id: "emeraldsplash", damage: 20 },
+          { cooldown: 3, id: "timestop", turns: 5 },
+          { cooldown: 10, id: "fruitpunch", damage: 20 },
+          { cooldown: 2, id: "heal", power: 15 },
+          { cooldown: 4, id: "aegisdome", modifier: 100 },
+        ],
+      };
+      adventureManager.opponentExtraTurnEmbeds = [];
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should return false when no ability is used", async () => {
+      adventureManager.opponentAbilityCount = [0, 0, 0, 0, 0];
+
+      let result = await adventureManager.botUseAbility();
+
+      expect(result).toBe(false);
+    });
+
+    it("should return true when an ability is used", async () => {
+      adventureManager.opponentAbilityCount = [5, 0, 0, 0, 0];
+
+      let result = await adventureManager.botUseAbility();
+
+      expect(result).toBe(true);
+    });
+
+    describe("time stop ability", () => {
+      it("should do extra turns when time is stopped", async () => {
+        adventureManager.opponentAbilityCount = [0, 3, 0, 0, 0];
+
+        await adventureManager.botUseAbility();
+
+        expect(timeStopTurn).toHaveBeenCalledTimes(5);
+      });
+
+      it("should set ability text when using time stop", async () => {
+        adventureManager.opponentAbilityCount = [0, 3, 0, 0, 0];
+
+        await adventureManager.botUseAbility();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
+      });
+    });
+
+    describe("attack-based ability", () => {
+      let findOne;
+      let min;
+
+      beforeEach(() => {
+        findOne = jest.spyOn(AdventureInfo, "findOne").mockReturnValue(() => {
+          {
+            DefenseModifier: 1;
+          }
+        });
+        min = jest.spyOn(Math, "min").mockImplementation();
+      });
+
+      it("should fetch defense modifier when savedData exists", async () => {
+        adventureManager.opponentAbilityCount = [5, 0, 0, 0, 0];
+        adventureManager.savedData = {};
+
+        await adventureManager.botUseAbility();
+
+        expect(findOne).toHaveBeenCalledTimes(1);
+      });
+
+      it("should set ability text when ability hits", async () => {
+        adventureManager.opponentAbilityCount = [5, 0, 0, 0, 0];
+
+        await adventureManager.botUseAbility();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
+      });
+
+      it("should set miss text when ability misses", async () => {
+        adventureManager.opponentAbilityCount = [5, 0, 0, 0, 0];
+        jest.spyOn(CombatHandler, "tryAttack").mockImplementation(() => {
+          return false;
+        });
+
+        await adventureManager.botUseAbility();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("MISS");
+      });
+
+      it("should heal when ability has life steal", async () => {
+        adventureManager.opponentAbilityCount = [0, 0, 10, 0, 0];
+
+        await adventureManager.botUseAbility();
+
+        expect(min).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("heal ability", () => {
+      let min;
+
+      beforeEach(() => {
+        min = jest.spyOn(Math, "min").mockImplementation();
+      });
+
+      it("should set ability text when using heal", async () => {
+        adventureManager.opponentAbilityCount = [0, 0, 0, 2, 0];
+
+        await adventureManager.botUseAbility();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
+      });
+
+      it("should heal when ability is used", async () => {
+        adventureManager.opponentAbilityCount = [0, 0, 0, 2, 0];
+
+        await adventureManager.botUseAbility();
+
+        expect(min).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe("other ability", () => {
+      it("should set ability text when using heal", async () => {
+        adventureManager.opponentAbilityCount = [0, 0, 0, 0, 4];
+
+        await adventureManager.botUseAbility();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
+      });
     });
   });
 
