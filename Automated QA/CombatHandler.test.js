@@ -104,6 +104,16 @@ describe("AdventureManager", () => {
 
         expect(dodge).toHaveBeenCalled();
       });
+
+      it("should set dodge text when dodging", async () => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.8;
+        });
+
+        await adventureManager.botTurn();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("DODGE");
+      });
     });
 
     it("should not attack when a stand has died from an ability", async () => {
@@ -143,29 +153,6 @@ describe("AdventureManager", () => {
       adventureManager.botAttack();
 
       expect(rollDamage).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe("botDodge()", () => {
-    let setTurnText;
-
-    beforeEach(() => {
-      setTurnText = jest
-        .spyOn(CombatHandler, "setTurnText")
-        .mockImplementation();
-      jest.spyOn(adventureManager, "updateSchema").mockImplementation();
-      jest.spyOn(adventureManager, "updateAbilityCounts").mockImplementation();
-      jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it("should set dodge text when dodging", () => {
-      adventureManager.botDodge();
-
-      expect(setTurnText.mock.calls[0][1]).toBe("DODGE");
     });
   });
 

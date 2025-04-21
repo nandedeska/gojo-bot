@@ -201,7 +201,18 @@ class AdventureManager {
             }
           );
       }
-    } else await this.botDodge();
+    } else {
+      await this.botDodge();
+
+      CombatHandler.setTurnText(
+        this.opponentTurnEmbed,
+        "DODGE",
+        this.opponentStand,
+        {
+          isConfused: this.isConfused,
+        }
+      );
+    }
   }
 
   async botAttack() {
@@ -246,15 +257,6 @@ class AdventureManager {
   }
 
   async botDodge() {
-    CombatHandler.setTurnText(
-      this.opponentTurnEmbed,
-      "DODGE",
-      this.opponentStand,
-      {
-        isConfused: this.isConfused,
-      }
-    );
-
     // increment ability count
     this.updateAbilityCounts(this.opponentStand);
 
