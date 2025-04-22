@@ -1373,3 +1373,18 @@ describe("DuelManager", () => {
     });
   });
 });
+
+describe("CombatHandler", () => {
+  describe("setCooldownText()", () => {
+    it('should return "Ability Ready!" when cooldown is over', () => {
+      let result = CombatHandler.setCooldownText(5, 5);
+
+      expect(result).toBe("\nAbility Ready!");
+    });
+
+    it("should return cooldown turns when cooldown is active", () => {
+      let result = CombatHandler.setCooldownText(0, 5);
+
+      expect(result).toBe("\nAbility Cooldown: 5 Turns");
+    });
+  });
