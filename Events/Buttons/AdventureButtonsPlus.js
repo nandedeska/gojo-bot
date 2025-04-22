@@ -131,6 +131,12 @@ module.exports = {
       });
     }
   },
+  acceptAdventure,
+  declineAdventure,
+  attack,
+  dodge,
+  useAbility,
+  surrender,
 };
 
 async function acceptAdventure(buttonInteract, adventureManager) {
