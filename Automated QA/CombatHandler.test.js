@@ -1453,4 +1453,42 @@ describe("CombatHandler", () => {
       expect(turnEmbed.data.title).toBe("INVALID");
     });
   });
+
+  describe("tryAttack()", () => {
+    let defendingStand;
+    let defenseModifier;
+
+    beforeEach(() => {
+      defendingStand = { Defense: 25 };
+      defenseModifier = 2;
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should return true when attack roll is higher than or equal to enemy defense", () => {
+      jest.spyOn(Math, "random").mockReturnValue(0.5);
+
+      let result = CombatHandler.tryAttack(
+        defendingStand,
+        defenseModifier,
+        100
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it("should return false when attack roll is lower than enemy defense", () => {
+      jest.spyOn(Math, "random").mockReturnValue(0.1);
+
+      let result = CombatHandler.tryAttack(
+        defendingStand,
+        defenseModifier,
+        100
+      );
+
+      expect(result).toBe(false);
+    });
+  });
 });
