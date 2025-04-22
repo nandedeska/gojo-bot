@@ -13,6 +13,10 @@ describe("AdventureManager", () => {
     adventureManager.opponent = { id: "321" };
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe("botTurn()", () => {
     let setTurnText;
     let attack;
