@@ -281,6 +281,133 @@ describe("AdventureManager", () => {
     });
   });
 
+  describe("botTimeStopTurn()", () => {
+    let setTurnText;
+    let attack;
+    let dodge;
+
+    beforeEach(() => {
+      setTurnText = jest
+        .spyOn(CombatHandler, "setTurnText")
+        .mockImplementation();
+      attack = jest.spyOn(adventureManager, "botAttack").mockImplementation();
+      dodge = jest.spyOn(adventureManager, "botDodge").mockImplementation();
+      jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    describe("bot uses ability", () => {
+      it("should not attack when an ability is used", async () => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.5;
+        });
+        jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+          return { hasUsedAbility: true, abilityInfo: [] };
+        });
+        adventureManager.isMatchOver = false;
+
+        await adventureManager.botTimeStopTurn();
+
+        expect(attack).not.toHaveBeenCalled();
+      });
+
+      it("should set ability text when using ability", async () => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.5;
+        });
+        jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+          return { hasUsedAbility: true, abilityInfo: ["ability used!"] };
+        });
+        adventureManager.opponentStand = {
+          Ability: [{ cooldown: 10, id: "heal", power: 20 }],
+        };
+        adventureManager.opponentAbilityCount = [0];
+
+        await adventureManager.botTimeStopTurn();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
+      });
+    });
+
+    describe("bot uses attack", () => {
+      beforeEach(() => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.5;
+        });
+      });
+
+      it("should attack when no abilities were used", async () => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.5;
+        });
+        jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+          return false;
+        });
+        jest.spyOn(adventureManager, "botAttack").mockImplementation(() => {
+          return { hasAttackHit: true, damage: 50 };
+        });
+        adventureManager.isMatchOver = false;
+
+        await adventureManager.botTimeStopTurn();
+
+        expect(attack).toHaveBeenCalled();
+      });
+
+      it("should set attack text when attack hits", async () => {
+        jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+          return false;
+        });
+        jest.spyOn(adventureManager, "botAttack").mockImplementation(() => {
+          return { hasAttackHit: true, damage: 50 };
+        });
+        adventureManager.isMatchOver = false;
+
+        await adventureManager.botTimeStopTurn();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("ATTACK");
+      });
+
+      it("should set miss text when attack misses", async () => {
+        jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+          return false;
+        });
+        jest.spyOn(adventureManager, "botAttack").mockImplementation(() => {
+          return { hasAttackHit: false, damage: 0 };
+        });
+        adventureManager.isMatchOver = false;
+
+        await adventureManager.botTimeStopTurn();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("MISS");
+      });
+    });
+
+    describe("bot uses dodge", () => {
+      it("should dodge when neither attacking nor using ability", async () => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.95;
+        });
+
+        await adventureManager.botTimeStopTurn();
+
+        expect(dodge).toHaveBeenCalled();
+      });
+
+      it("should set dodge text when dodging", async () => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.95;
+        });
+
+        await adventureManager.botTimeStopTurn();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("DODGE");
+      });
+    });
+  });
+
   describe("checkStandDeath()", () => {
     it("should set win state to ongoing when player and opponent are above 0 hp", () => {
       adventureManager.playerHp = 50;
