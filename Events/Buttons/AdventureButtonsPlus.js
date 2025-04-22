@@ -173,10 +173,12 @@ async function acceptAdventure(buttonInteract, adventureManager) {
   }
 
   if (
-    await PlayerBooleans.findOne({
-      Guild: adventureManager.guildId,
-      User: adventureManager.player.id,
-    }).IsAdventuring
+    (
+      await PlayerBooleans.findOne({
+        Guild: adventureManager.guildId,
+        User: adventureManager.player.id,
+      })
+    ).IsAdventuring
   ) {
     await buttonInteract.deferUpdate();
     return await buttonInteract.editReply({
