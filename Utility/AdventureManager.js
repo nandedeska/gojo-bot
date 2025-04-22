@@ -581,7 +581,8 @@ class AdventureManager {
       if (this.opponentExtraTurnEmbeds.length > 0)
         embeds.push(...this.opponentExtraTurnEmbeds);
     } else {
-      embeds.push(this.opponentTurnEmbed);
+      if (this.opponentTurnEmbed?.data?.title)
+        embeds.push(this.opponentTurnEmbed);
       if (this.opponentExtraTurnEmbeds.length > 0)
         embeds.push(...this.opponentExtraTurnEmbeds);
       if (this.turnEmbed?.data?.title) embeds.push(this.turnEmbed);

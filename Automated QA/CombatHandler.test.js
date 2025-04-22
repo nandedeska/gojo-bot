@@ -844,8 +844,9 @@ describe("AdventureManager", () => {
       });
 
       it("should not return turnEmbed when it has no content", () => {
-        let opponentTurnEmbed = new EmbedBuilder();
+        let opponentTurnEmbed = new EmbedBuilder().setTitle("Opponent Turn");
         let fightEmbed = new EmbedBuilder();
+        adventureManager.opponentTurnEmbed.setTitle("Opponent Turn");
         adventureManager.playerWinState = "ONGOING";
 
         let result = adventureManager.orderEmbedDisplay();
@@ -855,9 +856,10 @@ describe("AdventureManager", () => {
 
       it("should return turnEmbed when it has content", () => {
         let turnEmbed = new EmbedBuilder().setTitle("Player Turn");
-        let opponentTurnEmbed = new EmbedBuilder();
+        let opponentTurnEmbed = new EmbedBuilder().setTitle("Opponent Turn");
         let fightEmbed = new EmbedBuilder();
         adventureManager.turnEmbed.setTitle("Player Turn");
+        adventureManager.opponentTurnEmbed.setTitle("Opponent Turn");
         adventureManager.playerWinState = "ONGOING";
 
         let result = adventureManager.orderEmbedDisplay();
@@ -871,9 +873,10 @@ describe("AdventureManager", () => {
 
       it("should return opponentExtraTurnEmbeds when they are present", () => {
         let turnEmbed = new EmbedBuilder().setTitle("Player Turn");
-        let opponentTurnEmbed = new EmbedBuilder();
+        let opponentTurnEmbed = new EmbedBuilder().setTitle("Opponent Turn");
         let fightEmbed = new EmbedBuilder();
         adventureManager.turnEmbed.setTitle("Player Turn");
+        adventureManager.opponentTurnEmbed.setTitle("Opponent Turn");
         adventureManager.opponentExtraTurnEmbeds = [0, 0, 0];
         adventureManager.playerWinState = "ONGOING";
 
