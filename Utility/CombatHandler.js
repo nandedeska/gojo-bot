@@ -50,12 +50,12 @@ function setTurnText(
 ) {
   let text = "INVALID";
 
-  if (isConfused) text = generateGlitchedText("long");
+  if (isConfused) text = module.exports.generateGlitchedText("long");
   else if (turnState == "ABILITY") text = abilityText;
   else if (turnState == "ATTACK")
     text = `${stand.Name}'s attack hits! It deals ${damage} damage.`;
   else if (turnState == "DODGE") text = `${stand.Name} prepares to dodge!`;
-  else if (turnState == "MISS") text = `${stand.Name} missed!`;
+  else if (turnState == "MISS") text = `${stand.Name} misses!`;
 
   turnEmbed.setTitle(text);
 }

@@ -1392,3 +1392,65 @@ describe("CombatHandler", () => {
       expect(result).toBe("\nAbility Cooldown: 5 Turns");
     });
   });
+
+  describe("setTurnText()", () => {
+    let turnEmbed;
+    let stand;
+
+    beforeEach(() => {
+      turnEmbed = new EmbedBuilder();
+      stand = { Name: "TEST" };
+    });
+
+    it("should set turn text to glitched text when player is confused", () => {
+      let generateGlitchedText = jest
+        .spyOn(CombatHandler, "generateGlitchedText")
+        .mockReturnValue("GLITCHED TEXT");
+
+      CombatHandler.setTurnText(turnEmbed, "ATTACK", stand, {
+        abilityText: "",
+        isConfused: true,
+      });
+
+      expect(generateGlitchedText).toHaveBeenCalledTimes(1);
+
+      generateGlitchedText.mockRestore();
+    });
+
+    it("should set turn text to ability text when ability is used", () => {
+      CombatHandler.setTurnText(turnEmbed, "ABILITY", stand, {
+        abilityText: "ABILITY USED",
+      });
+
+      expect(turnEmbed.data.title).toBe("ABILITY USED");
+    });
+
+    it("should set turn text to attack text when attacking", () => {
+      CombatHandler.setTurnText(turnEmbed, "ATTACK", stand, {
+        damage: 20,
+      });
+
+      expect(turnEmbed.data.title).toBe(
+        "TEST's attack hits! It deals 20 damage."
+      );
+    });
+
+    it("should set turn text to dodge text when dodging", () => {
+      CombatHandler.setTurnText(turnEmbed, "DODGE", stand);
+
+      expect(turnEmbed.data.title).toBe("TEST prepares to dodge!");
+    });
+
+    it("should set turn text to miss text when attack misses", () => {
+      CombatHandler.setTurnText(turnEmbed, "MISS", stand);
+
+      expect(turnEmbed.data.title).toBe("TEST misses!");
+    });
+
+    it('should set turn text to "INVALID" otherwise', () => {
+      CombatHandler.setTurnText(turnEmbed, "NOTHING", stand);
+
+      expect(turnEmbed.data.title).toBe("INVALID");
+    });
+  });
+});
