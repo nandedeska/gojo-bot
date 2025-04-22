@@ -172,8 +172,18 @@ class AdventureManager {
     const rand = Math.random();
 
     if (rand < 0.8) {
-      let hasUsedAbility = false;
-      hasUsedAbility = await this.botUseAbility();
+      let { hasUsedAbility, abilityInfo } = await this.botUseAbility();
+
+      if (hasUsedAbility)
+        CombatHandler.setTurnText(
+          this.opponentTurnEmbed,
+          "ABILITY",
+          this.opponentStand,
+          {
+            abilityText: abilityInfo[0],
+            isConfused: this.isConfused,
+          }
+        );
 
       await this.checkStandDeath();
 
@@ -270,13 +280,16 @@ class AdventureManager {
   }
 
   async botUseAbility() {
+    let hasUsedAbility = false;
+    let abilityInfo = [];
+
     for (let i = 0; i < this.opponentStand.Ability.length; i++) {
       if (
         this.opponentAbilityCount[i] >= this.opponentStand.Ability[i].cooldown
       ) {
         let ability = this.opponentStand.Ability[i];
         let abilityId = ability.id;
-        let abilityInfo = StandAbilities.abilities[abilityId](
+        abilityInfo = StandAbilities.abilities[abilityId](
           this.opponentStand,
           this.playerStand,
           ability
@@ -302,16 +315,6 @@ class AdventureManager {
           for (let i = 0; i < timeStopTurns; i++) {
             this.opponentExtraTurnEmbeds.push(await this.botTimeStopTurn());
           }
-
-          CombatHandler.setTurnText(
-            this.opponentTurnEmbed,
-            "ABILITY",
-            this.opponentStand,
-            {
-              abilityText: abilityInfo[0],
-              isConfused: this.isConfused,
-            }
-          );
         }
         // ATTACK-BASED ABILITY
         else if (damage > 0) {
@@ -341,25 +344,6 @@ class AdventureManager {
                 this.opponentStand.Healthpoints
               );
             }
-
-            CombatHandler.setTurnText(
-              this.opponentTurnEmbed,
-              "ABILITY",
-              this.opponentStand,
-              {
-                abilityText: abilityInfo[0],
-                isConfused: this.isConfused,
-              }
-            );
-          } else {
-            CombatHandler.setTurnText(
-              this.opponentTurnEmbed,
-              "MISS",
-              this.opponentStand,
-              {
-                isConfused: this.isConfused,
-              }
-            );
           }
         }
         // HEAL ABILITY
@@ -369,26 +353,7 @@ class AdventureManager {
             this.opponentHp,
             this.opponentStand.Healthpoints
           );
-
-          CombatHandler.setTurnText(
-            this.opponentTurnEmbed,
-            "ABILITY",
-            this.opponentStand,
-            {
-              abilityText: abilityInfo[0],
-              isConfused: this.isConfused,
-            }
-          );
-        } else
-          CombatHandler.setTurnText(
-            this.opponentTurnEmbed,
-            "ABILITY",
-            this.opponentStand,
-            {
-              abilityText: abilityInfo[0],
-              isConfused: this.isConfused,
-            }
-          );
+        }
 
         this.updateAbilityCounts(this.opponentStand, i);
 
@@ -399,11 +364,11 @@ class AdventureManager {
           DefenseModifier: nextTurnDefenseModifier,
         });
 
-        return true;
+        hasUsedAbility = true;
       }
     }
 
-    return false;
+    return { hasUsedAbility, abilityInfo };
   }
 
   async botTimeStopTurn() {

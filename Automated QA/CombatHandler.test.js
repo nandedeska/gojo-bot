@@ -37,13 +37,30 @@ describe("AdventureManager", () => {
           return 0.5;
         });
         jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
-          return true;
+          return { hasUsedAbility: true, abilityInfo: [] };
         });
         adventureManager.isMatchOver = false;
 
         await adventureManager.botTurn();
 
         expect(attack).not.toHaveBeenCalled();
+      });
+
+      it("should set ability text when using ability", async () => {
+        jest.spyOn(Math, "random").mockImplementation(() => {
+          return 0.5;
+        });
+        jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
+          return { hasUsedAbility: true, abilityInfo: ["ability used!"] };
+        });
+        adventureManager.opponentStand = {
+          Ability: [{ cooldown: 10, id: "heal", power: 20 }],
+        };
+        adventureManager.opponentAbilityCount = [0];
+
+        await adventureManager.botTurn();
+
+        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
       });
     });
 
@@ -157,7 +174,6 @@ describe("AdventureManager", () => {
   });
 
   describe("botUseAbility()", () => {
-    let rollDamage;
     let setTurnText;
     let timeStopTurn;
 
@@ -165,7 +181,6 @@ describe("AdventureManager", () => {
       jest.spyOn(CombatHandler, "tryAttack").mockImplementation(() => {
         return true;
       });
-      rollDamage = jest.spyOn(CombatHandler, "rollDamage").mockImplementation();
       setTurnText = jest
         .spyOn(CombatHandler, "setTurnText")
         .mockImplementation();
@@ -195,7 +210,7 @@ describe("AdventureManager", () => {
     it("should return false when no ability is used", async () => {
       adventureManager.opponentAbilityCount = [0, 0, 0, 0, 0];
 
-      let result = await adventureManager.botUseAbility();
+      let result = (await adventureManager.botUseAbility()).hasUsedAbility;
 
       expect(result).toBe(false);
     });
@@ -203,7 +218,7 @@ describe("AdventureManager", () => {
     it("should return true when an ability is used", async () => {
       adventureManager.opponentAbilityCount = [5, 0, 0, 0, 0];
 
-      let result = await adventureManager.botUseAbility();
+      let result = (await adventureManager.botUseAbility()).hasUsedAbility;
 
       expect(result).toBe(true);
     });
@@ -215,14 +230,6 @@ describe("AdventureManager", () => {
         await adventureManager.botUseAbility();
 
         expect(timeStopTurn).toHaveBeenCalledTimes(5);
-      });
-
-      it("should set ability text when using time stop", async () => {
-        adventureManager.opponentAbilityCount = [0, 3, 0, 0, 0];
-
-        await adventureManager.botUseAbility();
-
-        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
       });
     });
 
@@ -248,25 +255,6 @@ describe("AdventureManager", () => {
         expect(findOne).toHaveBeenCalledTimes(1);
       });
 
-      it("should set ability text when ability hits", async () => {
-        adventureManager.opponentAbilityCount = [5, 0, 0, 0, 0];
-
-        await adventureManager.botUseAbility();
-
-        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
-      });
-
-      it("should set miss text when ability misses", async () => {
-        adventureManager.opponentAbilityCount = [5, 0, 0, 0, 0];
-        jest.spyOn(CombatHandler, "tryAttack").mockImplementation(() => {
-          return false;
-        });
-
-        await adventureManager.botUseAbility();
-
-        expect(setTurnText.mock.calls[0][1]).toBe("MISS");
-      });
-
       it("should heal when ability has life steal", async () => {
         adventureManager.opponentAbilityCount = [0, 0, 10, 0, 0];
 
@@ -283,30 +271,12 @@ describe("AdventureManager", () => {
         min = jest.spyOn(Math, "min").mockImplementation();
       });
 
-      it("should set ability text when using heal", async () => {
-        adventureManager.opponentAbilityCount = [0, 0, 0, 2, 0];
-
-        await adventureManager.botUseAbility();
-
-        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
-      });
-
       it("should heal when ability is used", async () => {
         adventureManager.opponentAbilityCount = [0, 0, 0, 2, 0];
 
         await adventureManager.botUseAbility();
 
         expect(min).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    describe("other ability", () => {
-      it("should set ability text when using heal", async () => {
-        adventureManager.opponentAbilityCount = [0, 0, 0, 0, 4];
-
-        await adventureManager.botUseAbility();
-
-        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
       });
     });
   });
