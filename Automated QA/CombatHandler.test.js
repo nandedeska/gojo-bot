@@ -771,7 +771,7 @@ describe("AdventureManager", () => {
       adventureManager.updateAbilityCounts(stand, 2);
       let result = adventureManager.opponentAbilityCount;
 
-      expect(result).toStrictEqual([5, 6, -4]);
+      expect(result).toStrictEqual([5, 6, 0]);
     });
   });
 

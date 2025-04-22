@@ -556,8 +556,7 @@ class AdventureManager {
         }
       } else if (stand == this.opponentStand) {
         if (i == exceptionIndex) {
-          if (isTimeStopAbility) this.opponentAbilityCount[i] = -abilityInfo[6];
-          else this.opponentAbilityCount[i] = 0;
+          this.opponentAbilityCount[i] = 0;
         } else {
           this.opponentAbilityCount[i] =
             this.savedData.OpponentAbilityCount[i] + 1;
