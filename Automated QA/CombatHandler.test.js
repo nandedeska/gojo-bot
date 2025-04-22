@@ -65,10 +65,13 @@ describe("AdventureManager", () => {
     });
 
     describe("bot uses attack", () => {
-      it("should attack when no abilities were used", async () => {
+      beforeEach(() => {
         jest.spyOn(Math, "random").mockImplementation(() => {
           return 0.5;
         });
+      });
+
+      it("should attack when no abilities were used", async () => {
         jest.spyOn(adventureManager, "botUseAbility").mockImplementation(() => {
           return false;
         });
