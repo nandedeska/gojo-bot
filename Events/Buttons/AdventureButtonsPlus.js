@@ -163,12 +163,10 @@ async function acceptAdventure(buttonInteract, adventureManager) {
           round: true,
         }
       );
-      return await buttonInteract
-        .editReply({
-          content: `You can go on an adventure again in ${remainingTime}.`,
-          ephemeral: true,
-        })
-        .catch(console.log);
+      return await buttonInteract.editReply({
+        content: `You can go on an adventure again in ${remainingTime}.`,
+        ephemeral: true,
+      });
     }
   }
 
