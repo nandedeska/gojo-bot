@@ -9,7 +9,14 @@ const {
 let version = "1.1.0";
 const patchNotes = {
   "1.1.0": {
-    notes: "Updated /patchnotes: version selection and cycling\n",
+    notes:
+      "Updated /patchnotes: version selection and cycling\n" +
+      "Stand speed now makes it more likely to land a hit\n" +
+      "Stand speed now makes it more likely to dodge successfully\n" +
+      "Increased max stand defense (DEF 70 >> 120)\n" +
+      "Adventure improvements\n" +
+      "Duel improvements\n" +
+      "Bug fixes",
   },
   "1.0.1": {
     notes:
