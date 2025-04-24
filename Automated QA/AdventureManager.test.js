@@ -28,6 +28,8 @@ describe("AdventureManager", () => {
       attack = jest.spyOn(adventureManager, "botAttack").mockImplementation();
       dodge = jest.spyOn(adventureManager, "botDodge").mockImplementation();
       jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
+      adventureManager.opponentTurnEmbed = new EmbedBuilder();
+      adventureManager.opponentStand = {};
     });
 
     afterEach(() => {
@@ -63,7 +65,12 @@ describe("AdventureManager", () => {
 
         await adventureManager.botTurn();
 
-        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
+        expect(setTurnText).toHaveBeenCalledWith(
+          expect.anything(),
+          "ABILITY",
+          expect.anything(),
+          expect.anything()
+        );
       });
     });
 
@@ -99,7 +106,12 @@ describe("AdventureManager", () => {
 
         await adventureManager.botTurn();
 
-        expect(setTurnText.mock.calls[0][1]).toBe("ATTACK");
+        expect(setTurnText).toHaveBeenCalledWith(
+          expect.anything(),
+          "ATTACK",
+          expect.anything(),
+          expect.anything()
+        );
       });
 
       it("should set miss text when attack misses", async () => {
@@ -113,7 +125,12 @@ describe("AdventureManager", () => {
 
         await adventureManager.botTurn();
 
-        expect(setTurnText.mock.calls[0][1]).toBe("MISS");
+        expect(setTurnText).toHaveBeenCalledWith(
+          expect.anything(),
+          "MISS",
+          expect.anything(),
+          expect.anything()
+        );
       });
     });
 
@@ -135,7 +152,12 @@ describe("AdventureManager", () => {
 
         await adventureManager.botTurn();
 
-        expect(setTurnText.mock.calls[0][1]).toBe("DODGE");
+        expect(setTurnText).toHaveBeenCalledWith(
+          expect.anything(),
+          "DODGE",
+          expect.anything(),
+          expect.anything()
+        );
       });
     });
 
@@ -299,6 +321,8 @@ describe("AdventureManager", () => {
       attack = jest.spyOn(adventureManager, "botAttack").mockImplementation();
       dodge = jest.spyOn(adventureManager, "botDodge").mockImplementation();
       jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
+      adventureManager.opponentTurnEmbed = new EmbedBuilder();
+      adventureManager.opponentStand = {};
     });
 
     afterEach(() => {
@@ -334,7 +358,12 @@ describe("AdventureManager", () => {
 
         await adventureManager.botTimeStopTurn();
 
-        expect(setTurnText.mock.calls[0][1]).toBe("ABILITY");
+        expect(setTurnText).toHaveBeenCalledWith(
+          expect.anything(),
+          "ABILITY",
+          expect.anything(),
+          expect.anything()
+        );
       });
     });
 
@@ -373,7 +402,12 @@ describe("AdventureManager", () => {
 
         await adventureManager.botTimeStopTurn();
 
-        expect(setTurnText.mock.calls[0][1]).toBe("ATTACK");
+        expect(setTurnText).toHaveBeenCalledWith(
+          expect.anything(),
+          "ATTACK",
+          expect.anything(),
+          expect.anything()
+        );
       });
 
       it("should set miss text when attack misses", async () => {
@@ -387,7 +421,12 @@ describe("AdventureManager", () => {
 
         await adventureManager.botTimeStopTurn();
 
-        expect(setTurnText.mock.calls[0][1]).toBe("MISS");
+        expect(setTurnText).toHaveBeenCalledWith(
+          expect.anything(),
+          "MISS",
+          expect.anything(),
+          expect.anything()
+        );
       });
     });
 
@@ -409,7 +448,12 @@ describe("AdventureManager", () => {
 
         await adventureManager.botTimeStopTurn();
 
-        expect(setTurnText.mock.calls[0][1]).toBe("DODGE");
+        expect(setTurnText).toHaveBeenCalledWith(
+          expect.anything(),
+          "DODGE",
+          expect.anything(),
+          expect.anything()
+        );
       });
     });
   });
