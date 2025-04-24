@@ -1,8 +1,10 @@
 const AdventureButtons = require("../Events/Buttons/AdventureButtonsPlus");
 const { AdventureManager } = require("../Utility/AdventureManager");
+const CombatHandler = require("../Utility/CombatHandler");
 const Cooldowns = require("../Schemas/Cooldowns");
 const PlayerBooleans = require("../Schemas/PlayerBooleans");
 const { EmbedBuilder, ActionRowBuilder } = require("discord.js");
+const AdventureInfo = require("../Schemas/AdventureInfo");
 
 describe("AdventureButtons.js", () => {
   let adventureManager;
@@ -96,6 +98,62 @@ describe("AdventureButtons.js", () => {
       await AdventureButtons.acceptAdventure(buttonInteract, adventureManager);
 
       expect(findOneAndDelete).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("attack()", () => {
+    beforeEach(() => {
+      jest.spyOn(adventureManager, "updateAbilityCounts").mockImplementation();
+      jest.spyOn(adventureManager, "updateSchema").mockImplementation();
+      jest.spyOn(adventureManager, "checkStandDeath").mockImplementation();
+
+      adventureManager.turnEmbed = new EmbedBuilder();
+      adventureManager.player = { id: "123" };
+      adventureManager.playerStand = {};
+    });
+
+    it("should fetch defense modifier when savedData exists", async () => {
+      jest.spyOn(CombatHandler, "tryAttack").mockImplementation();
+      adventureManager.savedData = {};
+      let findOne = jest.spyOn(AdventureInfo, "findOne").mockReturnValue({
+        DefenseModifier: 1,
+      });
+
+      await AdventureButtons.attack(adventureManager);
+
+      expect(findOne).toHaveBeenCalledTimes(1);
+    });
+
+    it("should set attack text when attack hits", async () => {
+      jest.spyOn(CombatHandler, "tryAttack").mockReturnValue(true);
+      let setTurnText = jest
+        .spyOn(CombatHandler, "setTurnText")
+        .mockImplementation();
+
+      await AdventureButtons.attack(adventureManager);
+
+      expect(setTurnText).toHaveBeenCalledWith(
+        expect.anything(),
+        "ATTACK",
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it("should set miss text when attack misses", async () => {
+      jest.spyOn(CombatHandler, "tryAttack").mockReturnValue(false);
+      let setTurnText = jest
+        .spyOn(CombatHandler, "setTurnText")
+        .mockImplementation();
+
+      await AdventureButtons.attack(adventureManager);
+
+      expect(setTurnText).toHaveBeenCalledWith(
+        expect.anything(),
+        "MISS",
+        expect.anything(),
+        expect.anything()
+      );
     });
   });
 });
