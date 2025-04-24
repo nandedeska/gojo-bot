@@ -240,6 +240,7 @@ class AdventureManager {
 
     if (
       CombatHandler.tryAttack(
+        this.opponentStand,
         this.playerStand,
         enemyDefenseModifier,
         this.attackRollHeight
@@ -330,6 +331,7 @@ class AdventureManager {
 
           if (
             CombatHandler.tryAttack(
+              this.opponentStand,
               this.playerStand,
               enemyDefenseModifier * thisTurnDefenseModifier,
               this.attackRollHeight

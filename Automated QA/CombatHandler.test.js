@@ -78,10 +78,12 @@ describe("CombatHandler", () => {
   });
 
   describe("tryAttack()", () => {
+    let attackingStand;
     let defendingStand;
     let defenseModifier;
 
     beforeEach(() => {
+      attackingStand = { Speed: 50 };
       defendingStand = { Defense: 25 };
       defenseModifier = 2;
     });
@@ -91,9 +93,10 @@ describe("CombatHandler", () => {
     });
 
     it("should return true when attack roll is higher than or equal to enemy defense", () => {
-      jest.spyOn(Math, "random").mockReturnValue(0.5);
+      jest.spyOn(Math, "random").mockReturnValue(0.45);
 
       let result = CombatHandler.tryAttack(
+        attackingStand,
         defendingStand,
         defenseModifier,
         100
@@ -106,6 +109,7 @@ describe("CombatHandler", () => {
       jest.spyOn(Math, "random").mockReturnValue(0.1);
 
       let result = CombatHandler.tryAttack(
+        attackingStand,
         defendingStand,
         defenseModifier,
         100

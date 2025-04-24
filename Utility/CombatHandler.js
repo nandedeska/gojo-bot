@@ -31,8 +31,16 @@ const GlitchedText = {
   NumberString: ["୧̶͚̘͕̲͐͐̌͝͝ͅ୧̷̢̧̲͓̱͐͆͒̔̿", "მ̵̧̬̜͕̰̔̈͑͛̚μ̴̧̛̩̦̬̅̿̀͜͠", "Ɛ̶̧̩̙̙̰̆̑̔̓̌ς̶͙̪̩̥̮͛̀́͝͠", "Ɩ̵̛̼̤̯̱̲͂̌̀̊მ̷̝̘͓̤̞̀̾̅̽̚", "ɘ̵̨̡̺̬̞̀̀̂̉̎Ɉ̶̢͍͉͍̝̍͋͑̿͝ǭ̷͎̠̗̘̓̉̽͘", "m̶̹̦̓̑̏̏̕i̶͊̈́̚ƨ̴͕͂̊̂́̿ƨ̸͝"],
 };
 
-function tryAttack(defendingStand, defenseModifier, attackRollHeight) {
-  let attackRoll = Math.floor(Math.random() * attackRollHeight) + 1;
+function tryAttack(
+  attackingStand,
+  defendingStand,
+  defenseModifier,
+  attackRollHeight
+) {
+  let attackRoll =
+    Math.floor(
+      Math.random() * (attackRollHeight + Math.floor(attackingStand.Speed / 5))
+    ) + 1;
 
   if (attackRoll >= defendingStand.Defense * defenseModifier) return true;
   else return false;

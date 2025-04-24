@@ -234,6 +234,7 @@ async function attack(adventureManager) {
 
   if (
     CombatHandler.tryAttack(
+      adventureManager.playerStand,
       adventureManager.opponentStand,
       enemyDefenseModifier,
       adventureManager.attackRollHeight
@@ -336,6 +337,7 @@ async function useAbility(abilityIndex, adventureManager) {
 
     if (
       CombatHandler.tryAttack(
+        adventureManager.playerStand,
         adventureManager.opponentStand,
         enemyDefenseModifier * thisTurnDefenseModifier,
         adventureManager.attackRollHeight
