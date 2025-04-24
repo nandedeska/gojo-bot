@@ -42,7 +42,12 @@ function tryAttack(
       Math.random() * (attackRollHeight + Math.floor(attackingStand.Speed / 5))
     ) + 1;
 
-  if (attackRoll >= defendingStand.Defense * defenseModifier) return true;
+  let defenseBonus = Math.floor(
+    Math.random() * Math.floor(defendingStand.Speed / 10)
+  );
+
+  if (attackRoll >= (defendingStand.Defense + defenseBonus) * defenseModifier)
+    return true;
   else return false;
 }
 
