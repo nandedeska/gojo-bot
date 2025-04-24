@@ -47,6 +47,8 @@ module.exports = {
     )
       return await buttonInteract.deferUpdate().catch(console.error);
 
+    await buttonInteract.deferUpdate();
+
     let isNewDuel = false;
 
     switch (splitArray[1]) {
@@ -177,7 +179,6 @@ async function acceptDuel(buttonInteract, duelManager) {
   duelManager.updateDisplay();
 
   // reply
-  await buttonInteract.deferUpdate();
   await buttonInteract.editReply({
     content: `<@${duelManager.challenger.id}> <@${duelManager.challenged.id}>`,
     embeds: [duelManager.fightEmbed],
@@ -196,7 +197,6 @@ async function declineDuel(buttonInteract, duelManager) {
   );
 
   // reply
-  await buttonInteract.deferUpdate();
   return buttonInteract.editReply({
     embeds: [],
     components: [],

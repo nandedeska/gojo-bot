@@ -35,6 +35,8 @@ module.exports = {
     if (buttonInteract.user.id !== splitText[3])
       return await buttonInteract.deferUpdate().catch(console.error);
 
+    await buttonInteract.deferUpdate();
+
     var plr = await client.users.cache.get(splitText[3]);
 
     let adventureManager = new AdventureManager();
@@ -155,7 +157,6 @@ async function acceptAdventure(buttonInteract, adventureManager) {
         Command: "adventure",
       });
     else {
-      await buttonInteract.deferUpdate();
       const remainingTime = HumanizeDuration(
         cooldown.Cooldown + CooldownTime - Date.now(),
         {
@@ -178,7 +179,6 @@ async function acceptAdventure(buttonInteract, adventureManager) {
       })
     ).IsAdventuring
   ) {
-    await buttonInteract.deferUpdate();
     return await buttonInteract.editReply({
       content: "You are already in an adventure!",
       ephemeral: true,
@@ -188,7 +188,6 @@ async function acceptAdventure(buttonInteract, adventureManager) {
   adventureManager.updateAbilityUI();
   adventureManager.updateDisplay();
 
-  await buttonInteract.deferUpdate();
   await adventureManager.updateSchema(PlayerBooleans, { IsAdventuring: true });
 
   await buttonInteract.editReply({
@@ -215,7 +214,6 @@ async function declineAdventure(buttonInteract, adventureManager) {
     IsAdventuring: false,
   });
 
-  await buttonInteract.deferUpdate();
   await buttonInteract.editReply({
     content: `You ran away from ${adventureManager.opponent.displayName}!`,
     embeds: [],

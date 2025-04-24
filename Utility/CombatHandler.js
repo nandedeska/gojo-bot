@@ -86,7 +86,6 @@ function generateGlitchedText(type) {
 }
 
 async function reply(buttonInteract, embedList, componentList) {
-  await buttonInteract.deferUpdate();
   await buttonInteract.editReply({
     embeds: embedList,
     components: componentList,
