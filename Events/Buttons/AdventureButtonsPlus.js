@@ -189,6 +189,8 @@ async function acceptAdventure(buttonInteract, adventureManager) {
   adventureManager.updateDisplay();
 
   await buttonInteract.deferUpdate();
+  await adventureManager.updateSchema(PlayerBooleans, { IsAdventuring: true });
+
   await buttonInteract.editReply({
     content: null,
     embeds: [adventureManager.quoteEmbed, adventureManager.fightEmbed],

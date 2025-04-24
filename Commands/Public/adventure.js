@@ -222,11 +222,6 @@ module.exports = {
         )
     );
 
-    await PlayerBooleans.updateOne(
-      { Guild: guild, User: member.id },
-      { $set: { IsAdventuring: true } }
-    );
-
     await interaction.editReply({ components: [offerButtons] });
   },
 };

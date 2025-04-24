@@ -25,6 +25,7 @@ describe("AdventureButtons.js", () => {
     beforeEach(() => {
       jest.spyOn(adventureManager, "updateAbilityUI").mockImplementation();
       jest.spyOn(adventureManager, "updateDisplay").mockImplementation();
+      jest.spyOn(adventureManager, "updateSchema").mockImplementation();
       jest.spyOn(buttonInteract, "deferUpdate").mockImplementation();
       jest.spyOn(Cooldowns, "findOne").mockImplementation();
 
