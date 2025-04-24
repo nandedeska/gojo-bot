@@ -384,7 +384,13 @@ async function useAbility(abilityIndex, adventureManager) {
       adventureManager.playerStand,
       { abilityText: abilityInfo[0], isConfused: adventureManager.isConfused }
     );
-  }
+  } else
+    CombatHandler.setTurnText(
+      adventureManager.turnEmbed,
+      "ABILITY",
+      adventureManager.playerStand,
+      { abilityText: abilityInfo[0], isConfused: adventureManager.isConfused }
+    );
 
   // increment other ability counts except for used ability
   adventureManager.updateAbilityCounts(
