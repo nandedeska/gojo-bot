@@ -117,7 +117,7 @@ module.exports = {
           statName = "Attack";
           break;
         case "def":
-          if (stand.Defense >= 70)
+          if (stand.Defense >= 120)
             return interaction.reply({
               content: "This stat is maxed out!",
             });
@@ -147,7 +147,7 @@ module.exports = {
         $set: {
           Healthpoints: Math.min(stand.Healthpoints + hpUpgrade, 500),
           Attack: Math.min(stand.Attack + atkUpgrade, 100),
-          Defense: Math.min(stand.Defense + defUpgrade, 70),
+          Defense: Math.min(stand.Defense + defUpgrade, 120),
           Speed: Math.min(stand.Speed + spdUpgrade, 100),
         },
       }
@@ -177,7 +177,7 @@ module.exports = {
         },
         {
           name: "Defense",
-          value: `${stand.Defense} / 70`,
+          value: `${stand.Defense} / 120`,
           inline: true,
         },
         {
