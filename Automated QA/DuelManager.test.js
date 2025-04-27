@@ -1,5 +1,6 @@
 const { EmbedBuilder, ActionRowBuilder } = require("discord.js");
 const { DuelManager } = require("../Utility/DuelManager");
+const PlayerInventory = require("../Schemas/PlayerInventory");
 
 describe("DuelManager", () => {
   /*describe("init()", () => {
@@ -442,6 +443,47 @@ describe("DuelManager", () => {
       let result = duelManager.challengedAbilityCount;
 
       expect(result).toStrictEqual([5, 6, -4]);
+    });
+  });
+
+  describe("giveRewards()", () => {
+    let duelManager;
+
+    beforeEach(() => {
+      duelManager = new DuelManager();
+      duelManager.challenger = { id: "123" };
+      duelManager.challenged = { id: "321" };
+      duelManager.rewardEmbed = new EmbedBuilder().setDescription(
+        "CONTACT DEVELOPER: REWARD EMBED ERROR"
+      );
+
+      jest
+        .spyOn(PlayerInventory, "findOne")
+        .mockReturnValue({ StandArrow: 0, StandDisc: 0, RocacacaFruit: 0 });
+      jest.spyOn(duelManager, "updateSchema").mockImplementation();
+      jest.spyOn(console, "log").mockImplementation();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("should change embed description to reward text when challenger gets reward", async () => {
+      jest.spyOn(Math, "random").mockReturnValue(0);
+      duelManager.playerWinState = "CHALLENGER";
+
+      await duelManager.giveRewards();
+
+      expect(duelManager.rewardEmbed.data.description).toBe("8x Stand Arrow\n");
+    });
+
+    it("should change embed description to reward text when challenged gets reward", async () => {
+      jest.spyOn(Math, "random").mockReturnValue(0);
+      duelManager.playerWinState = "CHALLENGED";
+
+      await duelManager.giveRewards();
+
+      expect(duelManager.rewardEmbed.data.description).toBe("8x Stand Arrow\n");
     });
   });
 });
