@@ -398,6 +398,8 @@ class DuelManager {
       Cooldown: Date.now(),
     });
 
+    let embeds = [this.turnEmbed, this.winEmbed];
+
     if (this.playerWinState == "DRAW") {
       let challengerStats = await PlayerStats.findOne({
         Guild: this.guildId,
@@ -505,13 +507,12 @@ class DuelManager {
       );
 
       this.winEmbed.setTitle(`${winner.username} won the duel!`);
-    }
 
-    let embeds = [this.turnEmbed, this.winEmbed];
-
-    if (Math.random() < 0.5) {
-      this.giveRewards();
-      embeds.push(this.rewardEmbed);
+      if (Math.random() < 0.5) {
+        this.rewardEmbed.setTitle(`${winner.username} found a loot crate!`);
+        await this.giveRewards();
+        embeds.push(this.rewardEmbed);
+      }
     }
 
     CombatHandler.reply(buttonInteract, embeds, []);
