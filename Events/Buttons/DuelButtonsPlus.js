@@ -147,7 +147,7 @@ async function acceptDuel(buttonInteract, duelManager) {
       duelManager.challenger
     );
 
-    return await buttonInteract.update({
+    return await buttonInteract.editReply({
       content: `${duelManager.challenged.username} is already inviting someone!`,
       embeds: [],
       components: [],
