@@ -72,7 +72,8 @@ module.exports = {
         break;
     }
 
-    if (duelManager.isMatchOver) return duelManager.endDuel(buttonInteract);
+    if (duelManager.isMatchOver)
+      return await duelManager.endDuel(buttonInteract);
 
     if (!isNewDuel) {
       duelManager.updateAbilityUI();
