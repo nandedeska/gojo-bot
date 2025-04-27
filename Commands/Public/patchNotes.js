@@ -6,8 +6,13 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
-let version = "1.1.0";
+let version = "1.1.1";
 const patchNotes = {
+  "1.1.1": {
+    notes:
+      "Fixed reward embed not displaying properly in duels\n" +
+      "Fixed bot crash on two-way duel invite",
+  },
   "1.1.0": {
     notes:
       "Updated /patchnotes: version selection and cycling\n" +
